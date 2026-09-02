@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports & Analysis — Fee Payment Management | MMCOE</title>
+
+    <!-- Google Fonts: Plus Jakarta Sans & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap 5.3.3 CSS & Bootstrap Icons 1.11.3 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
+    <!-- Design System Stylesheets -->
+    <link href="../assets/css/dashboard.css" rel="stylesheet">
+    <link href="css/reports.css" rel="stylesheet">
+</head>
+<body data-page="admin-reports">
+
+<div class="erp-dashboard-layout">
+
+    <!-- ====================================================================
+         INSTITUTIONAL SIDEBAR
+         ==================================================================== -->
+    <aside class="erp-sidebar" id="erpSidebar">
+        <!-- Sidebar Header -->
+        <div class="erp-sidebar-header">
+            <div class="sidebar-emblem">
+                <i class="bi bi-shield-shaded"></i>
+            </div>
+            <div class="sidebar-brand-text">
+                <h1>MMCOE ERP</h1>
+                <span>Admin Administration</span>
+            </div>
+        </div>
+
+        <!-- Sidebar Navigation -->
+        <div class="erp-sidebar-nav">
+            <div class="sidebar-group-label">Core Modules</div>
+            <ul class="erp-nav-list">
+                <li class="erp-nav-item">
+                    <a class="erp-nav-link" href="../admin/dashboard.html#dashboard">
+                        <i class="bi bi-grid-1x2-fill"></i>
+                        <span>Dashboard Overview</span>
+                    </a>
+                </li>
+                <li class="erp-nav-item">
+                    <a class="erp-nav-link" href="../admin/dashboard.html#students">
+                        <i class="bi bi-people-fill"></i>
+                        <span>Manage Students</span>
+                        <span class="erp-nav-badge" style="background:#e0e7ff; color:#3730a3; border-color:#c7d2fe;">1.2k</span>
+                    </a>
+                </li>
+                <li class="erp-nav-item">
+                    <a class="erp-nav-link" href="../admin/dashboard.html#fee-structure">
+                        <i class="bi bi-cash-stack"></i>
+                        <span>Manage Fee Structure</span>
+                    </a>
+                </li>
+                <li class="erp-nav-item">
+                    <a class="erp-nav-link" href="../admin/dashboard.html#user-accounts">
+                        <i class="bi bi-person-gear"></i>
+                        <span>Manage User Accounts</span>
+                    </a>
+                </li>
+                <li class="erp-nav-item">
+                    <a class="erp-nav-link" href="../admin/dashboard.html#roles">
+                        <i class="bi bi-person-badge-fill"></i>
+                        <span>Roles & Permissions</span>
+                    </a>
+                </li>
+                <li class="erp-nav-item">
+                    <a class="erp-nav-link active" href="reports.html">
+                        <i class="bi bi-bar-chart-line-fill"></i>
+                        <span>Reports & Analysis</span>
+                    </a>
+                </li>
+            </ul>
+
+            <div class="sidebar-group-label">System & Security</div>
+            <ul class="erp-nav-list">
+                <li class="erp-nav-item">
+                    <a class="erp-nav-link" href="../admin/dashboard.html#audit-logs">
+                        <i class="bi bi-journal-text"></i>
+                        <span>Audit Logs</span>
+                    </a>
+                </li>
+                <li class="erp-nav-item">
+                    <a class="erp-nav-link" href="../admin/dashboard.html#security">
+                        <i class="bi bi-shield-check"></i>
+                        <span>Security Monitoring</span>
+                    </a>
+                </li>
+                <li class="erp-nav-item">
+                    <a class="erp-nav-link" href="../admin/dashboard.html#backup">
+                        <i class="bi bi-database-down"></i>
+                        <span>Backup & Restore</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Sidebar Footer -->
+        <div class="erp-sidebar-footer">
+            <div class="sidebar-user-card">
+                <div class="user-avatar-circle user-avatar-display">AD</div>
+                <div class="user-meta-info">
+                    <div class="name user-name-display">Administrator</div>
+                    <div class="role user-role-display">System Admin</div>
+                </div>
+            </div>
+            <button class="btn-sidebar-signout logout-btn" id="logoutBtn" title="Sign Out">
+                <i class="bi bi-box-arrow-right"></i>
+            </button>
+        </div>
+    </aside>
+
+    <!-- ====================================================================
+         MAIN VIEWPORT
+         ==================================================================== -->
+    <div class="erp-main-wrapper">
+
+        <!-- Topbar Header -->
+        <header class="erp-topbar">
+            <div class="topbar-left">
+                <button class="mobile-menu-toggle" id="sidebarToggleBtn" aria-label="Toggle Sidebar Menu">
+                    <i class="bi bi-list"></i>
+                </button>
+                <div class="breadcrumb-nav">
+                    <a href="../admin/dashboard.html">Administration</a>
+                    <i class="bi bi-chevron-right text-muted small"></i>
+                    <span class="active-crumb" id="topbarCrumb">Reports & Analysis</span>
+                </div>
+            </div>
+            <div class="topbar-right">
+                <div class="academic-term-chip">
+                    <i class="bi bi-calendar3 text-primary"></i>
+                    <span id="liveDate">Academic Year 2025-26</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Reports View Content -->
+        <main class="erp-canvas-content p-4">
+
+            <!-- Page Title & Header Actions -->
+            <div class="reports-page-header">
+                <div class="reports-page-title">
+                    <h2>Reports & Analysis</h2>
+                    <p>Financial performance, fee collections, and outstanding ledgers across departments, courses, and terms.</p>
+                </div>
+                <div class="reports-actions-group">
+                    <button class="btn-reports-outline" id="btnExportCSV">
+                        <i class="bi bi-file-earmark-excel"></i> Export CSV
+                    </button>
+                    <button class="btn-reports-primary" id="btnPrintReport">
+                        <i class="bi bi-printer"></i> Print Report
+                    </button>
+                </div>
+            </div>
+
+            <!-- Filter Panel Card -->
+            <div class="reports-filter-card">
+                <div class="filter-card-header">
+                    <div class="filter-card-title">
+                        <i class="bi bi-funnel-fill text-primary"></i> Analytical Query Filters
+                    </div>
+                    <span class="badge bg-light text-muted border">Real-Time Ledger Filter</span>
+                </div>
+
+                <div class="filter-grid">
+                    <div class="filter-group">
+                        <label for="filterAcademicYear">Academic Year</label>
+                        <select id="filterAcademicYear">
+                            <option value="">All Academic Years</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="filterDepartment">Department</label>
+                        <select id="filterDepartment">
+                            <option value="">All Departments</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="filterProgram">Program / Course</label>
+                        <select id="filterProgram">
+                            <option value="">All Programs</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="filterSemester">Year / Semester</label>
+                        <select id="filterSemester">
+                            <option value="">All Semesters</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="filterFeeType">Fee Type</label>
+                        <select id="filterFeeType">
+                            <option value="">All Fee Types</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="filterStatus">Payment Status</label>
+                        <select id="filterStatus">
+                            <option value="">All Statuses</option>
+                            <option value="SUCCESS">SUCCESS / PAID</option>
+                            <option value="PARTIALLY_PAID">PARTIALLY PAID</option>
+                            <option value="PENDING">PENDING / UNPAID</option>
+                            <option value="FAILED">FAILED / REJECTED</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="filterFromDate">From Date</label>
+                        <input type="date" id="filterFromDate">
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="filterToDate">To Date</label>
+                        <input type="date" id="filterToDate">
+                    </div>
+                </div>
+
+                <div class="filter-buttons-row">
+                    <button class="btn-reports-outline" id="btnResetFilters">
+                        <i class="bi bi-arrow-counterclockwise"></i> Reset Filters
+                    </button>
+                    <button class="btn-reports-primary" id="btnApplyFilters">
+                        <i class="bi bi-check2-circle"></i> Apply Filters
+                    </button>
+                </div>
+            </div>
+
+            <!-- KPI Cards Summary Row -->
+            <div class="reports-kpi-grid">
+                <!-- KPI 1: Total Fee Collection -->
+                <div class="kpi-card" style="--kpi-accent-color: #059669; --kpi-bg-light: #d1fae5;">
+                    <div class="kpi-card-content">
+                        <div class="kpi-info-group">
+                            <label>Total Fee Collection</label>
+                            <div class="kpi-value" id="kpiTotalCollection">₹0</div>
+                            <div class="kpi-subtext text-success">
+                                <i class="bi bi-arrow-up-right"></i> Verified Gateway Receipts
+                            </div>
+                        </div>
+                        <div class="kpi-icon-badge">
+                            <i class="bi bi-cash-coin"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- KPI 2: Total Outstanding Fee -->
+                <div class="kpi-card" style="--kpi-accent-color: #dc2626; --kpi-bg-light: #fee2e2;">
+                    <div class="kpi-card-content">
+                        <div class="kpi-info-group">
+                            <label>Total Outstanding Fee</label>
+                            <div class="kpi-value" id="kpiTotalOutstanding">₹0</div>
+                            <div class="kpi-subtext text-danger">
+                                <i class="bi bi-exclamation-triangle"></i> Pending Ledger Balance
+                            </div>
+                        </div>
+                        <div class="kpi-icon-badge">
+                            <i class="bi bi-wallet2"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- KPI 3: Payment Success Rate -->
+                <div class="kpi-card" style="--kpi-accent-color: #2563eb; --kpi-bg-light: #eff6ff;">
+                    <div class="kpi-card-content">
+                        <div class="kpi-info-group">
+                            <label>Payment Success Rate</label>
+                            <div class="kpi-value" id="kpiSuccessRate">0.0%</div>
+                            <div class="kpi-subtext text-primary">
+                                <i class="bi bi-shield-check"></i> Gateway Settlement Ratio
+                            </div>
+                        </div>
+                        <div class="kpi-icon-badge">
+                            <i class="bi bi-pie-chart-fill"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- KPI 4: Pending Installments -->
+                <div class="kpi-card" style="--kpi-accent-color: #d97706; --kpi-bg-light: #fef3c7;">
+                    <div class="kpi-card-content">
+                        <div class="kpi-info-group">
+                            <label>Pending Installments</label>
+                            <div class="kpi-value" id="kpiPendingInstallments">0</div>
+                            <div class="kpi-subtext text-warning">
+                                <i class="bi bi-clock-history"></i> Active Due Installments
+                            </div>
+                        </div>
+                        <div class="kpi-icon-badge">
+                            <i class="bi bi-calendar-event"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analytics Charts Grid -->
+            <div class="reports-charts-grid">
+                <!-- Chart 1: Fee Collection Trend -->
+                <div class="chart-card chart-card-lg">
+                    <div class="chart-card-header">
+                        <div class="chart-card-title">
+                            <i class="bi bi-graph-up text-primary"></i> Fee Collection & Outstanding Trend
+                        </div>
+                        <span class="badge bg-light text-muted border">Monthly Breakdown</span>
+                    </div>
+                    <div class="chart-container-wrapper">
+                        <canvas id="chartCollectionTrend"></canvas>
+                    </div>
+                </div>
+
+                <!-- Chart 2: Payment Success Rate -->
+                <div class="chart-card chart-card-sm">
+                    <div class="chart-card-header">
+                        <div class="chart-card-title">
+                            <i class="bi bi-pie-chart text-success"></i> Transaction Status
+                        </div>
+                    </div>
+                    <div class="chart-container-wrapper">
+                        <canvas id="chartSuccessRate"></canvas>
+                    </div>
+                </div>
+
+                <!-- Chart 3: Installment Distribution -->
+                <div class="chart-card chart-card-md">
+                    <div class="chart-card-header">
+                        <div class="chart-card-title">
+                            <i class="bi bi-bar-chart-steps text-warning"></i> Installment Breakdown
+                        </div>
+                    </div>
+                    <div class="chart-container-wrapper">
+                        <canvas id="chartInstallmentDist"></canvas>
+                    </div>
+                </div>
+
+                <!-- Chart 4: Department-wise Collection -->
+                <div class="chart-card chart-card-md">
+                    <div class="chart-card-header">
+                        <div class="chart-card-title">
+                            <i class="bi bi-building text-info"></i> Department-wise Fee Collection
+                        </div>
+                    </div>
+                    <div class="chart-container-wrapper">
+                        <canvas id="chartDeptCollection"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabbed Report Tables Card -->
+            <div class="reports-table-card">
+
+                <!-- Navigation Tabs -->
+                <div class="reports-nav-tabs">
+                    <button class="tab-btn active" data-tab="collection">
+                        <i class="bi bi-cash-stack"></i> Fee Collection Report
+                    </button>
+                    <button class="tab-btn" data-tab="pending">
+                        <i class="bi bi-hourglass-split"></i> Pending Fee Report
+                    </button>
+                    <button class="tab-btn" data-tab="payment">
+                        <i class="bi bi-credit-card-2-front"></i> Transaction Report
+                    </button>
+                    <button class="tab-btn" data-tab="student">
+                        <i class="bi bi-person-lines-fill"></i> Student Fee Report
+                    </button>
+                    <button class="tab-btn" data-tab="department">
+                        <i class="bi bi-buildings"></i> Department Analysis
+                    </button>
+                    <button class="tab-btn" data-tab="semester">
+                        <i class="bi bi-mortarboard"></i> Semester Analysis
+                    </button>
+                </div>
+
+                <!-- Table Action Bar -->
+                <div class="table-toolbar">
+                    <div class="search-box-wrapper">
+                        <i class="bi bi-search"></i>
+                        <input type="text" class="search-input" id="reportsSearchInput" placeholder="Search by Student ID, PRN, Name, Payment ID...">
+                    </div>
+                    <div class="table-records-badge" id="tableRecordsBadge">
+                        Showing 0 records
+                    </div>
+                </div>
+
+                <!-- Dynamic Table Container -->
+                <div class="table-responsive" id="reportsTableContainer">
+                    <!-- Loaded dynamically via reports.js -->
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+</div>
+
+<!-- Bootstrap 5 Bundle JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+
+<!-- Dashboard Engine & Reports Scripts -->
+<script src="../assets/js/auth.js"></script>
+<script src="../assets/js/dashboard.js"></script>
+<script src="js/reportsDummyData.js"></script>
+<script src="js/reports.js"></script>
+
+</body>
+</html>
