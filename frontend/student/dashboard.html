@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Financial Portal — Fee Payment Management | MMCOE</title>
+
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap 5.3.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons 1.11.3 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
+    <!-- Design System Stylesheet -->
+    <link href="../assets/css/dashboard.css" rel="stylesheet">
+</head>
+<body>
+
+<div class="erp-dashboard-layout">
+
+    <!-- ====================================================================
+         INSTITUTIONAL SIDEBAR
+         ==================================================================== -->
+    <aside class="erp-sidebar" id="erpSidebar">
+        <!-- Sidebar Header -->
+        <div class="erp-sidebar-header">
+            <div class="sidebar-emblem">
+                <i class="bi bi-mortarboard-fill"></i>
+            </div>
+            <div class="sidebar-brand-text">
+                <h1>MMCOE Portal</h1>
+                <span>Student Self-Service</span>
+            </div>
+        </div>
+
+        <!-- Sidebar Navigation -->
+        <div class="erp-sidebar-nav">
+            <div class="sidebar-group-label">Academic Ledger</div>
+            <ul class="erp-nav-list">
+                <li class="erp-nav-item">
+                    <a class="erp-nav-link active" href="#dashboard" data-section="sec-student-dashboard">
+                        <i class="bi bi-speedometer2"></i>
+                        <span>Dashboard Overview</span>
+                    </a>
+                </li>
+                <li class="erp-nav-item">
+                    <a class="erp-nav-link" href="#profile" data-section="sec-student-profile">
+                        <i class="bi bi-person-vcard-fill"></i>
+                        <span>My Academic Profile</span>
+                    </a>
+                </li>
+                <li class="erp-nav-item">
+                    <a class="erp-nav-link" href="#fee-structure" data-section="sec-student-fee-structure">
+                        <i class="bi bi-receipt"></i>
+                        <span>Fee Structure Breakdown</span>
+                    </a>
+                </li>
+                <li class="erp-nav-item">
+                    <a class="erp-nav-link" href="#apply-installment" data-section="sec-student-apply-installment">
+                        <i class="bi bi-calendar-plus"></i>
+                        <span>Apply for Installment Plan</span>
+                    </a>
+                </li>
+                <li class="erp-nav-item">
+                    <a class="erp-nav-link" href="#installment-status" data-section="sec-student-installment-status">
+                        <i class="bi bi-hourglass-split"></i>
+                        <span>Installment Status</span>
+                    </a>
+                </li>
+                <li class="erp-nav-item">
+                    <a class="erp-nav-link" href="#installment-schedule" data-section="sec-student-installment-schedule">
+                        <i class="bi bi-calendar-check-fill"></i>
+                        <span>Approved Schedule</span>
+                    </a>
+                </li>
+            </ul>
+
+            <div class="sidebar-group-label">Payments & Clearance</div>
+            <ul class="erp-nav-list">
+                <li class="erp-nav-item">
+                    <a class="erp-nav-link" href="#pay-fee" data-section="sec-student-pay-fee">
+                        <i class="bi bi-credit-card-2-front-fill"></i>
+                        <span>Initiate Fee Payment</span>
+                        <span class="erp-nav-badge" style="background:#fef3c7; color:#92400e; border-color:#fde68a;">Due</span>
+                    </a>
+                </li>
+                <li class="erp-nav-item">
+                    <a class="erp-nav-link" href="#payment-history" data-section="sec-student-payment-history">
+                        <i class="bi bi-clock-history"></i>
+                        <span>Payment History</span>
+                    </a>
+                </li>
+                <li class="erp-nav-item">
+                    <a class="erp-nav-link" href="#track-status" data-section="sec-student-track-status">
+                        <i class="bi bi-graph-up-arrow"></i>
+                        <span>Track Fee Status</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Sidebar Footer -->
+        <div class="erp-sidebar-footer">
+            <div class="sidebar-user-card">
+                <div class="user-avatar-circle user-avatar-display" style="border-color:#6ee7b7;">MT</div>
+                <div class="user-meta-info">
+                    <div class="name user-name-display">Manan Vivekanand Tote</div>
+                    <div class="role user-role-display">B25IT2010 • SE (IT)</div>
+                </div>
+            </div>
+            <button class="btn-sidebar-signout logout-btn" id="logoutBtn">
+                <i class="bi bi-box-arrow-right"></i>
+                <span>Sign Out of Portal</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- ====================================================================
+         MAIN VIEWPORT
+         ==================================================================== -->
+    <div class="erp-main-wrapper">
+
+        <!-- Sticky Topbar -->
+        <header class="erp-topbar">
+            <div class="topbar-left">
+                <button class="mobile-menu-toggle" id="sidebarToggleBtn" aria-label="Toggle Sidebar Menu">
+                    <i class="bi bi-list"></i>
+                </button>
+                <div class="breadcrumb-nav">
+                    <a href="#">MMCOE ERP</a>
+                    <i class="bi bi-chevron-right" style="font-size:0.7rem;"></i>
+                    <a href="#">Student Services</a>
+                    <i class="bi bi-chevron-right" style="font-size:0.7rem;"></i>
+                    <span class="active-crumb" id="topbarCrumb">Fee Overview</span>
+                </div>
+            </div>
+
+            <div class="topbar-right">
+                <!-- Academic Term Chip -->
+                <div class="academic-term-chip">
+                    <i class="bi bi-mortarboard-fill"></i>
+                    <span>AY 2025-26 • B.Tech (IT)</span>
+                </div>
+
+                <!-- Notifications Dropdown -->
+                <div class="dropdown">
+                    <button class="notification-dropdown-btn" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Notifications">
+                        <i class="bi bi-bell"></i>
+                        <span class="notification-unread-dot"></span>
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-end notification-popover-menu">
+                        <div class="notification-header">
+                            <h6 class="mb-0 fw-bold" style="font-size:0.88rem;">Student Notices</h6>
+                            <span class="badge bg-primary-subtle text-primary">2 Active</span>
+                        </div>
+                        <a href="#" class="notification-item">
+                            <div class="notif-icon-box notif-icon-green"><i class="bi bi-patch-check-fill"></i></div>
+                            <div>
+                                <div class="fw-bold" style="font-size:0.8rem;">Installment 1 Receipt Generated</div>
+                                <div class="text-muted" style="font-size:0.72rem;">₹60,000 cleared — Installment 1 paid.</div>
+                            </div>
+                        </a>
+                        <a href="#" class="notification-item">
+                            <div class="notif-icon-box notif-icon-amber"><i class="bi bi-clock-history"></i></div>
+                            <div>
+                                <div class="fw-bold" style="font-size:0.8rem;">Installment 2 Due Soon</div>
+                                <div class="text-muted" style="font-size:0.72rem;">Balance ₹60,000 due on 15 November 2025.</div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Role Badge -->
+                <span class="topbar-role-badge badge-role-student">
+                    <i class="bi bi-mortarboard"></i> Student
+                </span>
+            </div>
+        </header>
+
+        <!-- Canvas Body -->
+        <main class="erp-content-canvas">
+            <div id="notificationArea"></div>
+
+            <!-- ================================================================
+                 SECTION 1: STUDENT DASHBOARD OVERVIEW
+                 ================================================================ -->
+            <section id="sec-student-dashboard" class="dashboard-section">
+
+                <!-- Welcome Hero Area -->
+                <div class="dashboard-welcome-hero" style="background: linear-gradient(135deg, #09172c 0%, #0e2f59 60%, #1e56a0 100%);">
+                    <div class="welcome-hero-content">
+                        <h2>Good Morning, Manan 👋</h2>
+                        <p>Track your academic fee ledger, upcoming installments, and payment authorizations.</p>
+                    </div>
+                    <div class="hero-quick-meta">
+                        <div class="hero-meta-item">
+                            <i class="bi bi-person-badge"></i>
+                            <span>PRN: <strong>B25IT2010</strong></span>
+                        </div>
+                        <div class="hero-meta-item">
+                            <i class="bi bi-building"></i>
+                            <span>Information Technology (SE - Div A)</span>
+                        </div>
+                        <div class="hero-meta-item">
+                            <i class="bi bi-patch-check-fill text-success"></i>
+                            <span>Status: <strong>INSTALLMENT 1 PAID (50%)</strong></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4 Statistics Cards -->
+                <div class="row g-3 mb-4">
+                    <div class="col-xl-3 col-sm-6">
+                        <div class="erp-stat-card">
+                            <div class="stat-card-header">
+                                <span class="stat-card-label">Total Annual Fee</span>
+                                <div class="stat-icon-wrapper stat-icon-blue">
+                                    <i class="bi bi-wallet2"></i>
+                                </div>
+                            </div>
+                            <div class="stat-card-value">₹1,20,000</div>
+                            <div class="stat-card-footer">
+                                <span class="trend-badge trend-neutral">B.Tech IT</span>
+                                <span>AY 2025-26</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-3 col-sm-6">
+                        <div class="erp-stat-card">
+                            <div class="stat-card-header">
+                                <span class="stat-card-label">Amount Paid</span>
+                                <div class="stat-icon-wrapper stat-icon-green">
+                                    <i class="bi bi-check2-circle"></i>
+                                </div>
+                            </div>
+                            <div class="stat-card-value text-success">₹60,000</div>
+                            <div class="stat-card-footer">
+                                <span class="trend-badge trend-positive">Installment 1 Paid</span>
+                                <span>Receipt on file</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-3 col-sm-6">
+                        <div class="erp-stat-card">
+                            <div class="stat-card-header">
+                                <span class="stat-card-label">Balance Due</span>
+                                <div class="stat-icon-wrapper stat-icon-amber">
+                                    <i class="bi bi-hourglass-bottom"></i>
+                                </div>
+                            </div>
+                            <div class="stat-card-value text-warning">₹60,000</div>
+                            <div class="stat-card-footer">
+                                <span class="trend-badge trend-warning">Installment 2</span>
+                                <span>Due: 15 Nov 2025</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-3 col-sm-6">
+                        <div class="erp-stat-card">
+                            <div class="stat-card-header">
+                                <span class="stat-card-label">Approved Scheme</span>
+                                <div class="stat-icon-wrapper stat-icon-purple">
+                                    <i class="bi bi-calendar3-range"></i>
+                                </div>
+                            </div>
+                            <div class="stat-card-value" style="font-size:1.5rem;">2-Installment</div>
+                            <div class="stat-card-footer">
+                                <span class="trend-badge trend-positive">Standard Plan</span>
+                                <span>Inst 1 + Inst 2</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fee Payment Progress Bar Visualization -->
+                <div class="fee-progress-card">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <div>
+                            <h5 class="fw-bold text-dark mb-0">Annual Fee Clearance Progress — Two Installments</h5>
+                            <span class="text-muted small">50% Cleared • ₹60,000 Paid of ₹1,20,000 Total</span>
+                        </div>
+                        <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-3 py-2 fw-bold">
+                            <i class="bi bi-hourglass-split me-1"></i>Installment 2 Pending
+                        </span>
+                    </div>
+                    <div class="progress-milestone-bar">
+                        <div class="progress-fill-active" style="width: 50%;"></div>
+                    </div>
+                    <div class="progress-milestone-markers">
+                        <span>₹0 (Start)</span>
+                        <span class="text-success fw-bold">₹60,000 (Inst 1 • PAID ✓)</span>
+                        <span class="text-danger fw-bold">₹1,20,000 (Inst 2 • Due 15 Nov)</span>
+                    </div>
+                </div>
+
+                <!-- Split Row: Upcoming Due & Recent Receipts -->
+                <div class="row g-4 mb-4">
+                    <!-- Upcoming Installment Card -->
+                    <div class="col-lg-5">
+                        <div class="erp-table-container">
+                            <div class="table-header-toolbar">
+                                <div class="table-title-group">
+                                    <h3>Upcoming Installment</h3>
+                                    <p>Next required milestone clearance</p>
+                                </div>
+                                <span class="status-pill status-pill-pending">ACTION REQUIRED</span>
+                            </div>
+                            <div class="p-4">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <div>
+                                        <span class="text-muted small d-block">Installment Number</span>
+                                        <h5 class="fw-bold text-dark mb-0">Installment 2 (Final)</h5>
+                                    </div>
+                                    <div class="text-end">
+                                        <span class="text-muted small d-block">Amount Due</span>
+                                        <h4 class="fw-bold text-primary mb-0">₹60,000</h4>
+                                    </div>
+                                </div>
+
+                                <div class="p-3 bg-light rounded-3 mb-3" style="font-size:0.85rem;">
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <span class="text-muted">Due Deadline:</span>
+                                        <strong class="text-danger">15 November 2025</strong>
+                                    </div>
+                                    <div class="d-flex justify-content-between">
+                                        <span class="text-muted">Late Fee Surcharge:</span>
+                                        <span>₹0.00 (Grace Period Active)</span>
+                                    </div>
+                                </div>
+
+                                <button class="btn-erp-primary w-100 py-2 justify-content-center" onclick="initiatePaymentModal(60000, 'Installment 2 (Final)')">
+                                    <i class="bi bi-lock-fill"></i> Pay ₹60,000 Now via Gateway
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Payment History Snippet -->
+                    <div class="col-lg-7">
+                        <div class="erp-table-container">
+                            <div class="table-header-toolbar">
+                                <div class="table-title-group">
+                                    <h3>Verified Payment Receipts</h3>
+                                    <p>Official MMCOE institutional fee receipts</p>
+                                </div>
+                                <button class="btn-erp-outline" onclick="document.querySelector('[data-section=\'sec-student-payment-history\']').click();">
+                                    View Full History
+                                </button>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="erp-data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Receipt No</th>
+                                            <th>Description</th>
+                                            <th>Amount</th>
+                                            <th>Date</th>
+                                            <th>Status</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><span class="prn-code-badge">REC-2025-0812</span></td>
+                                            <td><strong>Installment 1 (Term 1)</strong></td>
+                                            <td>₹40,000</td>
+                                            <td>15 June 2025</td>
+                                            <td><span class="status-pill status-pill-paid">PAID</span></td>
+                                            <td>
+                                                <button class="btn-icon-action" title="Download Official PDF" onclick="alert('Downloading Receipt REC-2025-0812 PDF...');"><i class="bi bi-file-earmark-pdf"></i></button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="prn-code-badge">REC-2025-0945</span></td>
+                                            <td><strong>Installment 2 (Term 1)</strong></td>
+                                            <td>₹40,000</td>
+                                            <td>10 August 2025</td>
+                                            <td><span class="status-pill status-pill-paid">PAID</span></td>
+                                            <td>
+                                                <button class="btn-icon-action" title="Download Official PDF" onclick="alert('Downloading Receipt REC-2025-0945 PDF...');"><i class="bi bi-file-earmark-pdf"></i></button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- ================================================================
+                 SECTION 2: MY PROFILE
+                 ================================================================ -->
+            <section id="sec-student-profile" class="dashboard-section d-none">
+                <div class="erp-table-container">
+                    <div class="table-header-toolbar">
+                        <div class="table-title-group">
+                            <h3>Student Identity & Academic Record</h3>
+                            <p>Official enrolled profile registered in MMCOE records</p>
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <div class="row g-4">
+                            <div class="col-md-4">
+                                <label class="text-muted small d-block">Full Legal Name</label>
+                                <div class="fw-bold fs-6">Manan Vivekanand Tote</div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="text-muted small d-block">Permanent Registration Number (PRN)</label>
+                                <div><span class="prn-code-badge fs-6">B25IT2010</span></div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="text-muted small d-block">Official Institute Email</label>
+                                <div class="fw-bold fs-6 text-primary">manan@mmcoe.com</div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="text-muted small d-block">Department / Program</label>
+                                <div class="fw-bold fs-6">Information Technology (B.Tech)</div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="text-muted small d-block">Academic Class</label>
+                                <div class="fw-bold fs-6">Second Year (SE)</div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="text-muted small d-block">Division & Batch</label>
+                                <div class="fw-bold fs-6">Division A • Batch T2</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ================================================================
+                 SECTION 3: FEE STRUCTURE
+                 ================================================================ -->
+            <section id="sec-student-fee-structure" class="dashboard-section d-none">
+                <div class="erp-table-container">
+                    <div class="table-header-toolbar">
+                        <div class="table-title-group">
+                            <h3>Official Fee Breakdown — B.Tech (IT) AY 2025-26</h3>
+                            <p>Sanctioned fee heads for the academic cycle</p>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="erp-data-table">
+                            <thead>
+                                <tr>
+                                    <th>Fee Component</th>
+                                    <th>Amount (₹)</th>
+                                    <th>Purpose & Classification</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Tuition Fee</strong></td>
+                                    <td>₹95,000</td>
+                                    <td>Academic Instruction, Practical Labs & Faculty Mentorship</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Development Fee</strong></td>
+                                    <td>₹15,000</td>
+                                    <td>Digital Infrastructure, High-Speed Campus WiFi & Library</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>SPPU University Examination Fee</strong></td>
+                                    <td>₹10,000</td>
+                                    <td>Semester Assessments, Practical Exams & Marksheet Processing</td>
+                                </tr>
+                                <tr style="background:#f8fafc; font-weight:800;">
+                                    <td>Total Annual Academic Fee</td>
+                                    <td class="text-primary fs-6">₹1,20,000</td>
+                                    <td>Two-Installment clearance (₹60,000 × 2)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ================================================================
+                 SECTION 4: APPLY FOR INSTALLMENT PLAN
+                 ================================================================ -->
+            <section id="sec-student-apply-installment" class="dashboard-section d-none">
+                <div class="erp-table-container">
+                    <div class="table-header-toolbar">
+                        <div class="table-title-group">
+                            <h3>Apply for Fee Installment Scheme</h3>
+                            <p>Submit a formal request for multi-part fee payment to Accounts Office</p>
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <div class="alert alert-success d-flex align-items-center gap-2 mb-4">
+                            <i class="bi bi-check-circle-fill fs-5"></i>
+                            <div>Standard <strong>Two-Installment Plan</strong> is automatically applied. No request needed. Installment 1: <strong>₹60,000</strong> due 15 June • Installment 2: <strong>₹60,000</strong> due 15 November.</div>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="p-3 border rounded-3 text-center" style="border-color:var(--success-600,#16a34a)!important;">
+                                    <div class="text-success fw-bold mb-1"><i class="bi bi-check-circle-fill me-1"></i>Installment 1</div>
+                                    <div class="fs-4 fw-bold text-success">₹60,000</div>
+                                    <div class="text-muted small">Due: 15 June 2025</div>
+                                    <span class="status-pill status-pill-paid mt-2 d-inline-block">PAID</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="p-3 border rounded-3 text-center" style="border-color:#f59e0b!important;">
+                                    <div class="text-warning fw-bold mb-1"><i class="bi bi-hourglass-split me-1"></i>Installment 2</div>
+                                    <div class="fs-4 fw-bold text-warning">₹60,000</div>
+                                    <div class="text-muted small">Due: 15 November 2025</div>
+                                    <span class="status-pill status-pill-pending mt-2 d-inline-block">PENDING</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ================================================================
+                 SECTION 5: INSTALLMENT STATUS
+                 ================================================================ -->
+            <section id="sec-student-installment-status" class="dashboard-section d-none">
+                <div class="erp-table-container p-4">
+                    <div class="d-flex align-items-center gap-3 p-3 border rounded-3 bg-success-subtle text-success">
+                        <i class="bi bi-check-circle-fill fs-2"></i>
+                        <div>
+                            <h5 class="fw-bold mb-1">Two-Installment Plan Active</h5>
+                            <p class="mb-0 small text-success-emphasis">
+                                Standard two-installment plan: Installment 1 (₹60,000) due 15 June 2025 — <strong>PAID</strong>. Installment 2 (₹60,000) due 15 November 2025 — <strong>PENDING</strong>.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ================================================================
+                 SECTION 6: APPROVED SCHEDULE
+                 ================================================================ -->
+            <section id="sec-student-installment-schedule" class="dashboard-section d-none">
+                <div class="erp-table-container">
+                    <div class="table-header-toolbar">
+                        <div class="table-title-group">
+                            <h3>Two-Installment Payment Timeline</h3>
+                            <p>AY 2025-26 — Installment 1 + Installment 2 = ₹1,20,000 Total</p>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="erp-data-table">
+                            <thead>
+                                <tr>
+                                    <th>Installment</th>
+                                    <th>Amount</th>
+                                    <th>Due Date</th>
+                                    <th>Status</th>
+                                    <th>Receipt Ref</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Installment 1 (50%)</strong></td>
+                                    <td>₹60,000</td>
+                                    <td>15 June 2025</td>
+                                    <td><span class="status-pill status-pill-paid">PAID</span></td>
+                                    <td><code>REC-2025-0812</code></td>
+                                    <td><button class="btn-icon-action" title="Download PDF" onclick="alert('Downloading REC-2025-0812...');"><i class="bi bi-file-earmark-pdf"></i></button></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Installment 2 (50%)</strong></td>
+                                    <td>₹60,000</td>
+                                    <td>15 November 2025</td>
+                                    <td><span class="status-pill status-pill-pending">DUE</span></td>
+                                    <td><span class="text-muted">—</span></td>
+                                    <td><button class="btn-erp-primary btn-sm py-1" onclick="initiatePaymentModal(60000, 'Installment 2 (Final)')"><i class="bi bi-credit-card me-1"></i>Pay Now</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ================================================================
+                 SECTION 7: INITIATE FEE PAYMENT
+                 ================================================================ -->
+            <section id="sec-student-pay-fee" class="dashboard-section d-none">
+                <div class="erp-table-container">
+                    <div class="table-header-toolbar">
+                        <div class="table-title-group">
+                            <h3>Initiate Fee Payment via Gateway</h3>
+                            <p>Clear outstanding installment balance securely</p>
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <div class="alert alert-info d-flex align-items-center gap-2 mb-4">
+                            <i class="bi bi-info-circle-fill fs-5"></i>
+                            <div>Outstanding Balance: <strong>₹40,000 (Installment 3)</strong> due on <strong>30 Sept 2025</strong>.</div>
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold small">Choose Payment Mode</label>
+                                <select class="form-select">
+                                    <option>UPI (Google Pay, PhonePe, Paytm, BHIM)</option>
+                                    <option>Net Banking (SBI, HDFC, ICICI, Axis & 50+ Banks)</option>
+                                    <option>Debit / Credit Card (Visa, MasterCard, RuPay)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <button class="btn-erp-primary" onclick="initiatePaymentModal(40000, 'Installment 3 (Final)')">
+                            <i class="bi bi-shield-lock-fill"></i> Proceed to Pay ₹40,000 Securely
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ================================================================
+                 SECTION 8: PAYMENT HISTORY
+                 ================================================================ -->
+            <section id="sec-student-payment-history" class="dashboard-section d-none">
+                <div class="erp-table-container">
+                    <div class="table-header-toolbar">
+                        <div class="table-title-group">
+                            <h3>Complete Transaction History</h3>
+                            <p>Lifetime audit record of all fees paid to MMCOE</p>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="erp-data-table">
+                            <thead>
+                                <tr>
+                                    <th>Receipt Number</th>
+                                    <th>Payment Description</th>
+                                    <th>Amount Paid</th>
+                                    <th>Payment Mode</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><span class="prn-code-badge">REC-2025-0812</span></td>
+                                    <td>Installment 1 (Term 1)</td>
+                                    <td><strong>₹40,000</strong></td>
+                                    <td>UPI</td>
+                                    <td>15 June 2025</td>
+                                    <td><span class="status-pill status-pill-paid">SUCCESS</span></td>
+                                    <td>
+                                        <button class="btn-icon-action" onclick="alert('Downloading Official Receipt REC-2025-0812...');"><i class="bi bi-download"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><span class="prn-code-badge">REC-2025-0945</span></td>
+                                    <td>Installment 2 (Term 1)</td>
+                                    <td><strong>₹40,000</strong></td>
+                                    <td>Net Banking</td>
+                                    <td>10 August 2025</td>
+                                    <td><span class="status-pill status-pill-paid">SUCCESS</span></td>
+                                    <td>
+                                        <button class="btn-icon-action" onclick="alert('Downloading Official Receipt REC-2025-0945...');"><i class="bi bi-download"></i></button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ================================================================
+                 SECTION 9: TRACK FEE STATUS
+                 ================================================================ -->
+            <section id="sec-student-track-status" class="dashboard-section d-none">
+                <div class="erp-table-container p-4">
+                    <h4 class="fw-bold mb-3"><i class="bi bi-graph-up-arrow text-primary me-2"></i>Institutional Financial Status</h4>
+                    <p class="text-muted">Academic Clearance Status: <strong>INSTALLMENT 1 CLEARED — INSTALLMENT 2 PENDING</strong></p>
+                    <div class="progress mb-3" style="height: 18px; border-radius: 8px;">
+                        <div class="progress-bar bg-success" style="width: 50%;">Inst 1 Paid (₹60,000)</div>
+                        <div class="progress-bar bg-warning text-dark" style="width: 50%;">Inst 2 Pending (₹60,000)</div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+</div>
+
+<!-- ====================================================================
+     MODAL: PAYMENT GATEWAY SIMULATOR
+     ==================================================================== -->
+<div class="modal fade erp-modal" id="paymentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="modal-title fw-bold"><i class="bi bi-shield-check text-primary me-2"></i>MMCOE Fee Payment Gateway</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center py-3">
+                    <span class="text-muted small d-block mb-1">Payment for</span>
+                    <h5 class="fw-bold" id="payModalDesc">Installment 3</h5>
+                    <h2 class="text-primary fw-extrabold my-2" id="payModalAmount">₹40,000</h2>
+                    <span class="badge bg-light text-muted border">256-Bit SSL Encrypted</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-erp-primary btn-sm" onclick="simulatePaymentSuccess()">
+                    <i class="bi bi-check-circle-fill"></i> Simulate Payment Success
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap 5 Bundle JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Global Auth & Session Script -->
+<script src="../assets/js/auth.js"></script>
+
+<!-- Global Dashboard Script -->
+<script src="../assets/js/dashboard.js"></script>
+<script src="../assets/js/student.js"></script>
+
+<script>
+function initiatePaymentModal(amount, desc) {
+    document.getElementById('payModalAmount').textContent = '₹' + Number(amount).toLocaleString('en-IN');
+    document.getElementById('payModalDesc').textContent = desc;
+    new bootstrap.Modal(document.getElementById('paymentModal')).show();
+}
+
+function updatePaymentAmount() {
+    // Nothing to do dynamically — handled in proceedPayment()
+}
+
+function proceedPayment() {
+    const sel = document.getElementById('paymentTypeSelect');
+    const amount = parseInt(sel?.value || 60000);
+    const desc   = sel?.options[sel?.selectedIndex]?.text || 'Installment 2';
+    initiatePaymentModal(amount, desc);
+}
+
+function simulatePaymentSuccess() {
+    const modal = bootstrap.Modal.getInstance(document.getElementById('paymentModal'));
+    if (modal) modal.hide();
+    const txnRef = 'TXN-' + Math.floor(100000 + Math.random() * 900000);
+    const notifArea = document.getElementById('notificationArea');
+    if (notifArea) {
+        notifArea.innerHTML = `<div class="alert alert-success alert-dismissible fade show d-flex align-items-center gap-2 mb-3" role="alert" style="border-radius:12px;">
+            <i class="bi bi-check-circle-fill fs-5"></i>
+            <div>Payment successful! Transaction Reference: <strong>${txnRef}</strong>. Your receipt will be available within 24 hours.</div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>`;
+    }
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accounts Officer ERP Portal — Fee Payment Management | MMCOE</title>
+
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap 5.3.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons 1.11.3 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
+    <!-- Design System Stylesheet -->
+    <link href="../assets/css/dashboard.css" rel="stylesheet">
+</head>
+<body>
+
+<div class="erp-dashboard-layout">
+
+    <!-- ====================================================================
+         INSTITUTIONAL SIDEBAR
+         ==================================================================== -->
+    <aside class="erp-sidebar" id="erpSidebar">
+        <!-- Sidebar Header -->
+        <div class="erp-sidebar-header">
+            <div class="sidebar-emblem" style="color:var(--accent-gold); border-color:var(--accent-gold);">
+                <i class="bi bi-bank2"></i>
+            </div>
+            <div class="sidebar-brand-text">
+                <h1>MMCOE Accounts</h1>
+                <span>Finance & Reconciliation</span>
+            </div>
+        </div>
+
+        <!-- Sidebar Navigation -->
+        <div class="erp-sidebar-nav">
+            <div class="sidebar-group-label">Financial Operations</div>
+            <ul class="erp-nav-list">
+                <li class="erp-nav-item">
+                    <a class="erp-nav-link active" href="#dashboard" data-section="sec-accounts-dashboard">
+                        <i class="bi bi-pie-chart-fill"></i>
+                        <span>Dashboard Overview</span>
+                    </a>
+                </li>
+                <li class="erp-nav-item">
+                    <a class="erp-nav-link" href="#requests" data-section="sec-accounts-requests">
+                        <i class="bi bi-card-checklist"></i>
+                        <span>Installment Requests</span>
+                        <span class="erp-nav-badge">8 New</span>
+                    </a>
+                </li>
+                <li class="erp-nav-item">
+                    <a class="erp-nav-link" href="#fee-structure" data-section="sec-accounts-fee-structure">
+                        <i class="bi bi-cash-stack"></i>
+                        <span>Fee Structure</span>
+                    </a>
+                </li>
+                <li class="erp-nav-item">
+                    <a class="erp-nav-link" href="#approvals" data-section="sec-accounts-approvals">
+                        <i class="bi bi-hand-thumbs-up-fill"></i>
+                        <span>Approvals Queue</span>
+                    </a>
+                </li>
+                <li class="erp-nav-item">
+                    <a class="erp-nav-link" href="#schedules" data-section="sec-accounts-schedules">
+                        <i class="bi bi-calendar3-range-fill"></i>
+                        <span>Installment Schedules</span>
+                    </a>
+                </li>
+            </ul>
+
+            <div class="sidebar-group-label">Audit & Statements</div>
+            <ul class="erp-nav-list">
+                <li class="erp-nav-item">
+                    <a class="erp-nav-link" href="#transactions" data-section="sec-accounts-transactions">
+                        <i class="bi bi-cash-stack"></i>
+                        <span>Transaction Ledger</span>
+                    </a>
+                </li>
+                <li class="erp-nav-item">
+                    <a class="erp-nav-link" href="#verify" data-section="sec-accounts-verify">
+                        <i class="bi bi-patch-check-fill"></i>
+                        <span>Verify Payments</span>
+                    </a>
+                </li>
+                <li class="erp-nav-item">
+                    <a class="erp-nav-link" href="#reports" data-section="sec-accounts-reports">
+                        <i class="bi bi-file-earmark-bar-graph-fill"></i>
+                        <span>Reports & Analytics</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Sidebar Footer -->
+        <div class="erp-sidebar-footer">
+            <div class="sidebar-user-card">
+                <div class="user-avatar-circle user-avatar-display" style="border-color:#f59e0b;">AO</div>
+                <div class="user-meta-info">
+                    <div class="name user-name-display">Accounts Officer</div>
+                    <div class="role user-role-display">Finance Officer</div>
+                </div>
+            </div>
+            <button class="btn-sidebar-signout logout-btn" id="logoutBtn">
+                <i class="bi bi-box-arrow-right"></i>
+                <span>Sign Out of Portal</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- ====================================================================
+         MAIN VIEWPORT
+         ==================================================================== -->
+    <div class="erp-main-wrapper">
+
+        <!-- Sticky Topbar -->
+        <header class="erp-topbar">
+            <div class="topbar-left">
+                <button class="mobile-menu-toggle" id="sidebarToggleBtn" aria-label="Toggle Sidebar Menu">
+                    <i class="bi bi-list"></i>
+                </button>
+                <div class="breadcrumb-nav">
+                    <a href="#">MMCOE ERP</a>
+                    <i class="bi bi-chevron-right" style="font-size:0.7rem;"></i>
+                    <a href="#">Finance Office</a>
+                    <i class="bi bi-chevron-right" style="font-size:0.7rem;"></i>
+                    <span class="active-crumb" id="topbarCrumb">Accounts Dashboard</span>
+                </div>
+            </div>
+
+            <div class="topbar-right">
+                <!-- Academic Term Chip -->
+                <div class="academic-term-chip">
+                    <i class="bi bi-shield-fill-check text-success"></i>
+                    <span>Bank Gateway: Synchronized</span>
+                </div>
+
+                <!-- Notifications Dropdown -->
+                <div class="dropdown">
+                    <button class="notification-dropdown-btn" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Notifications">
+                        <i class="bi bi-bell"></i>
+                        <span class="notification-unread-dot"></span>
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-end notification-popover-menu">
+                        <div class="notification-header">
+                            <h6 class="mb-0 fw-bold" style="font-size:0.88rem;">Finance Alerts</h6>
+                            <span class="badge bg-warning-subtle text-warning-emphasis">8 Requests</span>
+                        </div>
+                        <a href="#" class="notification-item">
+                            <div class="notif-icon-box notif-icon-amber"><i class="bi bi-hourglass-split"></i></div>
+                            <div>
+                                <div class="fw-bold" style="font-size:0.8rem;">8 Concession Applications</div>
+                                <div class="text-muted" style="font-size:0.72rem;">Pending installment scheme verification.</div>
+                            </div>
+                        </a>
+                        <a href="#" class="notification-item">
+                            <div class="notif-icon-box notif-icon-green"><i class="bi bi-cash-stack"></i></div>
+                            <div>
+                                <div class="fw-bold" style="font-size:0.8rem;">Batch NEFT Settled</div>
+                                <div class="text-muted" style="font-size:0.72rem;">₹12,40,000 credited from SBI payment portal.</div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Role Badge -->
+                <span class="topbar-role-badge badge-role-accounts">
+                    <i class="bi bi-person-workspace"></i> Accounts Officer
+                </span>
+            </div>
+        </header>
+
+        <!-- Canvas Body -->
+        <main class="erp-content-canvas">
+            <div id="notificationArea"></div>
+
+            <!-- ================================================================
+                 SECTION 1: ACCOUNTS DASHBOARD OVERVIEW
+                 ================================================================ -->
+            <section id="sec-accounts-dashboard" class="dashboard-section">
+
+                <!-- Welcome Hero Area -->
+                <div class="dashboard-welcome-hero" style="background: linear-gradient(135deg, #09172c 0%, #153864 60%, #1b4985 100%);">
+                    <div class="welcome-hero-content">
+                        <h2>Good Morning, Accounts Officer 👋</h2>
+                        <p>Institutional fee reconciliation, installment authorizations, and daily ledger controls.</p>
+                    </div>
+                    <div class="hero-quick-meta">
+                        <div class="hero-meta-item">
+                            <i class="bi bi-currency-rupee"></i>
+                            <span>Total Clearance: <strong>₹82,50,000</strong></span>
+                        </div>
+                        <div class="hero-meta-item">
+                            <i class="bi bi-card-checklist"></i>
+                            <span>Pending Approvals: <strong>8 Requests</strong></span>
+                        </div>
+                        <div class="hero-meta-item">
+                            <i class="bi bi-check-all text-success"></i>
+                            <span>Reconciliation Status: <strong>100% Matched</strong></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4 Statistics Cards -->
+                <div class="row g-3 mb-4">
+                    <div class="col-xl-3 col-sm-6">
+                        <div class="erp-stat-card">
+                            <div class="stat-card-header">
+                                <span class="stat-card-label">Total Fee Collection</span>
+                                <div class="stat-icon-wrapper stat-icon-green">
+                                    <i class="bi bi-currency-rupee"></i>
+                                </div>
+                            </div>
+                            <div class="stat-card-value text-success">₹82,50,000</div>
+                            <div class="stat-card-footer">
+                                <span class="trend-badge trend-positive"><i class="bi bi-arrow-up-short"></i> 85.3%</span>
+                                <span>Target Clearance Met</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-3 col-sm-6">
+                        <div class="erp-stat-card">
+                            <div class="stat-card-header">
+                                <span class="stat-card-label">Pending / Arrears</span>
+                                <div class="stat-icon-wrapper stat-icon-amber">
+                                    <i class="bi bi-hourglass-split"></i>
+                                </div>
+                            </div>
+                            <div class="stat-card-value text-warning">₹14,25,000</div>
+                            <div class="stat-card-footer">
+                                <span class="trend-badge trend-warning">42 Accounts</span>
+                                <span>Installment 3 Due 30 Sept</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-3 col-sm-6">
+                        <div class="erp-stat-card">
+                            <div class="stat-card-header">
+                                <span class="stat-card-label">Pending Approvals</span>
+                                <div class="stat-icon-wrapper stat-icon-purple">
+                                    <i class="bi bi-card-checklist"></i>
+                                </div>
+                            </div>
+                            <div class="stat-card-value">8 Requests</div>
+                            <div class="stat-card-footer">
+                                <span class="trend-badge trend-warning">Action Needed</span>
+                                <span>Concessions Queue</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-3 col-sm-6">
+                        <div class="erp-stat-card">
+                            <div class="stat-card-header">
+                                <span class="stat-card-label">Total Transactions</span>
+                                <div class="stat-icon-wrapper stat-icon-blue">
+                                    <i class="bi bi-check-all"></i>
+                                </div>
+                            </div>
+                            <div class="stat-card-value">1,126</div>
+                            <div class="stat-card-footer">
+                                <span class="trend-badge trend-positive">100% Settled</span>
+                                <span>UPI, Cards & Net Banking</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Installment Requests Table -->
+                <div class="erp-table-container">
+                    <div class="table-header-toolbar">
+                        <div class="table-title-group">
+                            <h3>Recent Installment Scheme Applications</h3>
+                            <p>Verify eligibility and authorize multi-phase payment requests</p>
+                        </div>
+                        <button class="btn-erp-outline" onclick="document.querySelector('[data-section=\'sec-accounts-requests\']').click();">
+                            View All 8 Applications
+                        </button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="erp-data-table">
+                            <thead>
+                                <tr>
+                                    <th>Student</th>
+                                    <th>PRN Number</th>
+                                    <th>Annual Fee</th>
+                                    <th>Requested Scheme</th>
+                                    <th>Requested Date</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <div class="student-avatar-inline">
+                                            <div class="avatar-initials-badge">VJ</div>
+                                            <div class="student-name-text">Vikram Joshi</div>
+                                        </div>
+                                    </td>
+                                    <td><span class="prn-code-badge">B25IT2005</span></td>
+                                    <td>₹1,20,000</td>
+                                    <td>3 Installments (₹40k each)</td>
+                                    <td>05 Aug 2025</td>
+                                    <td><span class="status-pill status-pill-pending">UNDER REVIEW</span></td>
+                                    <td>
+                                        <div class="table-action-btns">
+                                            <button class="btn-icon-action" title="View Details" onclick="viewAppModal('Vikram Joshi', 'B25IT2005', '₹1,20,000', '3 Installments of ₹40,000')"><i class="bi bi-eye"></i></button>
+                                            <button class="btn-icon-action btn-icon-approve" title="Approve Request" onclick="approveRow(this, 'Vikram Joshi')"><i class="bi bi-check-lg"></i></button>
+                                            <button class="btn-icon-action btn-icon-reject" title="Reject Request" onclick="rejectRow(this, 'Vikram Joshi')"><i class="bi bi-x-lg"></i></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="student-avatar-inline">
+                                            <div class="avatar-initials-badge">DN</div>
+                                            <div class="student-name-text">Divya Nair</div>
+                                        </div>
+                                    </td>
+                                    <td><span class="prn-code-badge">B25IT2008</span></td>
+                                    <td>₹1,20,000</td>
+                                    <td>2 Installments (₹60k each)</td>
+                                    <td>06 Aug 2025</td>
+                                    <td><span class="status-pill status-pill-pending">UNDER REVIEW</span></td>
+                                    <td>
+                                        <div class="table-action-btns">
+                                            <button class="btn-icon-action" title="View Details" onclick="viewAppModal('Divya Nair', 'B25IT2008', '₹1,20,000', '2 Installments of ₹60,000')"><i class="bi bi-eye"></i></button>
+                                            <button class="btn-icon-action btn-icon-approve" title="Approve Request" onclick="approveRow(this, 'Divya Nair')"><i class="bi bi-check-lg"></i></button>
+                                            <button class="btn-icon-action btn-icon-reject" title="Reject Request" onclick="rejectRow(this, 'Divya Nair')"><i class="bi bi-x-lg"></i></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="student-avatar-inline">
+                                            <div class="avatar-initials-badge">AR</div>
+                                            <div class="student-name-text">Arjun Rao</div>
+                                        </div>
+                                    </td>
+                                    <td><span class="prn-code-badge">B25IT2009</span></td>
+                                    <td>₹1,20,000</td>
+                                    <td>3 Installments (₹40k each)</td>
+                                    <td>08 Aug 2025</td>
+                                    <td><span class="status-pill status-pill-pending">UNDER REVIEW</span></td>
+                                    <td>
+                                        <div class="table-action-btns">
+                                            <button class="btn-icon-action" title="View Details" onclick="viewAppModal('Arjun Rao', 'B25IT2009', '₹1,20,000', '3 Installments of ₹40,000')"><i class="bi bi-eye"></i></button>
+                                            <button class="btn-icon-action btn-icon-approve" title="Approve Request" onclick="approveRow(this, 'Arjun Rao')"><i class="bi bi-check-lg"></i></button>
+                                            <button class="btn-icon-action btn-icon-reject" title="Reject Request" onclick="rejectRow(this, 'Arjun Rao')"><i class="bi bi-x-lg"></i></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- ================================================================
+                 SECTION 2: ALL INSTALLMENT REQUESTS
+                 ================================================================ -->
+            <section id="sec-accounts-requests" class="dashboard-section d-none">
+                <div class="erp-table-container">
+                    <div class="table-header-toolbar">
+                        <div class="table-title-group">
+                            <h3>Installment Scheme Queue</h3>
+                            <p>Full repository of student concession and installment requests</p>
+                        </div>
+                        <div class="table-toolbar-actions">
+                            <button class="btn-erp-primary" onclick="alert('Bulk Authorization: All 8 verified applications approved.');">
+                                <i class="bi bi-check-all"></i> Bulk Authorize Verified
+                            </button>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="erp-data-table">
+                            <thead>
+                                <tr>
+                                    <th>Student</th>
+                                    <th>PRN</th>
+                                    <th>Department</th>
+                                    <th>Scheme</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Vikram Joshi</strong></td>
+                                    <td><code>B25IT2005</code></td>
+                                    <td>Information Technology</td>
+                                    <td>3 Installments</td>
+                                    <td><span class="status-pill status-pill-pending">UNDER REVIEW</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-success py-1 px-2" onclick="approveRow(this, 'Vikram Joshi')">Approve</button>
+                                        <button class="btn btn-sm btn-danger py-1 px-2 ms-1" onclick="rejectRow(this, 'Vikram Joshi')">Reject</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Divya Nair</strong></td>
+                                    <td><code>B25IT2008</code></td>
+                                    <td>Information Technology</td>
+                                    <td>2 Installments</td>
+                                    <td><span class="status-pill status-pill-pending">UNDER REVIEW</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-success py-1 px-2" onclick="approveRow(this, 'Divya Nair')">Approve</button>
+                                        <button class="btn btn-sm btn-danger py-1 px-2 ms-1" onclick="rejectRow(this, 'Divya Nair')">Reject</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ================================================================
+                 SECTION 3: FEE STRUCTURE MANAGEMENT
+                 ================================================================ -->
+            <section id="sec-accounts-fee-structure" class="dashboard-section d-none">
+                <div class="erp-table-container">
+                    <div class="table-header-toolbar">
+                        <div class="table-title-group">
+                            <h3>Fee Structure Management</h3>
+                            <p>Institutional fee slabs — Two-Installment System (Installment 1 + Installment 2 = Total Annual Fee)</p>
+                        </div>
+                        <button class="btn-erp-primary" onclick="showAddFeeForm()">
+                            <i class="bi bi-plus-circle"></i> Add Fee Structure
+                        </button>
+                    </div>
+
+                    <!-- Add/Edit Form (hidden by default) -->
+                    <div id="feeStructureForm" class="d-none p-4 border-bottom" style="background:#f8fafc;">
+                        <div class="row g-3 align-items-end">
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold small">Program / Course *</label>
+                                <input type="text" class="form-control form-control-sm" id="feeProgram" placeholder="e.g. B.Tech — IT">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label fw-semibold small">Tuition Fee (₹) *</label>
+                                <input type="number" class="form-control form-control-sm" id="feeTuition" placeholder="95000" oninput="calcFeeTotal()">
+                            </div>
+                            <div class="col-md-1">
+                                <label class="form-label fw-semibold small">Dev (₹)</label>
+                                <input type="number" class="form-control form-control-sm" id="feeDev" placeholder="15000" oninput="calcFeeTotal()">
+                            </div>
+                            <div class="col-md-1">
+                                <label class="form-label fw-semibold small">Exam (₹)</label>
+                                <input type="number" class="form-control form-control-sm" id="feeExam" placeholder="7000" oninput="calcFeeTotal()">
+                            </div>
+                            <div class="col-md-1">
+                                <label class="form-label fw-semibold small">Library (₹)</label>
+                                <input type="number" class="form-control form-control-sm" id="feeLib" placeholder="3000" oninput="calcFeeTotal()">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label fw-semibold small">Total (auto)</label>
+                                <input type="text" class="form-control form-control-sm text-primary fw-bold" id="feeTotal" readonly placeholder="₹0">
+                            </div>
+                            <div class="col-md-2 d-flex gap-2">
+                                <button class="btn btn-erp-primary btn-sm" onclick="saveFeeStructure()"><i class="bi bi-floppy2-fill me-1"></i>Save</button>
+                                <button class="btn btn-outline-secondary btn-sm" onclick="hideFeeForm()">Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="erp-data-table" id="feeStructureTable">
+                            <thead>
+                                <tr>
+                                    <th>Program / Course</th>
+                                    <th>Tuition (₹)</th>
+                                    <th>Dev (₹)</th>
+                                    <th>Exam (₹)</th>
+                                    <th>Library (₹)</th>
+                                    <th>Total Annual (₹)</th>
+                                    <th>Installment 1</th>
+                                    <th>Installment 2</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="feeStructureTbody">
+                                <tr id="fee-row-1">
+                                    <td><strong>B.Tech — Information Technology</strong></td>
+                                    <td>₹95,000</td><td>₹15,000</td><td>₹7,000</td><td>₹3,000</td>
+                                    <td><strong class="text-primary">₹1,20,000</strong></td>
+                                    <td>₹60,000</td><td>₹60,000</td>
+                                    <td><span class="status-pill status-pill-active">ACTIVE</span></td>
+                                    <td>
+                                        <div class="table-action-btns">
+                                            <button class="btn-icon-action" title="Edit" onclick="editFeeRow('fee-row-1', 'B.Tech — Information Technology', 95000, 15000, 7000, 3000)"><i class="bi bi-pencil"></i></button>
+                                            <button class="btn-icon-action btn-icon-reject" title="Toggle Status" onclick="toggleFeeStatus('fee-row-1', this)"><i class="bi bi-toggle-on"></i></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr id="fee-row-2">
+                                    <td><strong>B.Tech — Computer Engineering</strong></td>
+                                    <td>₹95,000</td><td>₹15,000</td><td>₹7,000</td><td>₹3,000</td>
+                                    <td><strong class="text-primary">₹1,20,000</strong></td>
+                                    <td>₹60,000</td><td>₹60,000</td>
+                                    <td><span class="status-pill status-pill-active">ACTIVE</span></td>
+                                    <td>
+                                        <div class="table-action-btns">
+                                            <button class="btn-icon-action" title="Edit" onclick="editFeeRow('fee-row-2', 'B.Tech — Computer Engineering', 95000, 15000, 7000, 3000)"><i class="bi bi-pencil"></i></button>
+                                            <button class="btn-icon-action btn-icon-reject" title="Toggle Status" onclick="toggleFeeStatus('fee-row-2', this)"><i class="bi bi-toggle-on"></i></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr id="fee-row-3">
+                                    <td><strong>B.Tech — Mechanical Engineering</strong></td>
+                                    <td>₹85,000</td><td>₹15,000</td><td>₹7,000</td><td>₹3,000</td>
+                                    <td><strong class="text-primary">₹1,10,000</strong></td>
+                                    <td>₹55,000</td><td>₹55,000</td>
+                                    <td><span class="status-pill status-pill-active">ACTIVE</span></td>
+                                    <td>
+                                        <div class="table-action-btns">
+                                            <button class="btn-icon-action" title="Edit" onclick="editFeeRow('fee-row-3', 'B.Tech — Mechanical Engineering', 85000, 15000, 7000, 3000)"><i class="bi bi-pencil"></i></button>
+                                            <button class="btn-icon-action btn-icon-reject" title="Toggle Status" onclick="toggleFeeStatus('fee-row-3', this)"><i class="bi bi-toggle-on"></i></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr id="fee-row-4">
+                                    <td><strong>M.Tech — Computer Science</strong></td>
+                                    <td>₹1,10,000</td><td>₹20,000</td><td>₹10,000</td><td>₹5,000</td>
+                                    <td><strong class="text-primary">₹1,45,000</strong></td>
+                                    <td>₹72,500</td><td>₹72,500</td>
+                                    <td><span class="status-pill status-pill-active">ACTIVE</span></td>
+                                    <td>
+                                        <div class="table-action-btns">
+                                            <button class="btn-icon-action" title="Edit" onclick="editFeeRow('fee-row-4', 'M.Tech — Computer Science', 110000, 20000, 10000, 5000)"><i class="bi bi-pencil"></i></button>
+                                            <button class="btn-icon-action btn-icon-reject" title="Toggle Status" onclick="toggleFeeStatus('fee-row-4', this)"><i class="bi bi-toggle-on"></i></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ================================================================
+                 SECTION 4: APPROVALS QUEUE
+                 ================================================================ -->
+            <section id="sec-accounts-approvals" class="dashboard-section d-none">
+                <div class="erp-table-container p-4">
+                    <h4 class="fw-bold mb-2"><i class="bi bi-hand-thumbs-up text-primary me-2"></i>Formal Installment Authorizations</h4>
+                    <p class="text-muted">Authorized requests are automatically published to the student portal and synced with the fee ledger.</p>
+                    <div class="alert alert-success d-flex align-items-center gap-2">
+                        <i class="bi bi-shield-check fs-5"></i>
+                        <div>Governing body quota for AY 2025-26: <strong>150 Concessions Allowed (32 Used)</strong>.</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ================================================================
+                 SECTION 5: INSTALLMENT SCHEDULES
+                 ================================================================ -->
+            <section id="sec-accounts-schedules" class="dashboard-section d-none">
+                <div class="erp-table-container">
+                    <div class="table-header-toolbar">
+                        <div class="table-title-group">
+                            <h3>Standard Installment Calendars</h3>
+                            <p>Official milestone payment dates by semester</p>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="erp-data-table">
+                            <thead>
+                                <tr>
+                                    <th>Scheme Name</th>
+                                    <th>Installment Breakdown</th>
+                                    <th>Due Dates</th>
+                                    <th>Late Surcharge</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Standard 3-Part Scheme</strong></td>
+                                    <td>Phase 1: 33.3% | Phase 2: 33.3% | Phase 3: 33.4%</td>
+                                    <td>15 June / 15 August / 30 September</td>
+                                    <td>₹50/day after grace period</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Standard 2-Part Scheme</strong></td>
+                                    <td>Phase 1: 50.0% | Phase 2: 50.0%</td>
+                                    <td>15 June / 15 November</td>
+                                    <td>₹50/day after grace period</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ================================================================
+                 SECTION 6: TRANSACTION LEDGER
+                 ================================================================ -->
+            <section id="sec-accounts-transactions" class="dashboard-section d-none">
+                <div class="erp-table-container">
+                    <div class="table-header-toolbar">
+                        <div class="table-title-group">
+                            <h3>Complete Transaction Ledger</h3>
+                            <p>Live transaction stream from payment gateway & offline bank drafts</p>
+                        </div>
+                        <button class="btn-erp-outline" onclick="alert('Exporting Ledger to CSV...');">
+                            <i class="bi bi-file-earmark-excel"></i> Export Ledger CSV
+                        </button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="erp-data-table">
+                            <thead>
+                                <tr>
+                                    <th>Transaction Ref</th>
+                                    <th>Student Name</th>
+                                    <th>PRN</th>
+                                    <th>Amount (₹)</th>
+                                    <th>Mode</th>
+                                    <th>Settlement Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><span class="prn-code-badge">TXN-98012</span></td>
+                                    <td><strong>Aarav Sharma</strong></td>
+                                    <td>B25IT2001</td>
+                                    <td>₹15,000</td>
+                                    <td>UPI (GPay)</td>
+                                    <td><span class="status-pill status-pill-paid">SETTLED</span></td>
+                                </tr>
+                                <tr>
+                                    <td><span class="prn-code-badge">TXN-98013</span></td>
+                                    <td><strong>Priya Desai</strong></td>
+                                    <td>B25IT2002</td>
+                                    <td>₹20,000</td>
+                                    <td>Net Banking</td>
+                                    <td><span class="status-pill status-pill-paid">SETTLED</span></td>
+                                </tr>
+                                <tr>
+                                    <td><span class="prn-code-badge">TXN-98014</span></td>
+                                    <td><strong>Manan Tote</strong></td>
+                                    <td>B25IT2010</td>
+                                    <td>₹40,000</td>
+                                    <td>Debit Card</td>
+                                    <td><span class="status-pill status-pill-paid">SETTLED</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ================================================================
+                 SECTION 7: VERIFY PAYMENTS
+                 ================================================================ -->
+            <section id="sec-accounts-verify" class="dashboard-section d-none">
+                <div class="erp-table-container p-4">
+                    <h4 class="fw-bold mb-3"><i class="bi bi-patch-check text-success me-2"></i>Bank Settlement Reconciliation</h4>
+                    <p class="text-muted">Reconcile live bank statements with MMCOE student fee ledgers.</p>
+
+                    <button class="btn-erp-primary" onclick="alert('Fetching Bank Statement feed from SBI payment gateway... 1,126 transactions reconciled with 0 discrepancies.');">
+                        <i class="bi bi-arrow-repeat"></i> Fetch Real-Time Settlement Feed
+                    </button>
+                </div>
+            </section>
+
+            <!-- ================================================================
+                 SECTION 8: REPORTS & ANALYTICS — with Date Filters
+                 ================================================================ -->
+            <section id="sec-accounts-reports" class="dashboard-section d-none">
+                <div class="erp-table-container p-4">
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
+                        <h4 class="fw-bold mb-0"><i class="bi bi-file-earmark-bar-graph text-primary me-2"></i>Accounts Financial Reports</h4>
+                        <!-- Date Filter Buttons -->
+                        <div class="btn-group" role="group" aria-label="Report period filter">
+                            <button type="button" class="btn btn-outline-secondary btn-sm report-filter-btn" onclick="setReportFilter('week', this)">
+                                <i class="bi bi-calendar-week me-1"></i>This Week
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm report-filter-btn" onclick="setReportFilter('month', this)">
+                                <i class="bi bi-calendar-month me-1"></i>This Month
+                            </button>
+                            <button type="button" class="btn btn-outline-primary btn-sm report-filter-btn active" onclick="setReportFilter('all', this)">
+                                <i class="bi bi-calendar-range me-1"></i>All Time
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Filter Summary -->
+                    <div id="reportFilterSummary" class="alert alert-info py-2 px-3 mb-4 d-flex align-items-center gap-2" style="font-size:0.82rem;border-radius:10px;">
+                        <i class="bi bi-info-circle"></i>
+                        <span>Showing <strong>All Time</strong> data — ₹82,50,000 collected across 1,126 transactions.</span>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="p-3 border rounded-3 text-center">
+                                <i class="bi bi-file-earmark-pdf text-danger fs-1"></i>
+                                <h6 class="fw-bold mt-2">Daily Collection Statement</h6>
+                                <p class="text-muted small">Daily summary of all receipts</p>
+                                <button class="btn btn-erp-outline btn-sm w-100" onclick="alert('Downloading Daily Statement PDF...');">Download PDF</button>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-3 border rounded-3 text-center">
+                                <i class="bi bi-file-earmark-excel text-success fs-1"></i>
+                                <h6 class="fw-bold mt-2">Department Arrears Report</h6>
+                                <p class="text-muted small">Overdue fee list by branch</p>
+                                <button class="btn btn-erp-outline btn-sm w-100" onclick="alert('Downloading Arrears Excel CSV...');">Download Excel</button>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-3 border rounded-3 text-center">
+                                <i class="bi bi-graph-up-arrow text-primary fs-1"></i>
+                                <h6 class="fw-bold mt-2">Annual Fee Recovery Analytics</h6>
+                                <p class="text-muted small">Target vs Actual statistics</p>
+                                <button class="btn btn-erp-outline btn-sm w-100" onclick="alert('Generating Analytics report...');">Generate Report</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+</div>
+
+<!-- ====================================================================
+     MODAL: VIEW APPLICATION DETAILS
+     ==================================================================== -->
+<div class="modal fade erp-modal" id="appDetailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="modal-title fw-bold" id="appModalTitle">Application Details</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3">
+                    <div class="col-6">
+                        <span class="text-muted small d-block">Student Name</span>
+                        <strong id="appModalStudent">-</strong>
+                    </div>
+                    <div class="col-6">
+                        <span class="text-muted small d-block">PRN</span>
+                        <strong id="appModalPRN">-</strong>
+                    </div>
+                    <div class="col-6">
+                        <span class="text-muted small d-block">Annual Fee</span>
+                        <strong id="appModalFee">-</strong>
+                    </div>
+                    <div class="col-6">
+                        <span class="text-muted small d-block">Requested Scheme</span>
+                        <strong id="appModalScheme">-</strong>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap 5 Bundle JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Global Auth & Session Script -->
+<script src="../assets/js/auth.js"></script>
+
+<!-- Global Dashboard Script -->
+<script src="../assets/js/dashboard.js"></script>
+<script src="../assets/js/accounts.js"></script>
+
+<script>
+function viewAppModal(name, prn, fee, scheme) {
+    document.getElementById('appModalStudent').textContent = name;
+    document.getElementById('appModalPRN').textContent = prn;
+    document.getElementById('appModalFee').textContent = fee;
+    document.getElementById('appModalScheme').textContent = scheme;
+    new bootstrap.Modal(document.getElementById('appDetailModal')).show();
+}
+
+function approveRow(btn, name) {
+    const row = btn.closest('tr');
+    const pill = row.querySelector('.status-pill');
+    if (pill) { pill.className = 'status-pill status-pill-paid'; pill.textContent = 'APPROVED'; }
+    row.querySelectorAll('button').forEach(b => b.disabled = true);
+    const notifArea = document.getElementById('notificationArea');
+    if (notifArea) {
+        notifArea.innerHTML = `<div class="alert alert-success alert-dismissible fade show d-flex align-items-center gap-2 mb-3" role="alert" style="border-radius:12px;">
+            <i class="bi bi-check-circle-fill fs-5"></i>
+            <div>Installment plan for <strong>${name}</strong> has been <strong>approved</strong> and notified to student portal.</div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>`;
+    }
+}
+
+function rejectRow(btn, name) {
+    const row = btn.closest('tr');
+    const pill = row.querySelector('.status-pill');
+    if (pill) { pill.className = 'status-pill status-pill-inactive'; pill.textContent = 'REJECTED'; }
+    row.querySelectorAll('button').forEach(b => b.disabled = true);
+}
+
+// Fee Structure helpers
+function showAddFeeForm() {
+    document.getElementById('feeStructureForm').classList.remove('d-none');
+    document.getElementById('feeProgram').focus();
+}
+
+function hideFeeForm() {
+    document.getElementById('feeStructureForm').classList.add('d-none');
+    ['feeProgram','feeTuition','feeDev','feeExam','feeLib','feeTotal'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+    });
+}
+
+function calcFeeTotal() {
+    const t = parseFloat(document.getElementById('feeTuition')?.value || 0);
+    const d = parseFloat(document.getElementById('feeDev')?.value || 0);
+    const e = parseFloat(document.getElementById('feeExam')?.value || 0);
+    const l = parseFloat(document.getElementById('feeLib')?.value || 0);
+    const total = t + d + e + l;
+    const el = document.getElementById('feeTotal');
+    if (el) el.value = total > 0 ? '₹' + total.toLocaleString('en-IN') : '';
+}
+
+function saveFeeStructure() {
+    const program = document.getElementById('feeProgram')?.value.trim();
+    const tuition = parseFloat(document.getElementById('feeTuition')?.value || 0);
+    const dev     = parseFloat(document.getElementById('feeDev')?.value || 0);
+    const exam    = parseFloat(document.getElementById('feeExam')?.value || 0);
+    const lib     = parseFloat(document.getElementById('feeLib')?.value || 0);
+
+    if (!program || tuition <= 0) {
+        alert('Program name and Tuition Fee are required.');
+        return;
+    }
+
+    const total = tuition + dev + exam + lib;
+    const inst  = total / 2;
+    const fmt   = n => '₹' + n.toLocaleString('en-IN');
+
+    const tbody = document.getElementById('feeStructureTbody');
+    const rowId = 'fee-row-' + Date.now();
+    const newRow = document.createElement('tr');
+    newRow.id = rowId;
+    newRow.innerHTML = `
+        <td><strong>${program}</strong></td>
+        <td>${fmt(tuition)}</td><td>${fmt(dev)}</td><td>${fmt(exam)}</td><td>${fmt(lib)}</td>
+        <td><strong class="text-primary">${fmt(total)}</strong></td>
+        <td>${fmt(inst)}</td><td>${fmt(inst)}</td>
+        <td><span class="status-pill status-pill-active">ACTIVE</span></td>
+        <td>
+            <div class="table-action-btns">
+                <button class="btn-icon-action" title="Edit" onclick="editFeeRow('${rowId}', '${program}', ${tuition}, ${dev}, ${exam}, ${lib})"><i class="bi bi-pencil"></i></button>
+                <button class="btn-icon-action btn-icon-reject" title="Toggle Status" onclick="toggleFeeStatus('${rowId}', this)"><i class="bi bi-toggle-on"></i></button>
+            </div>
+        </td>`;
+    tbody.appendChild(newRow);
+    hideFeeForm();
+}
+
+function editFeeRow(rowId, program, tuition, dev, exam, lib) {
+    document.getElementById('feeStructureForm').classList.remove('d-none');
+    document.getElementById('feeProgram').value  = program;
+    document.getElementById('feeTuition').value  = tuition;
+    document.getElementById('feeDev').value      = dev;
+    document.getElementById('feeExam').value     = exam;
+    document.getElementById('feeLib').value      = lib;
+    calcFeeTotal();
+    document.getElementById('feeProgram').focus();
+}
+
+function toggleFeeStatus(rowId, btn) {
+    const row = document.getElementById(rowId);
+    if (!row) return;
+    const pill = row.querySelector('.status-pill');
+    if (!pill) return;
+    const isActive = pill.classList.contains('status-pill-active');
+    if (isActive) {
+        pill.className = 'status-pill status-pill-inactive';
+        pill.textContent = 'INACTIVE';
+        btn.innerHTML = '<i class="bi bi-toggle-off"></i>';
+        btn.title = 'Activate';
+    } else {
+        pill.className = 'status-pill status-pill-active';
+        pill.textContent = 'ACTIVE';
+        btn.innerHTML = '<i class="bi bi-toggle-on"></i>';
+        btn.title = 'Deactivate';
+    }
+}
+
+// Reports filter
+const reportData = {
+    week:  { amount: '₹4,25,000',  txns: '48',    msg: 'This Week (last 7 days)' },
+    month: { amount: '₹18,50,000', txns: '210',   msg: 'This Month (August 2025)' },
+    all:   { amount: '₹82,50,000', txns: '1,126', msg: 'All Time' }
+};
+
+function setReportFilter(period, btn) {
+    document.querySelectorAll('.report-filter-btn').forEach(b => {
+        b.classList.remove('active', 'btn-outline-primary');
+        b.classList.add('btn-outline-secondary');
+    });
+    btn.classList.add('active', 'btn-outline-primary');
+    btn.classList.remove('btn-outline-secondary');
+
+    const data = reportData[period];
+    const summary = document.getElementById('reportFilterSummary');
+    if (summary && data) {
+        summary.querySelector('span').innerHTML =
+            `Showing <strong>${data.msg}</strong> data — <strong>${data.amount}</strong> collected across <strong>${data.txns}</strong> transactions.`;
+    }
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile — Admin | MMCOE</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="../assets/css/style.css" rel="stylesheet">
+    <link href="../assets/css/dashboard.css" rel="stylesheet">
+</head>
+<body data-page="admin-profile">
+
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<div class="dashboard-layout">
+
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <div class="sidebar-brand-icon"><i class="bi bi-mortarboard-fill"></i></div>
+            <div class="sidebar-brand-text">
+                <div class="brand-name">FPM Platform</div>
+                <div class="brand-sub">MMCOE</div>
+            </div>
+        </div>
+        <div class="sidebar-user">
+            <div class="sidebar-user-avatar" id="sidebarUserAvatar">A</div>
+            <div class="sidebar-user-info">
+                <div class="user-name" id="sidebarUserName">Administrator</div>
+                <div class="user-role" id="sidebarUserRole">Admin</div>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <div class="sidebar-nav-label">Navigation</div>
+            <a href="dashboard.html" class="sidebar-nav-item"><i class="bi bi-speedometer2"></i> Dashboard</a>
+            <a href="students.html" class="sidebar-nav-item"><i class="bi bi-people"></i> Students</a>
+            <a href="add-student.html" class="sidebar-nav-item"><i class="bi bi-person-plus"></i> Add Student</a>
+            <div class="sidebar-nav-label">Account</div>
+            <a href="profile.html" class="sidebar-nav-item active"><i class="bi bi-person-circle"></i> My Profile</a>
+            <a href="#" class="sidebar-nav-item logout" data-action="logout"><i class="bi bi-box-arrow-right"></i> Sign Out</a>
+        </nav>
+        <div class="sidebar-footer"><div class="version">Milestone 1 · v1.0.0</div></div>
+    </nav>
+
+    <div class="main-content">
+        <header class="topbar">
+            <div class="topbar-left">
+                <button class="topbar-toggle" id="sidebarToggle"><i class="bi bi-list"></i></button>
+                <span class="topbar-title">My Profile</span>
+            </div>
+            <div class="topbar-right">
+                <div class="topbar-user">
+                    <div class="user-avatar" id="topbarAvatar">A</div>
+                    <div class="user-info d-none d-md-block">
+                        <div class="name" id="topbarUserName">Administrator</div>
+                        <div class="role-tag" id="topbarUserRole">Admin</div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="page-content">
+            <div class="page-header">
+                <h1>My Profile</h1>
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item text-muted">Home</li>
+                    <li class="breadcrumb-item active">Profile</li>
+                </ol>
+            </div>
+
+            <div class="row justify-content-center">
+                <div class="col-lg-7">
+
+                    <!-- Profile Header Card -->
+                    <div class="profile-header-card">
+                        <div class="profile-avatar-xl" id="profileInitials">A</div>
+                        <div class="profile-header-info">
+                            <div class="profile-name" id="profileName">Administrator</div>
+                            <div class="profile-prn">System Administrator</div>
+                            <div class="profile-badge">
+                                <i class="bi bi-shield-check"></i> ADMIN
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Profile Details -->
+                    <div class="section-card">
+                        <div class="section-card-header">
+                            <h2><i class="bi bi-person"></i> Account Details</h2>
+                        </div>
+                        <div class="card-body px-4 py-2">
+                            <div class="profile-detail-row">
+                                <div class="profile-detail-label">Full Name</div>
+                                <div class="profile-detail-value" id="profileName2">Administrator</div>
+                            </div>
+                            <div class="profile-detail-row">
+                                <div class="profile-detail-label">Email Address</div>
+                                <div class="profile-detail-value" id="profileEmail">admin@mmcoe.com</div>
+                            </div>
+                            <div class="profile-detail-row">
+                                <div class="profile-detail-label">Role</div>
+                                <div class="profile-detail-value">
+                                    <span class="badge" style="background:#e8f0fe;color:#1a56db;border-radius:30px;padding:0.3em 0.75em;font-size:0.82rem;font-weight:600;">
+                                        <i class="bi bi-shield-check me-1"></i>Administrator
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="profile-detail-row">
+                                <div class="profile-detail-label">Institution</div>
+                                <div class="profile-detail-value">MMCOE, Pune</div>
+                            </div>
+                            <div class="profile-detail-row">
+                                <div class="profile-detail-label">Department</div>
+                                <div class="profile-detail-value">Administration</div>
+                            </div>
+                            <div class="profile-detail-row">
+                                <div class="profile-detail-label">Account Status</div>
+                                <div class="profile-detail-value">
+                                    <span class="badge badge-active">Active</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Security Notice -->
+                    <div class="alert alert-warning d-flex gap-2 mt-3" style="font-size:0.85rem;">
+                        <i class="bi bi-shield-exclamation mt-1 flex-shrink-0"></i>
+                        <div>
+                            <strong>Security Note:</strong> This is a demo account for development.
+                            Change the default password (<code>Admin@123</code>) before deploying to production.
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<div class="toast-container"></div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../assets/js/auth.js"></script>
+<script src="../assets/js/admin.js"></script>
+</body>
+</html>
