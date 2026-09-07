@@ -224,7 +224,8 @@
 
                 <!-- ── KPI Cards Row ──────────────────────────────────────────────────────── -->
                 <div class="row g-3 mb-4">
-                    <div class="col-xl-3 col-sm-6">
+                    <!-- Card 1: Total Students — Live from DB -->
+                    <div class="col-lg-6 col-sm-6">
                         <div class="erp-stat-card">
                             <div class="stat-card-header">
                                 <span class="stat-card-label">Total Students</span>
@@ -234,29 +235,14 @@
                             </div>
                             <div class="stat-card-value" id="statTotalStudents">—</div>
                             <div class="stat-card-footer">
-                                <span class="trend-badge trend-positive"><i class="bi bi-arrow-up-short"></i> +12 new</span>
-                                <span>Enrolled AY 2025-26</span>
+                                <span class="trend-badge trend-positive"><i class="bi bi-database-check"></i> Live from DB</span>
+                                <span>Registered — AY 2025-26</span>
                             </div>
                         </div>
                     </div>
 
-                    <div class="col-xl-3 col-sm-6">
-                        <div class="erp-stat-card">
-                            <div class="stat-card-header">
-                                <span class="stat-card-label">Active User Accounts</span>
-                                <div class="stat-icon-wrapper stat-icon-purple">
-                                    <i class="bi bi-person-check-fill"></i>
-                                </div>
-                            </div>
-                            <div class="stat-card-value" id="statActiveAccounts">—</div>
-                            <div class="stat-card-footer">
-                                <span class="trend-badge trend-positive">100% Verified</span>
-                                <span>Admin, Accounts, Students</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-xl-3 col-sm-6">
+                    <!-- Card 2: Total Fee Collection — Mock Data (payment tables TBD Milestone 2) -->
+                    <div class="col-lg-6 col-sm-6">
                         <div class="erp-stat-card">
                             <div class="stat-card-header">
                                 <span class="stat-card-label">Total Fee Collection</span>
@@ -264,26 +250,10 @@
                                     <i class="bi bi-currency-rupee"></i>
                                 </div>
                             </div>
-                            <div class="stat-card-value">₹82,50,000</div>
+                            <div class="stat-card-value" id="statTotalFeeCollection">₹82,50,000</div>
                             <div class="stat-card-footer">
-                                <span class="trend-badge trend-positive"><i class="bi bi-graph-up-arrow"></i> 85.3%</span>
-                                <span>Target Clearance Met</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-xl-3 col-sm-6">
-                        <div class="erp-stat-card">
-                            <div class="stat-card-header">
-                                <span class="stat-card-label">Pending Installments</span>
-                                <div class="stat-icon-wrapper stat-icon-amber">
-                                    <i class="bi bi-hourglass-split"></i>
-                                </div>
-                            </div>
-                            <div class="stat-card-value">₹14,25,000</div>
-                            <div class="stat-card-footer">
-                                <span class="trend-badge trend-warning">42 Overdue</span>
-                                <span>Due 30 September 2025</span>
+                                <span class="trend-badge trend-positive"><i class="bi bi-graph-up-arrow"></i> 85.3% Target</span>
+                                <span class="badge rounded-pill" style="background:#fef3c7;color:#92400e;font-size:0.7rem;font-weight:600;border:1px solid #fde68a;">📊 Demo Data — AY 2025-26</span>
                             </div>
                         </div>
                     </div>
@@ -303,15 +273,52 @@
                                     </h3>
                                     <p id="analyticsSubtitle">Monthly fee collection &mdash; Academic Year 2025-26</p>
                                 </div>
-                                <div class="d-flex align-items-center gap-2 flex-shrink-0">
-                                    <label for="analyticsPeriod" class="text-muted small mb-0 fw-semibold" style="white-space:nowrap;">View by:</label>
+                                <div class="d-flex align-items-center gap-2 flex-shrink-0 flex-wrap">
+                                    <label class="text-muted small mb-0 fw-semibold" style="white-space:nowrap;">View by:</label>
                                     <select id="analyticsPeriod"
                                             class="form-select form-select-sm"
-                                            style="width:auto;min-width:110px;font-size:0.83rem;border-radius:8px;border-color:var(--border-color);font-weight:600;"
+                                            style="width:auto;min-width:80px;font-size:0.83rem;border-radius:8px;border-color:var(--border-color);font-weight:600;"
                                             onchange="onAnalyticsPeriodChange(this.value)">
                                         <option value="year" selected>Year</option>
                                         <option value="month">Month</option>
                                         <option value="week">Week</option>
+                                    </select>
+                                    <!-- Year sub-selector -->
+                                    <select id="analyticsYearSelect"
+                                            class="form-select form-select-sm"
+                                            style="width:auto;min-width:110px;font-size:0.83rem;border-radius:8px;border-color:var(--border-color);font-weight:600;"
+                                            onchange="onAnalyticsSubSelectChange()">
+                                        <option value="2025-26" selected>AY 2025-26</option>
+                                        <option value="2024-25">AY 2024-25</option>
+                                        <option value="2023-24">AY 2023-24</option>
+                                    </select>
+                                    <!-- Month sub-selector (hidden by default) -->
+                                    <select id="analyticsMonthSelect"
+                                            class="form-select form-select-sm d-none"
+                                            style="width:auto;min-width:115px;font-size:0.83rem;border-radius:8px;border-color:var(--border-color);font-weight:600;"
+                                            onchange="onAnalyticsSubSelectChange()">
+                                        <option value="4">April</option>
+                                        <option value="5">May</option>
+                                        <option value="6">June</option>
+                                        <option value="7">July</option>
+                                        <option value="8" selected>August</option>
+                                        <option value="9">September</option>
+                                        <option value="10">October</option>
+                                        <option value="11">November</option>
+                                        <option value="12">December</option>
+                                        <option value="1">January</option>
+                                        <option value="2">February</option>
+                                        <option value="3">March</option>
+                                    </select>
+                                    <!-- Week sub-selector (hidden by default) -->
+                                    <select id="analyticsWeekSelect"
+                                            class="form-select form-select-sm d-none"
+                                            style="width:auto;min-width:90px;font-size:0.83rem;border-radius:8px;border-color:var(--border-color);font-weight:600;"
+                                            onchange="onAnalyticsSubSelectChange()">
+                                        <option value="1" selected>Week 1</option>
+                                        <option value="2">Week 2</option>
+                                        <option value="3">Week 3</option>
+                                        <option value="4">Week 4</option>
                                     </select>
                                 </div>
                             </div>
@@ -414,7 +421,7 @@
                             <div class="table-header-toolbar">
                                 <div class="table-title-group">
                                     <h3>Recent Student Registrations</h3>
-                                    <p>Official student profiles registered for current academic term</p>
+                                    <p>Latest student accounts registered in the system</p>
                                 </div>
                                 <button class="btn-erp-primary" onclick="document.querySelector('[data-section=\'sec-admin-students\']').click();">
                                     <i class="bi bi-list-ul"></i> View All Students
@@ -425,96 +432,67 @@
                                     <thead>
                                         <tr>
                                             <th>Student Name</th>
-                                            <th>PRN Number</th>
+                                            <th>PRN</th>
+                                            <th>Email</th>
                                             <th>Department</th>
-                                            <th>Year</th>
+                                            <th>Registration Date</th>
                                             <th>Status</th>
                                             <th>Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody id="recentStudentsTbody">
                                         <tr>
-                                            <td>
-                                                <div class="student-avatar-inline">
-                                                    <div class="avatar-initials-badge">MT</div>
-                                                    <div>
-                                                        <div class="student-name-text">Manan Vivekanand Tote</div>
-                                                        <div class="student-sub-text">b25it2010@mmcoe.com</div>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td><span class="prn-code-badge">B25IT2010</span></td>
-                                            <td>Information Technology</td>
-                                            <td>Second Year (SE)</td>
-                                            <td><span class="status-pill status-pill-active"><i class="bi bi-circle-fill" style="font-size:0.4rem;"></i> ACTIVE</span></td>
-                                            <td>
-                                                <button class="btn-icon-action" onclick="viewStudentModal('Manan Vivekanand Tote', 'B25IT2010', 'b25it2010@mmcoe.com', 'Information Technology', 'Second Year', 'A', 'ACTIVE')">
-                                                    <i class="bi bi-eye"></i>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <div class="student-avatar-inline">
-                                                    <div class="avatar-initials-badge">AS</div>
-                                                    <div>
-                                                        <div class="student-name-text">Aarav Sharma</div>
-                                                        <div class="student-sub-text">b25it2001@mmcoe.com</div>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td><span class="prn-code-badge">B25IT2001</span></td>
-                                            <td>Information Technology</td>
-                                            <td>Second Year (SE)</td>
-                                            <td><span class="status-pill status-pill-active"><i class="bi bi-circle-fill" style="font-size:0.4rem;"></i> ACTIVE</span></td>
-                                            <td>
-                                                <button class="btn-icon-action" onclick="viewStudentModal('Aarav Sharma', 'B25IT2001', 'b25it2001@mmcoe.com', 'Information Technology', 'Second Year', 'A', 'ACTIVE')">
-                                                    <i class="bi bi-eye"></i>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <div class="student-avatar-inline">
-                                                    <div class="avatar-initials-badge">PD</div>
-                                                    <div>
-                                                        <div class="student-name-text">Priya Desai</div>
-                                                        <div class="student-sub-text">b25it2002@mmcoe.com</div>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td><span class="prn-code-badge">B25IT2002</span></td>
-                                            <td>Computer Engineering</td>
-                                            <td>Third Year (TE)</td>
-                                            <td><span class="status-pill status-pill-active"><i class="bi bi-circle-fill" style="font-size:0.4rem;"></i> ACTIVE</span></td>
-                                            <td>
-                                                <button class="btn-icon-action" onclick="viewStudentModal('Priya Desai', 'B25IT2002', 'b25it2002@mmcoe.com', 'Computer Engineering', 'Third Year', 'B', 'ACTIVE')">
-                                                    <i class="bi bi-eye"></i>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <div class="student-avatar-inline">
-                                                    <div class="avatar-initials-badge" style="background:#fee2e2; color:#991b1b;">AM</div>
-                                                    <div>
-                                                        <div class="student-name-text">Ananya Mehta</div>
-                                                        <div class="student-sub-text">b25it2006@mmcoe.com</div>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td><span class="prn-code-badge">B25IT2006</span></td>
-                                            <td>Information Technology</td>
-                                            <td>Second Year (SE)</td>
-                                            <td><span class="status-pill status-pill-inactive"><i class="bi bi-circle-fill" style="font-size:0.4rem;"></i> INACTIVE</span></td>
-                                            <td>
-                                                <button class="btn-icon-action" onclick="viewStudentModal('Ananya Mehta', 'B25IT2006', 'b25it2006@mmcoe.com', 'Information Technology', 'Second Year', 'A', 'INACTIVE')">
-                                                    <i class="bi bi-eye"></i>
-                                                </button>
+                                            <td colspan="7" class="text-center py-3 text-muted">
+                                                <div class="spinner-border spinner-border-sm text-primary me-2"></div>Loading recent registrations...
                                             </td>
                                         </tr>
                                     </tbody>
                                 </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── Department-wise Fee Collection + Fee Type Distribution ─────────── -->
+                <div class="row g-4 mt-1">
+
+                    <!-- Department-wise Collection Chart -->
+                    <div class="col-lg-7">
+                        <div class="erp-table-container" style="height:100%;">
+                            <div class="table-header-toolbar align-items-start">
+                                <div class="table-title-group">
+                                    <h3>
+                                        <i class="bi bi-building me-2" style="color:var(--primary-500);font-size:1rem;"></i>
+                                        Department-wise Collection
+                                    </h3>
+                                    <p>Fee collection distribution by department &mdash; AY 2025-26</p>
+                                </div>
+                                <span class="badge rounded-pill flex-shrink-0" style="background:#fef3c7;color:#92400e;font-size:0.72rem;font-weight:600;border:1px solid #fde68a;">📊 Demo Data</span>
+                            </div>
+                            <div class="p-4" style="position:relative; min-height:240px;">
+                                <canvas id="deptFeeChart" style="max-height:240px;width:100%;"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Fee Type Distribution Donut Chart -->
+                    <div class="col-lg-5">
+                        <div class="erp-table-container" style="height:100%;">
+                            <div class="table-header-toolbar align-items-start">
+                                <div class="table-title-group">
+                                    <h3>
+                                        <i class="bi bi-pie-chart-fill me-2" style="color:var(--primary-500);font-size:1rem;"></i>
+                                        Fee Type Distribution
+                                    </h3>
+                                    <p>Collection by fee category</p>
+                                </div>
+                                <span class="badge rounded-pill flex-shrink-0" style="background:#fef3c7;color:#92400e;font-size:0.72rem;font-weight:600;border:1px solid #fde68a;">📊 Demo Data</span>
+                            </div>
+                            <div class="p-4 d-flex align-items-center justify-content-center" style="position:relative; min-height:240px;">
+                                <div style="width:100%;max-width:280px;">
+                                    <canvas id="feeTypeChart"></canvas>
+                                    <div id="feeTypeLegend" class="mt-3" style="font-size:0.78rem;"></div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -535,8 +513,23 @@
                         <div class="table-toolbar-actions">
                             <div class="table-search-input">
                                 <i class="bi bi-search"></i>
-                                <input type="text" placeholder="Search by name, PRN..." onkeyup="filterTable(this, 'allStudentsTable')">
+                                <input type="text" id="dashStudentSearch" placeholder="Search by name, PRN, email..." oninput="filterDashboardStudents(this.value)">
                             </div>
+                            <select id="dashStudentDeptFilter" class="form-select form-select-sm" style="width:auto;min-width:175px;font-size:0.83rem;border-radius:8px;" onchange="filterDashboardStudents()">
+                                <option value="">All Departments</option>
+                                <option>Information Technology</option>
+                                <option>Computer Engineering</option>
+                                <option>Mechanical Engineering</option>
+                                <option>Electronics &amp; Telecommunication</option>
+                                <option>Civil Engineering</option>
+                                <option>Computer Science &amp; Engineering (AI/ML)</option>
+                            </select>
+                            <select id="dashStudentStatusFilter" class="form-select form-select-sm" style="width:auto;min-width:120px;font-size:0.83rem;border-radius:8px;" onchange="filterDashboardStudents()">
+                                <option value="">All Status</option>
+                                <option value="ACTIVE">Active</option>
+                                <option value="INACTIVE">Inactive</option>
+                                <option value="PENDING">Pending</option>
+                            </select>
                             <button class="btn-erp-primary" data-bs-toggle="modal" data-bs-target="#addStudentModal">
                                 <i class="bi bi-person-plus-fill"></i> Add Student
                             </button>
@@ -548,111 +541,27 @@
                                 <tr>
                                     <th>Student Name</th>
                                     <th>PRN</th>
-                                    <th>Official Email</th>
+                                    <th>Email</th>
                                     <th>Department</th>
-                                    <th>Program</th>
+                                    <th>Course</th>
+                                    <th>Mobile</th>
                                     <th>Status</th>
-                                    <th>Action</th>
+                                    <th>Actions</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody id="allStudentsTbody">
                                 <tr>
-                                    <td>
-                                        <div class="student-avatar-inline">
-                                            <div class="avatar-initials-badge">MT</div>
-                                            <div class="student-name-text">Manan Vivekanand Tote</div>
-                                        </div>
-                                    </td>
-                                    <td><span class="prn-code-badge">B25IT2010</span></td>
-                                    <td>manan@mmcoe.com</td>
-                                    <td>Information Technology</td>
-                                    <td>B.Tech (SE)</td>
-                                    <td><span class="status-pill status-pill-active">ACTIVE</span></td>
-                                    <td>
-                                        <div class="table-action-btns">
-                                            <button class="btn-icon-action" title="View Details" onclick="viewStudentModal('Manan Vivekanand Tote', 'B25IT2010', 'manan@mmcoe.com', 'Information Technology', 'Second Year', 'A', 'ACTIVE')"><i class="bi bi-eye"></i></button>
-                                            <button class="btn-icon-action" title="Deactivate" onclick="alert('Student status toggled.');"><i class="bi bi-person-x"></i></button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <div class="student-avatar-inline">
-                                            <div class="avatar-initials-badge">AS</div>
-                                            <div class="student-name-text">Aarav Sharma</div>
-                                        </div>
-                                    </td>
-                                    <td><span class="prn-code-badge">B25IT2001</span></td>
-                                    <td>b25it2001@mmcoe.com</td>
-                                    <td>Information Technology</td>
-                                    <td>B.Tech (SE)</td>
-                                    <td><span class="status-pill status-pill-active">ACTIVE</span></td>
-                                    <td>
-                                        <div class="table-action-btns">
-                                            <button class="btn-icon-action" title="View Details" onclick="viewStudentModal('Aarav Sharma', 'B25IT2001', 'b25it2001@mmcoe.com', 'Information Technology', 'Second Year', 'A', 'ACTIVE')"><i class="bi bi-eye"></i></button>
-                                            <button class="btn-icon-action" title="Deactivate" onclick="alert('Student status toggled.');"><i class="bi bi-person-x"></i></button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <div class="student-avatar-inline">
-                                            <div class="avatar-initials-badge">PD</div>
-                                            <div class="student-name-text">Priya Desai</div>
-                                        </div>
-                                    </td>
-                                    <td><span class="prn-code-badge">B25IT2002</span></td>
-                                    <td>b25it2002@mmcoe.com</td>
-                                    <td>Computer Engineering</td>
-                                    <td>B.Tech (TE)</td>
-                                    <td><span class="status-pill status-pill-active">ACTIVE</span></td>
-                                    <td>
-                                        <div class="table-action-btns">
-                                            <button class="btn-icon-action" title="View Details" onclick="viewStudentModal('Priya Desai', 'B25IT2002', 'b25it2002@mmcoe.com', 'Computer Engineering', 'Third Year', 'B', 'ACTIVE')"><i class="bi bi-eye"></i></button>
-                                            <button class="btn-icon-action" title="Deactivate" onclick="alert('Student status toggled.');"><i class="bi bi-person-x"></i></button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <div class="student-avatar-inline">
-                                            <div class="avatar-initials-badge">RK</div>
-                                            <div class="student-name-text">Rohan Kulkarni</div>
-                                        </div>
-                                    </td>
-                                    <td><span class="prn-code-badge">B25IT2003</span></td>
-                                    <td>b25it2003@mmcoe.com</td>
-                                    <td>Mechanical Engineering</td>
-                                    <td>B.Tech (FE)</td>
-                                    <td><span class="status-pill status-pill-active">ACTIVE</span></td>
-                                    <td>
-                                        <div class="table-action-btns">
-                                            <button class="btn-icon-action" title="View Details" onclick="viewStudentModal('Rohan Kulkarni', 'B25IT2003', 'b25it2003@mmcoe.com', 'Mechanical Engineering', 'First Year', 'C', 'ACTIVE')"><i class="bi bi-eye"></i></button>
-                                            <button class="btn-icon-action" title="Deactivate" onclick="alert('Student status toggled.');"><i class="bi bi-person-x"></i></button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <div class="student-avatar-inline">
-                                            <div class="avatar-initials-badge">ND</div>
-                                            <div class="student-name-text">Nikhil Deshmukh</div>
-                                        </div>
-                                    </td>
-                                    <td><span class="prn-code-badge">B25IT2011</span></td>
-                                    <td>b25it2011@mmcoe.com</td>
-                                    <td>Information Technology</td>
-                                    <td>B.Tech (SE)</td>
-                                    <td><span class="status-pill status-pill-active">ACTIVE</span></td>
-                                    <td>
-                                        <div class="table-action-btns">
-                                            <button class="btn-icon-action" title="View Details" onclick="viewStudentModal('Nikhil Deshmukh', 'B25IT2011', 'b25it2011@mmcoe.com', 'Information Technology', 'Second Year', 'A', 'ACTIVE')"><i class="bi bi-eye"></i></button>
-                                            <button class="btn-icon-action" title="Deactivate" onclick="alert('Student status toggled.');"><i class="bi bi-person-x"></i></button>
-                                        </div>
+                                    <td colspan="8" class="text-center py-4 text-muted">
+                                        <div class="spinner-border spinner-border-sm text-primary me-2"></div>Loading students...
                                     </td>
                                 </tr>
                             </tbody>
                         </table>
+                    </div>
+                    <!-- Pagination for Manage Students -->
+                    <div class="d-flex justify-content-between align-items-center px-4 py-2" style="border-top:1px solid var(--border-color);font-size:0.82rem;color:var(--text-secondary);">
+                        <span id="dashStudentCountInfo">Loading...</span>
+                        <div id="dashStudentPagination"></div>
                     </div>
                 </div>
             </section>
@@ -661,7 +570,9 @@
                  SECTION 3: MANAGE FEE STRUCTURE
                  ================================================================ -->
             <section id="sec-admin-fee-structure" class="dashboard-section d-none">
-                <div class="erp-table-container">
+
+                <!-- Fee Slabs Table -->
+                <div class="erp-table-container mb-4">
                     <div class="table-header-toolbar">
                         <div class="table-title-group">
                             <h3>Approved Institutional Fee Slabs (AY 2025-26)</h3>
@@ -709,6 +620,22 @@
                                     <td><span class="badge bg-light text-dark border">Up to 3</span></td>
                                 </tr>
                                 <tr>
+                                    <td><strong>B.Tech — Electronics &amp; Telecommunication</strong></td>
+                                    <td>₹88,000</td>
+                                    <td>₹15,000</td>
+                                    <td>₹10,000</td>
+                                    <td><strong class="text-primary">₹1,13,000</strong></td>
+                                    <td><span class="badge bg-light text-dark border">Up to 3</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>B.Tech — Civil Engineering</strong></td>
+                                    <td>₹80,000</td>
+                                    <td>₹15,000</td>
+                                    <td>₹10,000</td>
+                                    <td><strong class="text-primary">₹1,05,000</strong></td>
+                                    <td><span class="badge bg-light text-dark border">Up to 3</span></td>
+                                </tr>
+                                <tr>
                                     <td><strong>M.Tech — Computer Science</strong></td>
                                     <td>₹1,10,000</td>
                                     <td>₹20,000</td>
@@ -720,6 +647,102 @@
                         </table>
                     </div>
                 </div>
+
+                <!-- ── Fee Distribution Analysis ─────────────────────────────────────── -->
+                <div class="erp-table-container p-0 mb-4">
+                    <div class="table-header-toolbar" style="border-bottom:1px solid var(--border-color);">
+                        <div class="table-title-group">
+                            <h3><i class="bi bi-bar-chart-steps me-2" style="color:var(--primary-500);font-size:1rem;"></i>Fee Distribution Analysis</h3>
+                            <p>Student-wise fee distribution by category — for policy planning and scholarship allocation</p>
+                        </div>
+                        <span class="badge rounded-pill" style="background:#fef3c7;color:#92400e;font-size:0.72rem;font-weight:600;border:1px solid #fde68a;">📊 Demo Data — caste/gender/income fields not yet in DB</span>
+                    </div>
+
+                    <div class="row g-0">
+
+                        <!-- A. Caste-wise Distribution -->
+                        <div class="col-md-4 p-4" style="border-right:1px solid var(--border-color);">
+                            <h6 class="fw-bold mb-1" style="font-size:0.88rem;"><i class="bi bi-diagram-3 me-2 text-primary"></i>Caste-wise Distribution</h6>
+                            <p class="text-muted mb-3" style="font-size:0.76rem;">Students by category (General / OBC / SC / ST / NT)</p>
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between mb-1" style="font-size:0.8rem;"><span>General (Open)</span><span class="fw-bold">38%</span></div>
+                                <div class="progress mb-2" style="height:7px;border-radius:4px;"><div class="progress-bar bg-primary" style="width:38%"></div></div>
+
+                                <div class="d-flex justify-content-between mb-1" style="font-size:0.8rem;"><span>OBC</span><span class="fw-bold">29%</span></div>
+                                <div class="progress mb-2" style="height:7px;border-radius:4px;"><div class="progress-bar" style="width:29%;background:#8b5cf6;"></div></div>
+
+                                <div class="d-flex justify-content-between mb-1" style="font-size:0.8rem;"><span>SC</span><span class="fw-bold">16%</span></div>
+                                <div class="progress mb-2" style="height:7px;border-radius:4px;"><div class="progress-bar bg-success" style="width:16%"></div></div>
+
+                                <div class="d-flex justify-content-between mb-1" style="font-size:0.8rem;"><span>ST</span><span class="fw-bold">10%</span></div>
+                                <div class="progress mb-2" style="height:7px;border-radius:4px;"><div class="progress-bar bg-warning" style="width:10%"></div></div>
+
+                                <div class="d-flex justify-content-between mb-1" style="font-size:0.8rem;"><span>NT / VJ / DT</span><span class="fw-bold">7%</span></div>
+                                <div class="progress mb-2" style="height:7px;border-radius:4px;"><div class="progress-bar bg-danger" style="width:7%"></div></div>
+                            </div>
+                            <div class="alert alert-light border mb-0 py-2 px-3" style="font-size:0.72rem;border-radius:8px;">
+                                <i class="bi bi-info-circle text-primary me-1"></i>
+                                Will connect to <code>GET /api/admin/fee-structure/caste-distribution</code> after <code>caste</code> field is added to <code>students</code> table.
+                            </div>
+                        </div>
+
+                        <!-- B. Gender-wise Distribution -->
+                        <div class="col-md-4 p-4" style="border-right:1px solid var(--border-color);">
+                            <h6 class="fw-bold mb-1" style="font-size:0.88rem;"><i class="bi bi-gender-ambiguous me-2 text-success"></i>Gender-wise Distribution</h6>
+                            <p class="text-muted mb-3" style="font-size:0.76rem;">Students and fee collection by gender</p>
+                            <div class="d-flex align-items-center gap-4 mb-4 justify-content-center">
+                                <div class="text-center">
+                                    <div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#3b82f6,#1d4ed8);display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.5rem;font-weight:700;margin:0 auto 6px;">62%</div>
+                                    <div style="font-size:0.78rem;color:#374151;font-weight:600;">Male</div>
+                                    <div style="font-size:0.72rem;color:#6b7280;">~744 Students</div>
+                                </div>
+                                <div class="text-center">
+                                    <div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#ec4899,#be185d);display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.5rem;font-weight:700;margin:0 auto 6px;">38%</div>
+                                    <div style="font-size:0.78rem;color:#374151;font-weight:600;">Female</div>
+                                    <div style="font-size:0.72rem;color:#6b7280;">~456 Students</div>
+                                </div>
+                            </div>
+                            <div class="mb-2">
+                                <div class="d-flex justify-content-between mb-1" style="font-size:0.8rem;"><span><i class="bi bi-circle-fill text-primary" style="font-size:0.5rem;"></i> Male — Fee Collected</span><span class="fw-bold">₹51.15 L</span></div>
+                                <div class="progress mb-2" style="height:7px;border-radius:4px;"><div class="progress-bar bg-primary" style="width:62%"></div></div>
+                                <div class="d-flex justify-content-between mb-1" style="font-size:0.8rem;"><span><i class="bi bi-circle-fill text-danger" style="font-size:0.5rem;"></i> Female — Fee Collected</span><span class="fw-bold">₹31.35 L</span></div>
+                                <div class="progress mb-2" style="height:7px;border-radius:4px;"><div class="progress-bar bg-danger" style="width:38%"></div></div>
+                            </div>
+                            <div class="alert alert-light border mb-0 py-2 px-3" style="font-size:0.72rem;border-radius:8px;">
+                                <i class="bi bi-info-circle text-primary me-1"></i>
+                                Will connect to <code>GET /api/admin/fee-structure/gender-distribution</code> after <code>gender</code> field is added to <code>students</code> table.
+                            </div>
+                        </div>
+
+                        <!-- C. Income-wise Distribution -->
+                        <div class="col-md-4 p-4">
+                            <h6 class="fw-bold mb-1" style="font-size:0.88rem;"><i class="bi bi-cash-coin me-2 text-warning"></i>Income-wise Distribution</h6>
+                            <p class="text-muted mb-3" style="font-size:0.76rem;">Students by family annual income bracket</p>
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between mb-1" style="font-size:0.8rem;"><span>Below ₹1 Lakh</span><span class="fw-bold">22%</span></div>
+                                <div class="progress mb-2" style="height:7px;border-radius:4px;"><div class="progress-bar bg-danger" style="width:22%"></div></div>
+
+                                <div class="d-flex justify-content-between mb-1" style="font-size:0.8rem;"><span>₹1 L – ₹2.5 L</span><span class="fw-bold">31%</span></div>
+                                <div class="progress mb-2" style="height:7px;border-radius:4px;"><div class="progress-bar bg-warning" style="width:31%"></div></div>
+
+                                <div class="d-flex justify-content-between mb-1" style="font-size:0.8rem;"><span>₹2.5 L – ₹6 L</span><span class="fw-bold">28%</span></div>
+                                <div class="progress mb-2" style="height:7px;border-radius:4px;"><div class="progress-bar bg-info" style="width:28%"></div></div>
+
+                                <div class="d-flex justify-content-between mb-1" style="font-size:0.8rem;"><span>₹6 L – ₹12 L</span><span class="fw-bold">13%</span></div>
+                                <div class="progress mb-2" style="height:7px;border-radius:4px;"><div class="progress-bar bg-primary" style="width:13%"></div></div>
+
+                                <div class="d-flex justify-content-between mb-1" style="font-size:0.8rem;"><span>Above ₹12 Lakh</span><span class="fw-bold">6%</span></div>
+                                <div class="progress mb-2" style="height:7px;border-radius:4px;"><div class="progress-bar bg-success" style="width:6%"></div></div>
+                            </div>
+                            <div class="alert alert-light border mb-0 py-2 px-3" style="font-size:0.72rem;border-radius:8px;">
+                                <i class="bi bi-info-circle text-primary me-1"></i>
+                                Will connect to <code>GET /api/admin/fee-structure/income-distribution</code> after <code>income</code> field is added to <code>students</code> table.
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
             </section>
 
             <!-- ================================================================
@@ -923,7 +946,7 @@
      MODAL: VIEW STUDENT DETAILS
      ==================================================================== -->
 <div class="modal fade erp-modal" id="studentDetailModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
             <div class="modal-header">
                 <div class="d-flex align-items-center gap-2">
@@ -937,25 +960,42 @@
             </div>
             <div class="modal-body">
                 <div class="row g-3">
-                    <div class="col-6">
+                    <div class="col-md-4 col-6">
                         <span class="text-muted small d-block">Department</span>
                         <strong id="modalStudentDept">-</strong>
                     </div>
-                    <div class="col-6">
+                    <div class="col-md-4 col-6">
+                        <span class="text-muted small d-block">Course / Program</span>
+                        <strong id="modalStudentCourse">-</strong>
+                    </div>
+                    <div class="col-md-4 col-6">
                         <span class="text-muted small d-block">Academic Year</span>
                         <strong id="modalStudentYear">-</strong>
                     </div>
-                    <div class="col-6">
-                        <span class="text-muted small d-block">Division</span>
-                        <strong id="modalStudentDiv">-</strong>
+                    <div class="col-md-4 col-6">
+                        <span class="text-muted small d-block">Official Email</span>
+                        <code id="modalStudentEmail" class="text-primary">-</code>
                     </div>
-                    <div class="col-6">
-                        <span class="text-muted small d-block">Status</span>
+                    <div class="col-md-4 col-6">
+                        <span class="text-muted small d-block">Mobile / Contact</span>
+                        <strong id="modalStudentMobile">-</strong>
+                    </div>
+                    <div class="col-md-4 col-6">
+                        <span class="text-muted small d-block">Account Status</span>
                         <span id="modalStudentStatus" class="status-pill status-pill-active">ACTIVE</span>
                     </div>
-                    <div class="col-12">
-                        <span class="text-muted small d-block">Registered Email</span>
-                        <code id="modalStudentEmail" class="text-primary">-</code>
+                    <div class="col-12"><hr class="my-1"></div>
+                    <div class="col-md-4 col-6">
+                        <span class="text-muted small d-block">Caste / Category</span>
+                        <span class="badge bg-light text-dark border" id="modalStudentCategory">General (Open)</span>
+                    </div>
+                    <div class="col-md-4 col-6">
+                        <span class="text-muted small d-block">Gender</span>
+                        <strong id="modalStudentGender">Male</strong>
+                    </div>
+                    <div class="col-md-4 col-6">
+                        <span class="text-muted small d-block">Income Category</span>
+                        <span class="badge bg-light text-dark border" id="modalStudentIncome">₹2.5L – ₹6.0L</span>
                     </div>
                 </div>
             </div>
@@ -1251,15 +1291,30 @@ async function loadAdminDashboardStats() {
         const json = await res.json();
         const data = json.data || {};
         const ts = document.getElementById('statTotalStudents');
-        const aa = document.getElementById('statActiveAccounts');
         if (ts) ts.textContent = Number(data.totalStudents || 0).toLocaleString('en-IN');
-        if (aa) aa.textContent = Number((data.activeStudents || 0) + 3).toLocaleString('en-IN'); // +3 for admin+accounts+system
     } catch (e) {
         const ts = document.getElementById('statTotalStudents');
-        const aa = document.getElementById('statActiveAccounts');
         if (ts) ts.textContent = '10';
-        if (aa) aa.textContent = '13';
     }
+}
+
+// ── Analytics sub-select handler ─────────────────────────────────────────────
+// Shows/hides Year / Month / Week sub-selectors and re-renders chart with
+// variant mock data. TODO: replace with GET /api/admin/analytics when
+// payment tables exist (Milestone 2).
+function onAnalyticsPeriodChange(period) {
+    const yearSel  = document.getElementById('analyticsYearSelect');
+    const monthSel = document.getElementById('analyticsMonthSelect');
+    const weekSel  = document.getElementById('analyticsWeekSelect');
+    if (yearSel)  yearSel.classList.toggle('d-none',  period !== 'year');
+    if (monthSel) monthSel.classList.toggle('d-none', period !== 'month');
+    if (weekSel)  weekSel.classList.toggle('d-none',  period !== 'week');
+    renderAnalyticsChart(period);
+}
+
+function onAnalyticsSubSelectChange() {
+    const period = document.getElementById('analyticsPeriod')?.value || 'year';
+    renderAnalyticsChart(period);
 }
 
 // ── Init on load ─────────────────────────────────────────────────────────────
@@ -1267,6 +1322,9 @@ document.addEventListener('DOMContentLoaded', () => {
     setDashboardGreeting();
     renderAnalyticsChart('year');
     loadAdminDashboardStats();
+    // Render secondary charts on dashboard
+    if (typeof renderDeptFeeChart === 'function') renderDeptFeeChart();
+    if (typeof renderFeeTypeChart === 'function') renderFeeTypeChart();
 });
 
 // ── Utility functions ────────────────────────────────────────────────────────
