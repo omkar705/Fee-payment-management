@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fee Payment Management — MMCOE</title>
+    <script>
+        // Redirect based on auth state
+        const token = localStorage.getItem('fpm_token');
+        const role  = localStorage.getItem('fpm_role');
+        if (token && role) {
+            if (role === 'ADMIN')    window.location.replace('admin/dashboard.html');
+            else if (role === 'ACCOUNTS') window.location.replace('accounts/dashboard.html');
+            else if (role === 'STUDENT')  window.location.replace('student/dashboard.html');
+            else window.location.replace('login.html');
+        } else {
+            window.location.replace('login.html');
+        }
+    </script>
+</head>
+<body>
+    <p style="font-family:sans-serif;text-align:center;padding:2rem;color:#6b7280;">Redirecting...</p>
+</body>
+</html>

@@ -1,11 +1,10 @@
 package com.feepayment.service;
 
-import com.feepayment.dao.PasswordResetTokenDao;
-import com.feepayment.dao.StudentDao;
-import com.feepayment.dao.UserDao;
-import com.feepayment.dto.*;
-import com.feepayment.entity.*;
-import com.feepayment.security.JwtUtil;
+import com.feepayment.config.JwtUtil;
+import com.feepayment.model.*;
+import com.feepayment.repository.PasswordResetTokenRepository;
+import com.feepayment.repository.StudentRepository;
+import com.feepayment.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -24,9 +23,9 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class AuthService {
 
-    private final UserDao userDao;
-    private final StudentDao studentDao;
-    private final PasswordResetTokenDao tokenDao;
+    private final UserRepository userRepository;
+    private final StudentRepository studentRepository;
+    private final PasswordResetTokenRepository tokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
@@ -44,7 +43,7 @@ public class AuthService {
         }
 
         // Load user
-        User user = userDao.findByEmail(request.getEmail())
+        User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new BadCredentialsException("Invalid credentials."));
 
         // Verify role matches selection
@@ -73,7 +72,7 @@ public class AuthService {
     private String getDisplayName(User user) {
         String role = user.getRole().getName();
         if ("STUDENT".equals(role)) {
-            return studentDao.findByUserId(user.getId())
+            return studentRepository.findByUserId(user.getId())
                     .map(Student::getName)
                     .orElse(user.getEmail());
         } else if ("ADMIN".equals(role)) {
@@ -87,7 +86,7 @@ public class AuthService {
     @Transactional
     public String forgotPassword(ForgotPasswordRequest request) {
         // Always respond generically to prevent email enumeration
-        Optional<User> userOpt = userDao.findByEmail(request.getEmail());
+        Optional<User> userOpt = userRepository.findByEmail(request.getEmail());
 
         if (userOpt.isPresent()) {
             User user = userOpt.get();
@@ -99,7 +98,7 @@ public class AuthService {
             }
 
             // Delete existing tokens for this user
-            tokenDao.deleteByUser(user);
+            tokenRepository.deleteByUser(user);
 
             // Create new token
             PasswordResetToken resetToken = new PasswordResetToken();
@@ -108,7 +107,7 @@ public class AuthService {
             resetToken.setToken(UUID.randomUUID().toString());
             resetToken.setExpiryDate(LocalDateTime.now().plusHours(1));
             resetToken.setUsed(false);
-            tokenDao.save(resetToken);
+            tokenRepository.save(resetToken);
 
             // In a real system, send an email here. For demo, log the token.
             System.out.println("[DEMO] Password reset token for " + user.getEmail() + ": " + resetToken.getToken());
@@ -123,7 +122,7 @@ public class AuthService {
             throw new IllegalArgumentException("Passwords do not match.");
         }
 
-        PasswordResetToken resetToken = tokenDao.findByToken(request.getToken())
+        PasswordResetToken resetToken = tokenRepository.findByToken(request.getToken())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid or expired reset link."));
 
         if (resetToken.isExpired()) {
@@ -136,10 +135,10 @@ public class AuthService {
 
         // Update password
         User user = resetToken.getUser();
-        userDao.updatePassword(user.getId(), passwordEncoder.encode(request.getNewPassword()));
+        userRepository.updatePassword(user.getId(), passwordEncoder.encode(request.getNewPassword()));
 
         // Mark token as used
         resetToken.setUsed(true);
-        tokenDao.save(resetToken);
+        tokenRepository.save(resetToken);
     }
 }

@@ -1,6 +1,6 @@
 package com.feepayment.controller;
 
-import com.feepayment.dto.ApiResponse;
+import com.feepayment.model.ApiResponse;
 import com.feepayment.service.AccountsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

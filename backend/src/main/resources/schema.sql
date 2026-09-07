@@ -3,16 +3,10 @@
 -- Milestone 1: Login, Admin, Accounts, Student Modules
 -- ============================================================
 
--- Drop existing tables (in correct FK order)
-DROP TABLE IF EXISTS password_reset_tokens CASCADE;
-DROP TABLE IF EXISTS students CASCADE;
-DROP TABLE IF EXISTS users CASCADE;
-DROP TABLE IF EXISTS roles CASCADE;
-
 -- ============================================================
 -- TABLE: roles
 -- ============================================================
-CREATE TABLE roles (
+CREATE TABLE IF NOT EXISTS roles (
     id   SERIAL PRIMARY KEY,
     name VARCHAR(50) NOT NULL UNIQUE
 );
@@ -20,7 +14,7 @@ CREATE TABLE roles (
 -- ============================================================
 -- TABLE: users
 -- ============================================================
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
     id         SERIAL PRIMARY KEY,
     email      VARCHAR(255) NOT NULL UNIQUE,
     password   VARCHAR(255) NOT NULL,
@@ -32,7 +26,7 @@ CREATE TABLE users (
 -- ============================================================
 -- TABLE: students
 -- ============================================================
-CREATE TABLE students (
+CREATE TABLE IF NOT EXISTS students (
     id            SERIAL PRIMARY KEY,
     user_id       INTEGER      NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
     name          VARCHAR(255) NOT NULL,
@@ -50,7 +44,7 @@ CREATE TABLE students (
 -- ============================================================
 -- TABLE: password_reset_tokens
 -- ============================================================
-CREATE TABLE password_reset_tokens (
+CREATE TABLE IF NOT EXISTS password_reset_tokens (
     id          SERIAL PRIMARY KEY,
     user_id     INTEGER      NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     token       VARCHAR(255) NOT NULL UNIQUE,
@@ -62,13 +56,13 @@ CREATE TABLE password_reset_tokens (
 -- ============================================================
 -- INDEXES
 -- ============================================================
-CREATE INDEX idx_users_email       ON users(email);
-CREATE INDEX idx_users_role_id     ON users(role_id);
-CREATE INDEX idx_students_prn      ON students(prn);
-CREATE INDEX idx_students_user_id  ON students(user_id);
-CREATE INDEX idx_students_status   ON students(status);
-CREATE INDEX idx_prt_token         ON password_reset_tokens(token);
-CREATE INDEX idx_prt_user_id       ON password_reset_tokens(user_id);
+CREATE INDEX IF NOT EXISTS idx_users_email       ON users(email);
+CREATE INDEX IF NOT EXISTS idx_users_role_id     ON users(role_id);
+CREATE INDEX IF NOT EXISTS idx_students_prn      ON students(prn);
+CREATE INDEX IF NOT EXISTS idx_students_user_id  ON students(user_id);
+CREATE INDEX IF NOT EXISTS idx_students_status   ON students(status);
+CREATE INDEX IF NOT EXISTS idx_prt_token         ON password_reset_tokens(token);
+CREATE INDEX IF NOT EXISTS idx_prt_user_id       ON password_reset_tokens(user_id);
 
 -- ============================================================
 -- CONFIRMED REPORTS TABLES: fee_structures, fee_assignments, fee_installments, fee_payments
@@ -114,3 +108,49 @@ CREATE TABLE IF NOT EXISTS fee_payments (
     status         VARCHAR(20) DEFAULT 'SUCCESS',
     payment_date   VARCHAR(20)
 );
+
+-- ============================================================
+-- RAZORPAY PAYMENT MODULE TABLES: transactions, payment_gateway_logs, receipts
+-- ============================================================
+CREATE TABLE IF NOT EXISTS transactions (
+    transaction_id        SERIAL PRIMARY KEY,
+    payment_id            INTEGER REFERENCES fee_payments(payment_id) ON DELETE SET NULL,
+    student_id            INTEGER REFERENCES students(id) ON DELETE SET NULL,
+    order_id              VARCHAR(255),
+    transaction_reference VARCHAR(255) UNIQUE NOT NULL,
+    gateway_name          VARCHAR(50) NOT NULL DEFAULT 'RAZORPAY',
+    transaction_status    VARCHAR(50) NOT NULL DEFAULT 'SUCCESS',
+    amount                NUMERIC(12,2) NOT NULL,
+    currency              VARCHAR(10) NOT NULL DEFAULT 'INR',
+    verified_by           VARCHAR(100) NOT NULL DEFAULT 'RAZORPAY_SIGNATURE_VERIFIED',
+    created_at            TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_txn_reference   ON transactions(transaction_reference);
+CREATE INDEX IF NOT EXISTS idx_txn_student_id  ON transactions(student_id);
+CREATE INDEX IF NOT EXISTS idx_txn_order_id    ON transactions(order_id);
+
+CREATE TABLE IF NOT EXISTS payment_gateway_logs (
+    gateway_log_id SERIAL PRIMARY KEY,
+    transaction_id INTEGER REFERENCES transactions(transaction_id) ON DELETE SET NULL,
+    gateway_name   VARCHAR(50) NOT NULL DEFAULT 'RAZORPAY',
+    request_data   TEXT,
+    response_data  TEXT,
+    status         VARCHAR(50),
+    log_time       TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_pgl_transaction_id ON payment_gateway_logs(transaction_id);
+
+CREATE TABLE IF NOT EXISTS receipts (
+    receipt_id      SERIAL PRIMARY KEY,
+    receipt_number  VARCHAR(100) UNIQUE NOT NULL,
+    transaction_id  INTEGER UNIQUE REFERENCES transactions(transaction_id) ON DELETE CASCADE,
+    student_id      INTEGER REFERENCES students(id) ON DELETE SET NULL,
+    receipt_url     VARCHAR(255),
+    generated_date  TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_receipts_number        ON receipts(receipt_number);
+CREATE INDEX IF NOT EXISTS idx_receipts_transaction_id ON receipts(transaction_id);
+CREATE INDEX IF NOT EXISTS idx_receipts_student_id    ON receipts(student_id);

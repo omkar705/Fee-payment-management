@@ -1,7 +1,7 @@
 package com.feepayment.service;
 
-import com.feepayment.dao.UserDao;
-import com.feepayment.entity.User;
+import com.feepayment.model.User;
+import com.feepayment.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.*;
@@ -13,11 +13,11 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserDetailsServiceImpl implements UserDetailsService {
 
-    private final UserDao userDao;
+    private final UserRepository userRepository;
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        User user = userDao.findByEmail(email)
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
 
         String roleName = "ROLE_" + user.getRole().getName();

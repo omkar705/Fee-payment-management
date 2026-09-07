@@ -1,6 +1,6 @@
 package com.feepayment.controller;
 
-import com.feepayment.dto.*;
+import com.feepayment.model.*;
 import com.feepayment.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

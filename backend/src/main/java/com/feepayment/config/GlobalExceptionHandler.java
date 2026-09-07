@@ -1,6 +1,6 @@
 package com.feepayment.config;
 
-import com.feepayment.dto.ApiResponse;
+import com.feepayment.model.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;

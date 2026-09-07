@@ -1,12 +1,12 @@
 package com.feepayment.service;
 
-import com.feepayment.dao.RoleDao;
-import com.feepayment.dao.StudentDao;
-import com.feepayment.dao.UserDao;
-import com.feepayment.dto.StudentDto;
-import com.feepayment.entity.Role;
-import com.feepayment.entity.Student;
-import com.feepayment.entity.User;
+import com.feepayment.model.Role;
+import com.feepayment.model.Student;
+import com.feepayment.model.StudentData;
+import com.feepayment.model.User;
+import com.feepayment.repository.RoleRepository;
+import com.feepayment.repository.StudentRepository;
+import com.feepayment.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -22,118 +22,118 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class AdminService {
 
-    private final StudentDao studentDao;
-    private final UserDao userDao;
-    private final RoleDao roleDao;
+    private final StudentRepository studentRepository;
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public List<StudentDto> getAllStudents(String department, String academicYear, String status) {
+    public List<StudentData> getAllStudents(String department, String academicYear, String status) {
         List<Student> students;
 
         if (department == null && academicYear == null && status == null) {
-            students = studentDao.findAll();
+            students = studentRepository.findAll();
         } else {
-            students = studentDao.findByFilters(department, academicYear, status);
+            students = studentRepository.findByFilters(department, academicYear, status);
         }
 
-        return students.stream().map(this::toDto).collect(Collectors.toList());
+        return students.stream().map(this::toData).collect(Collectors.toList());
     }
 
-    public StudentDto getStudentById(Long id) {
-        Student student = studentDao.findById(id)
+    public StudentData getStudentById(Long id) {
+        Student student = studentRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Student not found with id: " + id));
-        return toDto(student);
+        return toData(student);
     }
 
     @Transactional
-    public StudentDto createStudent(StudentDto dto) {
+    public StudentData createStudent(StudentData data) {
         // Validate uniqueness
-        if (userDao.existsByEmail(dto.getEmail())) {
+        if (userRepository.existsByEmail(data.getEmail())) {
             throw new IllegalArgumentException("An account with this email already exists.");
         }
-        if (studentDao.existsByPrn(dto.getPrn())) {
+        if (studentRepository.existsByPrn(data.getPrn())) {
             throw new IllegalArgumentException("A student with this PRN already exists.");
         }
 
         // Get STUDENT role
-        Role studentRole = roleDao.findByName("STUDENT")
+        Role studentRole = roleRepository.findByName("STUDENT")
                 .orElseThrow(() -> new IllegalStateException("STUDENT role not found. Please run the seed data."));
 
         // Create User — default password is Student@123
         User user = new User();
-        user.setEmail(dto.getEmail());
+        user.setEmail(data.getEmail());
         user.setPassword(passwordEncoder.encode("Student@123"));
         user.setRole(studentRole);
         user.setEnabled(true);
-        user = userDao.save(user);
+        user = userRepository.save(user);
 
         // Create Student
         Student student = new Student();
         student.setUserId(user.getId());
-        student.setName(dto.getName());
-        student.setPrn(dto.getPrn().toUpperCase());
-        student.setEmail(dto.getEmail());
-        student.setMobile(dto.getMobile());
-        student.setDepartment(dto.getDepartment());
-        student.setCourse(dto.getCourse());
-        student.setAcademicYear(dto.getAcademicYear());
+        student.setName(data.getName());
+        student.setPrn(data.getPrn().toUpperCase());
+        student.setEmail(data.getEmail());
+        student.setMobile(data.getMobile());
+        student.setDepartment(data.getDepartment());
+        student.setCourse(data.getCourse());
+        student.setAcademicYear(data.getAcademicYear());
         student.setStatus("ACTIVE");
         student.setUser(user);
-        student = studentDao.save(student);
+        student = studentRepository.save(student);
 
-        return toDto(student);
+        return toData(student);
     }
 
     @Transactional
-    public StudentDto updateStudent(Long id, StudentDto dto) {
-        Student student = studentDao.findById(id)
+    public StudentData updateStudent(Long id, StudentData data) {
+        Student student = studentRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Student not found with id: " + id));
 
         // Check email uniqueness (excluding current)
-        if (!student.getEmail().equals(dto.getEmail()) && userDao.existsByEmail(dto.getEmail())) {
+        if (!student.getEmail().equals(data.getEmail()) && userRepository.existsByEmail(data.getEmail())) {
             throw new IllegalArgumentException("An account with this email already exists.");
         }
         // Check PRN uniqueness (excluding current)
-        if (!student.getPrn().equals(dto.getPrn()) && studentDao.existsByPrn(dto.getPrn())) {
+        if (!student.getPrn().equals(data.getPrn()) && studentRepository.existsByPrn(data.getPrn())) {
             throw new IllegalArgumentException("A student with this PRN already exists.");
         }
 
-        student.setName(dto.getName());
-        student.setPrn(dto.getPrn().toUpperCase());
-        student.setEmail(dto.getEmail());
-        student.setMobile(dto.getMobile());
-        student.setDepartment(dto.getDepartment());
-        student.setCourse(dto.getCourse());
-        student.setAcademicYear(dto.getAcademicYear());
-        student = studentDao.save(student);
+        student.setName(data.getName());
+        student.setPrn(data.getPrn().toUpperCase());
+        student.setEmail(data.getEmail());
+        student.setMobile(data.getMobile());
+        student.setDepartment(data.getDepartment());
+        student.setCourse(data.getCourse());
+        student.setAcademicYear(data.getAcademicYear());
+        student = studentRepository.save(student);
 
-        return toDto(student);
+        return toData(student);
     }
 
     @Transactional
-    public StudentDto updateStudentStatus(Long id, String status) {
-        Student student = studentDao.findById(id)
+    public StudentData updateStudentStatus(Long id, String status) {
+        Student student = studentRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Student not found with id: " + id));
 
         if (!List.of("ACTIVE", "INACTIVE", "PENDING").contains(status.toUpperCase())) {
             throw new IllegalArgumentException("Invalid status. Allowed: ACTIVE, INACTIVE, PENDING");
         }
 
-        studentDao.updateStatus(id, status.toUpperCase());
+        studentRepository.updateStatus(id, status.toUpperCase());
 
         // Also update user.enabled
-        userDao.updateEnabled(student.getUserId(), "ACTIVE".equals(status.toUpperCase()));
+        userRepository.updateEnabled(student.getUserId(), "ACTIVE".equals(status.toUpperCase()));
 
         student.setStatus(status.toUpperCase());
-        return toDto(student);
+        return toData(student);
     }
 
     public Map<String, Object> getDashboardStats() {
         Map<String, Object> stats = new HashMap<>();
-        long total   = studentDao.count();
-        long active  = studentDao.countByStatus("ACTIVE");
-        long inactive = studentDao.countByStatus("INACTIVE");
-        long pending  = studentDao.countByStatus("PENDING");
+        long total   = studentRepository.count();
+        long active  = studentRepository.countByStatus("ACTIVE");
+        long inactive = studentRepository.countByStatus("INACTIVE");
+        long pending  = studentRepository.countByStatus("PENDING");
 
         stats.put("totalStudents",    total);
         stats.put("activeStudents",   active);
@@ -145,7 +145,6 @@ public class AdminService {
 
     /**
      * Fee Collection Analytics — returns chart-ready data.
-     * TODO Milestone 2: Replace dummy data with real payment queries.
      *
      * period = "year"  → monthly breakdown for AY 2025-26
      * period = "month" → weekly totals for current month (4 weeks)
@@ -185,25 +184,25 @@ public class AdminService {
         return result;
     }
 
-    private StudentDto toDto(Student student) {
-        StudentDto dto = new StudentDto();
-        dto.setId(student.getId());
-        dto.setName(student.getName());
-        dto.setPrn(student.getPrn());
-        dto.setEmail(student.getEmail());
-        dto.setMobile(student.getMobile());
-        dto.setDepartment(student.getDepartment());
-        dto.setCourse(student.getCourse());
-        dto.setAcademicYear(student.getAcademicYear());
-        dto.setStatus(student.getStatus());
-        dto.setCreatedAt(student.getCreatedAt() != null ? student.getCreatedAt().toString() : null);
+    private StudentData toData(Student student) {
+        StudentData data = new StudentData();
+        data.setId(student.getId());
+        data.setName(student.getName());
+        data.setPrn(student.getPrn());
+        data.setEmail(student.getEmail());
+        data.setMobile(student.getMobile());
+        data.setDepartment(student.getDepartment());
+        data.setCourse(student.getCourse());
+        data.setAcademicYear(student.getAcademicYear());
+        data.setStatus(student.getStatus());
+        data.setCreatedAt(student.getCreatedAt() != null ? student.getCreatedAt().toString() : null);
 
         // Fetch user enabled status if needed
         if (student.getUserId() != null) {
-            userDao.findById(student.getUserId()).ifPresent(u -> dto.setEnabled(u.getEnabled()));
+            userRepository.findById(student.getUserId()).ifPresent(u -> data.setEnabled(u.getEnabled()));
         } else if (student.getUser() != null) {
-            dto.setEnabled(student.getUser().getEnabled());
+            data.setEnabled(student.getUser().getEnabled());
         }
-        return dto;
+        return data;
     }
 }

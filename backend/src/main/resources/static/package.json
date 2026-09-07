@@ -1,0 +1,16 @@
+{
+  "name": "fee-payment-management-frontend",
+  "version": "1.0.0",
+  "description": "Fee Payment Management Platform Frontend",
+  "main": "login.html",
+  "scripts": {
+    "start": "python3 -m http.server 3000"
+  },
+  "keywords": [
+    "fee-management",
+    "bootstrap5",
+    "vanilla-js"
+  ],
+  "author": "MMCOE",
+  "license": "ISC"
+}

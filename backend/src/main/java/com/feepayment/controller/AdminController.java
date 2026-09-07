@@ -1,7 +1,7 @@
 package com.feepayment.controller;
 
-import com.feepayment.dto.ApiResponse;
-import com.feepayment.dto.StudentDto;
+import com.feepayment.model.ApiResponse;
+import com.feepayment.model.StudentData;
 import com.feepayment.service.AdminService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +31,6 @@ public class AdminController {
      * Fee Collection Analytics endpoint.
      * period: "year" | "month" | "week" (defaults to "year")
      * Returns chart-ready data: labels[] + amounts[]
-     * Wire to real payment data in a future milestone.
      */
     @GetMapping("/analytics")
     public ResponseEntity<?> getFeeAnalytics(
@@ -53,9 +52,9 @@ public class AdminController {
     }
 
     @PostMapping("/students")
-    public ResponseEntity<?> createStudent(@Valid @RequestBody StudentDto dto) {
+    public ResponseEntity<?> createStudent(@Valid @RequestBody StudentData data) {
         try {
-            StudentDto created = adminService.createStudent(dto);
+            StudentData created = adminService.createStudent(data);
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(ApiResponse.ok("Student account created successfully.", created));
         } catch (IllegalArgumentException e) {
@@ -73,9 +72,9 @@ public class AdminController {
     }
 
     @PutMapping("/students/{id}")
-    public ResponseEntity<?> updateStudent(@PathVariable Long id, @Valid @RequestBody StudentDto dto) {
+    public ResponseEntity<?> updateStudent(@PathVariable Long id, @Valid @RequestBody StudentData data) {
         try {
-            return ResponseEntity.ok(ApiResponse.ok("Student updated successfully.", adminService.updateStudent(id, dto)));
+            return ResponseEntity.ok(ApiResponse.ok("Student updated successfully.", adminService.updateStudent(id, data)));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
         }

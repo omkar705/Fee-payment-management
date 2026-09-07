@@ -1,6 +1,5 @@
 package com.feepayment.config;
 
-import com.feepayment.security.JwtAuthFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -43,17 +42,31 @@ public class SecurityConfig {
             )
             .headers(headers -> headers.frameOptions(frame -> frame.disable())) // Required for H2 console
             .authorizeHttpRequests(auth -> auth
-                // Public endpoints
+                // Public static frontend assets & auth endpoints
                 .requestMatchers(
+                    "/",
+                    "/index.html",
+                    "/login.html",
+                    "/forgot-password.html",
+                    "/*.html",
+                    "/admin/**",
+                    "/accounts/**",
+                    "/student/**",
+                    "/reports/**",
+                    "/assets/**",
+                    "/css/**",
+                    "/js/**",
+                    "/favicon.ico",
+                    "/error",
+                    "/h2-console/**",
                     "/api/auth/**",
-                    "/h2-console/**" // Allow H2 console access
+                    "/api/payments/**"
                 ).permitAll()
-                // Admin-only endpoints
+                // Role-restricted API endpoints
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                // Accounts-only endpoints
                 .requestMatchers("/api/accounts/**").hasRole("ACCOUNTS")
-                // Student-only endpoints
                 .requestMatchers("/api/student/**").hasRole("STUDENT")
+                .requestMatchers("/api/reports/**").authenticated()
                 // Any other request requires authentication
                 .anyRequest().authenticated()
             )

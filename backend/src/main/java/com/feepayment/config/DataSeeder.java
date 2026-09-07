@@ -1,11 +1,11 @@
 package com.feepayment.config;
 
-import com.feepayment.dao.RoleDao;
-import com.feepayment.dao.StudentDao;
-import com.feepayment.dao.UserDao;
-import com.feepayment.entity.Role;
-import com.feepayment.entity.Student;
-import com.feepayment.entity.User;
+import com.feepayment.model.Role;
+import com.feepayment.model.Student;
+import com.feepayment.model.User;
+import com.feepayment.repository.RoleRepository;
+import com.feepayment.repository.StudentRepository;
+import com.feepayment.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * DataSeeder — Seeds initial demo data on application startup if not present.
- * Uses JdbcTemplate DAOs (no JPA).
+ * Uses JdbcTemplate Repositories (no JPA).
  *
  * Demo Credentials (development only — NOT for production):
  *   Admin:    admin@mmcoe.com     / Admin@123
@@ -29,14 +29,18 @@ public class DataSeeder implements CommandLineRunner {
 
     private static final Logger log = LoggerFactory.getLogger(DataSeeder.class);
 
-    private final RoleDao roleDao;
-    private final UserDao userDao;
-    private final StudentDao studentDao;
+    private final RoleRepository roleRepository;
+    private final UserRepository userRepository;
+    private final StudentRepository studentRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
     @Transactional
     public void run(String... args) {
+        if (studentRepository.count() >= 10 && userRepository.existsByEmail("admin@mmcoe.com")) {
+            log.info("Database is already initialized with students and admin. Skipping redundant data seeding.");
+            return;
+        }
         seedRoles();
         seedUsers();
         seedStudents();
@@ -45,7 +49,7 @@ public class DataSeeder implements CommandLineRunner {
 
     private void seedRoles() {
         for (String name : new String[]{"ADMIN", "ACCOUNTS", "STUDENT"}) {
-            roleDao.insertIfAbsent(name);
+            roleRepository.insertIfAbsent(name);
             log.info("Role ensured: {}", name);
         }
     }
@@ -67,9 +71,14 @@ public class DataSeeder implements CommandLineRunner {
     }
 
     private void createUserIfNotExists(String email, String rawPassword, String roleName) {
-        if (userDao.existsByEmail(email)) return;
+        if (userRepository.existsByEmail(email)) {
+            userRepository.findByEmail(email).ifPresent(user -> {
+                userRepository.updatePassword(user.getId(), passwordEncoder.encode(rawPassword));
+            });
+            return;
+        }
 
-        Role role = roleDao.findByName(roleName)
+        Role role = roleRepository.findByName(roleName)
                 .orElseThrow(() -> new IllegalStateException("Role not found: " + roleName));
 
         User user = new User();
@@ -78,7 +87,7 @@ public class DataSeeder implements CommandLineRunner {
         user.setRole(role);
         // Ananya Mehta (b25it2006) starts as inactive
         user.setEnabled(!"b25it2006@mmcoe.com".equals(email));
-        userDao.save(user);
+        userRepository.save(user);
         log.info("Created user: {} ({})", email, roleName);
     }
 
@@ -103,9 +112,9 @@ public class DataSeeder implements CommandLineRunner {
             String mobile = (String) data[3];
             String status = (String) data[4];
 
-            if (studentDao.existsByPrn(prn)) continue;
+            if (studentRepository.existsByPrn(prn)) continue;
 
-            User user = userDao.findByEmail(email).orElse(null);
+            User user = userRepository.findByEmail(email).orElse(null);
             if (user == null) continue;
 
             Student student = new Student();
@@ -118,7 +127,7 @@ public class DataSeeder implements CommandLineRunner {
             student.setCourse("B.Tech");
             student.setAcademicYear("2025-26");
             student.setStatus(status);
-            studentDao.save(student);
+            studentRepository.save(student);
             log.info("Created student: {} ({})", name, prn);
         }
     }
