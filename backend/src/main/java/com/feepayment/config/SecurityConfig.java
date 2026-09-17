@@ -1,5 +1,6 @@
 package com.feepayment.config;
 
+import com.feepayment.config.JwtAuthFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -42,31 +43,32 @@ public class SecurityConfig {
             )
             .headers(headers -> headers.frameOptions(frame -> frame.disable())) // Required for H2 console
             .authorizeHttpRequests(auth -> auth
-                // Public static frontend assets & auth endpoints
+                // Public static frontend pages
                 .requestMatchers(
                     "/",
                     "/index.html",
                     "/login.html",
                     "/forgot-password.html",
-                    "/*.html",
                     "/admin/**",
                     "/accounts/**",
                     "/student/**",
                     "/reports/**",
                     "/assets/**",
-                    "/css/**",
                     "/js/**",
-                    "/favicon.ico",
-                    "/error",
-                    "/h2-console/**",
-                    "/api/auth/**",
-                    "/api/payments/**"
+                    "/css/**"
                 ).permitAll()
-                // Role-restricted API endpoints
+                // Public API endpoints
+                .requestMatchers(
+                    "/api/auth/**",
+                    "/api/payments/**",
+                    "/h2-console/**"
+                ).permitAll()
+                // Admin-only endpoints
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                // Accounts-only endpoints
                 .requestMatchers("/api/accounts/**").hasRole("ACCOUNTS")
+                // Student-only endpoints
                 .requestMatchers("/api/student/**").hasRole("STUDENT")
-                .requestMatchers("/api/reports/**").authenticated()
                 // Any other request requires authentication
                 .anyRequest().authenticated()
             )

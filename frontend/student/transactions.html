@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaction History — Fee Payment Management | MMCOE</title>
+    <meta name="description" content="View complete transaction history, payment status, receipts and rollback-eligible payments.">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="../assets/css/dashboard.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary:   #2563eb;
+            --success:   #16a34a;
+            --warning:   #d97706;
+            --danger:    #dc2626;
+            --info:      #0891b2;
+            --purple:    #7c3aed;
+            --neutral-50: #f8fafc;
+            --neutral-100: #f1f5f9;
+            --neutral-200: #e2e8f0;
+            --neutral-700: #334155;
+            --radius: 14px;
+        }
+
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--neutral-50); }
+
+        /* ── PAGE HEADER ───────────────────────────────── */
+        .page-hero {
+            background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 60%, #7c3aed 100%);
+            color: #fff;
+            padding: 2.5rem 2rem 4rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .page-hero::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: radial-gradient(circle at 80% 50%, rgba(124,58,237,.35) 0%, transparent 60%);
+        }
+        .page-hero h1 { font-size: 1.75rem; font-weight: 800; position: relative; }
+        .page-hero p  { opacity: .85; position: relative; }
+
+        /* ── STAT CHIPS ────────────────────────────────── */
+        .stat-chips { margin-top: -2rem; }
+        .stat-chip {
+            background: #fff;
+            border-radius: 14px;
+            padding: 1rem 1.25rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,.08);
+            display: flex; align-items: center; gap: .75rem;
+        }
+        .stat-chip .chip-icon {
+            width: 44px; height: 44px; border-radius: 10px;
+            display: grid; place-items: center; font-size: 1.2rem; flex-shrink: 0;
+        }
+        .chip-icon.success { background: #dcfce7; color: #16a34a; }
+        .chip-icon.warning { background: #fef3c7; color: #d97706; }
+        .chip-icon.danger  { background: #fee2e2; color: #dc2626; }
+        .chip-icon.info    { background: #e0f2fe; color: #0891b2; }
+        .stat-chip .chip-label { font-size: .7rem; color: #64748b; text-transform: uppercase; letter-spacing: .04em; }
+        .stat-chip .chip-value { font-size: 1.25rem; font-weight: 700; color: var(--neutral-700); line-height: 1; }
+
+        /* ── FILTER BAR ────────────────────────────────── */
+        .filter-bar {
+            background: #fff;
+            border: 1px solid var(--neutral-200);
+            border-radius: var(--radius);
+            padding: 1rem 1.25rem;
+        }
+
+        /* ── TRANSACTION TABLE ─────────────────────────── */
+        .txn-table-card {
+            background: #fff;
+            border: 1px solid var(--neutral-200);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+        .txn-table-card .card-header-custom {
+            padding: 1.1rem 1.5rem;
+            border-bottom: 1px solid var(--neutral-200);
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .txn-table-card .card-title {
+            font-weight: 700; font-size: 1rem; color: var(--neutral-700); margin: 0;
+        }
+        table.txn-table thead th {
+            background: var(--neutral-50);
+            font-size: .72rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: .06em;
+            color: #64748b; border-bottom: 1px solid var(--neutral-200);
+            padding: .75rem 1.25rem; white-space: nowrap;
+        }
+        table.txn-table tbody td {
+            padding: .9rem 1.25rem;
+            vertical-align: middle;
+            border-bottom: 1px solid var(--neutral-100);
+            font-size: .875rem;
+        }
+        table.txn-table tbody tr:last-child td { border-bottom: none; }
+        table.txn-table tbody tr:hover { background: var(--neutral-50); }
+
+        .txn-ref { font-family: monospace; font-size: .8rem; color: #1a56db; }
+        .txn-amount { font-weight: 700; font-size: .95rem; }
+
+        /* ── STATUS BADGES ─────────────────────────────── */
+        .badge-status {
+            padding: .3rem .75rem; border-radius: 30px;
+            font-size: .72rem; font-weight: 700; letter-spacing: .04em;
+            display: inline-flex; align-items: center; gap: .3rem;
+        }
+        .badge-status.SUCCESS     { background: #dcfce7; color: #15803d; }
+        .badge-status.PENDING     { background: #fef9c3; color: #854d0e; }
+        .badge-status.PROCESSING  { background: #e0f2fe; color: #0369a1; }
+        .badge-status.FAILED      { background: #fee2e2; color: #b91c1c; }
+        .badge-status.ROLLED_BACK { background: #f3e8ff; color: #6d28d9; }
+        .badge-status.REFUNDED    { background: #fce7f3; color: #be185d; }
+
+        /* ── GATEWAY BADGE ─────────────────────────────── */
+        .gw-badge {
+            font-size: .72rem; font-weight: 600;
+            padding: .25rem .6rem; border-radius: 6px;
+            background: var(--neutral-100); color: var(--neutral-700); border: 1px solid var(--neutral-200);
+        }
+
+        /* ── RECEIPT BUTTON ────────────────────────────── */
+        .btn-receipt {
+            font-size: .78rem; padding: .3rem .75rem; border-radius: 8px;
+            background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe;
+            transition: all .2s; white-space: nowrap;
+        }
+        .btn-receipt:hover { background: #2563eb; color: #fff; border-color: #2563eb; }
+
+        /* ── QUEUE STATUS PANEL ────────────────────────── */
+        .queue-panel {
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            color: #e2e8f0; border-radius: var(--radius);
+            padding: 1.5rem;
+        }
+        .queue-panel h5 { color: #7dd3fc; font-weight: 700; font-size: .95rem; }
+        .queue-metric { display: flex; justify-content: space-between; align-items: center; padding: .5rem 0; border-bottom: 1px solid rgba(255,255,255,.07); }
+        .queue-metric:last-child { border-bottom: none; }
+        .queue-metric-label { font-size: .78rem; color: #94a3b8; }
+        .queue-metric-val   { font-size: 1rem; font-weight: 700; color: #f1f5f9; }
+        .queue-metric-val.green  { color: #4ade80; }
+        .queue-metric-val.yellow { color: #facc15; }
+        .queue-metric-val.red    { color: #f87171; }
+
+        .event-log-item {
+            padding: .4rem .75rem; border-radius: 8px; margin-bottom: .3rem;
+            font-size: .72rem; display: flex; gap: .5rem; align-items: baseline;
+        }
+        .event-log-item.SUCCESS    { background: rgba(74,222,128,.08); }
+        .event-log-item.FAILED     { background: rgba(248,113,113,.08); }
+        .event-log-item.ENQUEUED   { background: rgba(96,165,250,.08); }
+        .event-log-item.PROCESSING { background: rgba(251,191,36,.08); }
+        .event-log-item .ev-tag { font-weight: 700; min-width: 90px; }
+        .event-log-item .ev-id  { font-family: monospace; color: #7dd3fc; font-size: .68rem; }
+        .event-log-item .ev-detail { color: #94a3b8; }
+
+        /* ── CONCURRENCY VISUAL ────────────────────────── */
+        .slot-bar { display: flex; gap: 6px; margin-top: .5rem; }
+        .slot { width: 32px; height: 32px; border-radius: 8px; border: 2px solid rgba(255,255,255,.2); display: grid; place-items: center; font-size: .7rem; font-weight: 700; transition: all .5s; }
+        .slot.free   { background: rgba(74,222,128,.15); color: #4ade80; border-color: #4ade80; }
+        .slot.busy   { background: rgba(251,191,36,.15); color: #facc15; border-color: #facc15; }
+
+        /* ── EMPTY STATE ───────────────────────────────── */
+        .empty-state { text-align: center; padding: 3.5rem 2rem; color: #94a3b8; }
+        .empty-state i { font-size: 3rem; opacity: .4; }
+        .empty-state p { margin-top: .75rem; font-size: .9rem; }
+
+        /* ── TABS ──────────────────────────────────────── */
+        .nav-tabs .nav-link { font-size: .85rem; font-weight: 600; color: #64748b; border: none; padding: .65rem 1.1rem; }
+        .nav-tabs .nav-link.active { color: var(--primary); border-bottom: 2px solid var(--primary); background: none; }
+        .nav-tabs { border-bottom: 2px solid var(--neutral-200); }
+
+        /* ── LOADING ───────────────────────────────────── */
+        .loading-row td { text-align: center; padding: 2.5rem; color: #94a3b8; font-size: .9rem; }
+
+        /* ── SCROLLBAR ─────────────────────────────────── */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+    </style>
+</head>
+<body data-page="transactions">
+
+    <!-- ═══════════════════════════════════ NAVBAR ═══════════════════════════════ -->
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background: linear-gradient(90deg,#1e3a5f,#2563eb);">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand fw-800 d-flex align-items-center gap-2" href="dashboard.html" style="font-size:1.05rem;">
+                <i class="bi bi-wallet2"></i> FeePayMS
+            </a>
+            <div class="d-flex align-items-center gap-3 ms-auto">
+                <span class="text-white-50" style="font-size:.8rem;" id="navUserEmail"></span>
+                <a href="dashboard.html" class="btn btn-sm btn-outline-light" style="font-size:.8rem; border-radius:8px;">
+                    <i class="bi bi-grid me-1"></i>Dashboard
+                </a>
+                <button class="btn btn-sm" style="background:rgba(255,255,255,.15);color:#fff;border-radius:8px;font-size:.8rem;" onclick="logout()">
+                    <i class="bi bi-box-arrow-right me-1"></i>Sign Out
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ═══════════════════════════════════ HERO ════════════════════════════════ -->
+    <div class="page-hero">
+        <div class="container-fluid px-4">
+            <nav aria-label="breadcrumb" class="mb-2">
+                <ol class="breadcrumb" style="font-size:.8rem;opacity:.75;">
+                    <li class="breadcrumb-item"><a href="dashboard.html" class="text-white">Dashboard</a></li>
+                    <li class="breadcrumb-item active text-white">Transactions</li>
+                </ol>
+            </nav>
+            <h1 class="mb-1"><i class="bi bi-arrow-left-right me-2"></i>Transaction History</h1>
+            <p class="mb-0" style="font-size:.9rem;">Complete record of all your payment transactions, receipts, and gateway processing logs.</p>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════ STAT CHIPS ══════════════════════════ -->
+    <div class="container-fluid px-4 stat-chips">
+        <div class="row g-3">
+            <div class="col-6 col-md-3">
+                <div class="stat-chip">
+                    <div class="chip-icon success"><i class="bi bi-check-circle-fill"></i></div>
+                    <div>
+                        <div class="chip-label">Successful</div>
+                        <div class="chip-value" id="statSuccess">—</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-chip">
+                    <div class="chip-icon warning"><i class="bi bi-clock-fill"></i></div>
+                    <div>
+                        <div class="chip-label">Pending</div>
+                        <div class="chip-value" id="statPending">—</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-chip">
+                    <div class="chip-icon danger"><i class="bi bi-x-circle-fill"></i></div>
+                    <div>
+                        <div class="chip-label">Failed / Rolled Back</div>
+                        <div class="chip-value" id="statFailed">—</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-chip">
+                    <div class="chip-icon info"><i class="bi bi-currency-rupee"></i></div>
+                    <div>
+                        <div class="chip-label">Total Paid</div>
+                        <div class="chip-value" id="statTotal">—</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════ MAIN CONTENT ════════════════════════ -->
+    <div class="container-fluid px-4 mt-4 pb-5">
+        <div class="row g-4">
+
+            <!-- LEFT: Transaction Table -->
+            <div class="col-lg-8">
+
+                <!-- Tabs -->
+                <ul class="nav nav-tabs mb-3" id="txnTabs">
+                    <li class="nav-item">
+                        <button class="nav-link active" id="tab-all" onclick="switchTab('all')">
+                            <i class="bi bi-list-ul me-1"></i>All Transactions
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" id="tab-receipts" onclick="switchTab('receipts')">
+                            <i class="bi bi-receipt me-1"></i>Receipts
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" id="tab-gateway" onclick="switchTab('gateway')">
+                            <i class="bi bi-activity me-1"></i>Gateway Logs
+                        </button>
+                    </li>
+                </ul>
+
+                <!-- Filter Bar -->
+                <div class="filter-bar mb-3" id="filterBar">
+                    <div class="row g-2 align-items-center">
+                        <div class="col-md-5">
+                            <input type="search" id="searchInput" class="form-control form-control-sm"
+                                   placeholder="Search by reference, receipt, gateway…" oninput="filterTable()">
+                        </div>
+                        <div class="col-md-3">
+                            <select id="statusFilter" class="form-select form-select-sm" onchange="filterTable()">
+                                <option value="">All Statuses</option>
+                                <option value="SUCCESS">Success</option>
+                                <option value="PENDING">Pending</option>
+                                <option value="FAILED">Failed</option>
+                                <option value="ROLLED_BACK">Rolled Back</option>
+                                <option value="REFUNDED">Refunded</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <span class="text-muted" style="font-size:.78rem;" id="txnCount">Loading…</span>
+                            <button class="btn btn-sm ms-2" style="background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;border-radius:8px;font-size:.78rem;" onclick="loadTransactions()">
+                                <i class="bi bi-arrow-clockwise me-1"></i>Refresh
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── ALL TRANSACTIONS TAB ── -->
+                <div id="pane-all">
+                    <div class="txn-table-card">
+                        <div class="card-header-custom">
+                            <span class="card-title"><i class="bi bi-arrow-left-right me-2 text-primary"></i>Payment Transactions</span>
+                            <span class="badge bg-primary rounded-pill" id="txnBadge">0</span>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="txn-table table table-borderless mb-0 w-100">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Reference</th>
+                                        <th>Amount</th>
+                                        <th>Status</th>
+                                        <th>Gateway</th>
+                                        <th>Date</th>
+                                        <th>Receipt</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="txnTbody">
+                                    <tr class="loading-row"><td colspan="7"><div class="spinner-border spinner-border-sm text-primary me-2"></div>Loading transactions…</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── RECEIPTS TAB ── -->
+                <div id="pane-receipts" style="display:none;">
+                    <div class="txn-table-card">
+                        <div class="card-header-custom">
+                            <span class="card-title"><i class="bi bi-receipt me-2 text-success"></i>Generated Receipts</span>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="txn-table table table-borderless mb-0 w-100">
+                                <thead>
+                                    <tr>
+                                        <th>Receipt #</th>
+                                        <th>Transaction Ref</th>
+                                        <th>Amount</th>
+                                        <th>Generated On</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="receiptsTbody">
+                                    <tr class="loading-row"><td colspan="5"><div class="spinner-border spinner-border-sm text-success me-2"></div>Loading receipts…</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── GATEWAY LOGS TAB ── -->
+                <div id="pane-gateway" style="display:none;">
+                    <div class="txn-table-card">
+                        <div class="card-header-custom">
+                            <span class="card-title"><i class="bi bi-activity me-2 text-warning"></i>Payment Gateway Audit Logs</span>
+                            <div class="d-flex gap-2 align-items-center">
+                                <button class="btn btn-sm" style="font-size:.75rem;background:#fef3c7;color:#92400e;border:1px solid #fde68a;border-radius:8px;" onclick="loadGatewayLogs(currentLogPage - 1)" id="btnLogPrev">← Prev</button>
+                                <span style="font-size:.75rem;color:#64748b;" id="logPageInfo">Page 1</span>
+                                <button class="btn btn-sm" style="font-size:.75rem;background:#fef3c7;color:#92400e;border:1px solid #fde68a;border-radius:8px;" onclick="loadGatewayLogs(currentLogPage + 1)" id="btnLogNext">Next →</button>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="txn-table table table-borderless mb-0 w-100">
+                                <thead>
+                                    <tr>
+                                        <th>Log ID</th>
+                                        <th>Txn ID</th>
+                                        <th>Gateway</th>
+                                        <th>Status</th>
+                                        <th>Timestamp</th>
+                                        <th>Response</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="gatewayLogsTbody">
+                                    <tr class="loading-row"><td colspan="6"><div class="spinner-border spinner-border-sm text-warning me-2"></div>Loading gateway logs…</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT: Queue Status + Info -->
+            <div class="col-lg-4">
+
+                <!-- Queue Status Panel -->
+                <div class="queue-panel mb-4">
+                    <h5 class="mb-3"><i class="bi bi-cpu me-2"></i>Payment Queue Monitor</h5>
+                    <p style="font-size:.72rem;color:#64748b;margin-bottom:1rem;">
+                        OS Concept: Thread Pool (5 workers) + Semaphore + LinkedBlockingQueue
+                    </p>
+
+                    <div class="queue-metric">
+                        <span class="queue-metric-label">Queue Depth</span>
+                        <span class="queue-metric-val" id="queueDepth">—</span>
+                    </div>
+                    <div class="queue-metric">
+                        <span class="queue-metric-label">Active Workers</span>
+                        <span class="queue-metric-val green" id="activeWorkers">—</span>
+                    </div>
+                    <div class="queue-metric">
+                        <span class="queue-metric-label">Available Slots</span>
+                        <span class="queue-metric-val green" id="availableSlots">—</span>
+                    </div>
+                    <div class="queue-metric">
+                        <span class="queue-metric-label">Total Enqueued</span>
+                        <span class="queue-metric-val" id="totalEnqueued">—</span>
+                    </div>
+                    <div class="queue-metric">
+                        <span class="queue-metric-label">Succeeded</span>
+                        <span class="queue-metric-val green" id="queueSucceeded">—</span>
+                    </div>
+                    <div class="queue-metric">
+                        <span class="queue-metric-label">Failed / Rejected</span>
+                        <span class="queue-metric-val red" id="queueFailed">—</span>
+                    </div>
+
+                    <!-- Slot visualization -->
+                    <div class="mt-3">
+                        <div style="font-size:.72rem;color:#64748b;margin-bottom:.5rem;">Processing Slots (Semaphore)</div>
+                        <div class="slot-bar" id="slotBar">
+                            <div class="slot free">S1</div>
+                            <div class="slot free">S2</div>
+                            <div class="slot free">S3</div>
+                            <div class="slot free">S4</div>
+                            <div class="slot free">S5</div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Events -->
+                    <div class="mt-3">
+                        <div style="font-size:.72rem;color:#64748b;margin-bottom:.5rem;">Recent Queue Events</div>
+                        <div id="queueEvents" style="max-height:180px;overflow-y:auto;">
+                            <div style="font-size:.72rem;color:#475569;text-align:center;padding:.75rem;">No events yet</div>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-sm mt-3 w-100" style="background:rgba(125,211,252,.1);color:#7dd3fc;border:1px solid rgba(125,211,252,.3);border-radius:8px;font-size:.78rem;" onclick="loadQueueStatus()">
+                        <i class="bi bi-arrow-clockwise me-1"></i>Refresh Queue Status
+                    </button>
+                </div>
+
+                <!-- Test Queued Payment -->
+                <div class="card border-0 shadow-sm mb-4" style="border-radius:var(--radius);">
+                    <div class="card-body p-3">
+                        <h6 class="fw-700 mb-1" style="color:#7c3aed;"><i class="bi bi-layers me-2"></i>Queue Demo</h6>
+                        <p style="font-size:.75rem;color:#64748b;margin-bottom:1rem;">Send a test payment to the async queue to observe concurrency behavior.</p>
+                        <div class="mb-2">
+                            <label class="form-label" style="font-size:.78rem;font-weight:600;">Amount (₹)</label>
+                            <input type="number" id="queueAmount" class="form-control form-control-sm" value="5000" min="100">
+                        </div>
+                        <button class="btn btn-sm w-100 fw-600" id="btnEnqueue"
+                                style="background:linear-gradient(135deg,#7c3aed,#2563eb);color:#fff;border-radius:8px;font-size:.82rem;"
+                                onclick="enqueueTestPayment()">
+                            <i class="bi bi-send me-1"></i>Enqueue Payment
+                        </button>
+                        <div id="queueResult" class="mt-2" style="display:none;font-size:.75rem;"></div>
+                    </div>
+                </div>
+
+                <!-- ACID Rollback Info Card -->
+                <div class="card border-0 shadow-sm" style="border-radius:var(--radius);background:linear-gradient(135deg,#fefce8,#fff7ed);">
+                    <div class="card-body p-3">
+                        <h6 class="fw-700 mb-1" style="color:#92400e;"><i class="bi bi-shield-lock me-2"></i>ACID Rollback</h6>
+                        <p style="font-size:.75rem;color:#78350f;margin-bottom:.75rem;">Admin can roll back any SUCCESS transaction. All steps are atomic — all-or-nothing.</p>
+                        <div style="font-size:.72rem;color:#92400e;">
+                            <div class="mb-1"><i class="bi bi-check2 me-1"></i><strong>Atomicity</strong> — All steps in one @Transactional block</div>
+                            <div class="mb-1"><i class="bi bi-check2 me-1"></i><strong>Consistency</strong> — Valid state: SUCCESS → ROLLED_BACK</div>
+                            <div class="mb-1"><i class="bi bi-check2 me-1"></i><strong>Isolation</strong> — SERIALIZABLE level prevents dirty reads</div>
+                            <div class="mb-0"><i class="bi bi-check2 me-1"></i><strong>Durability</strong> — Committed to PostgreSQL permanently</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════ SCRIPTS ══════════════════════════════ -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../assets/js/auth.js"></script>
+    <script src="../assets/js/dashboard.js"></script>
+
+    <script>
+    /* ═══════════════════════════════════════════════════════
+       TRANSACTION HISTORY PAGE — Team 2 Module
+       Demonstrates: REST API consumption, dynamic DOM updates,
+       gateway log pagination, real-time queue monitoring
+    ═══════════════════════════════════════════════════════ */
+
+    const API = 'http://localhost:8080/api';
+    let allTransactions = [];
+    let currentTab = 'all';
+    let currentLogPage = 0;
+    const LOG_PAGE_SIZE = 15;
+
+    // ── BOOT ──────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', () => {
+        if (typeof requireAuth === 'function' && !requireAuth('STUDENT')) return;
+        const email = localStorage.getItem('userEmail') || sessionStorage.getItem('userEmail');
+        if (email) document.getElementById('navUserEmail').textContent = email;
+
+        loadTransactions();
+        loadQueueStatus();
+        // Auto-refresh queue every 5s
+        setInterval(loadQueueStatus, 5000);
+    });
+
+    // ── AUTH HEADER ───────────────────────────────────────
+    function authHeader() {
+        const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+        return token ? { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
+    }
+
+    function logout() {
+        localStorage.clear(); sessionStorage.clear();
+        window.location.href = '../login.html';
+    }
+
+    // ── TAB SWITCHING ─────────────────────────────────────
+    function switchTab(tab) {
+        currentTab = tab;
+        ['all', 'receipts', 'gateway'].forEach(t => {
+            document.getElementById('pane-' + t).style.display = (t === tab) ? '' : 'none';
+            document.getElementById('tab-' + t).classList.toggle('active', t === tab);
+        });
+        document.getElementById('filterBar').style.display = (tab === 'gateway') ? 'none' : '';
+
+        if (tab === 'receipts') renderReceiptsTab();
+        if (tab === 'gateway') loadGatewayLogs(0);
+    }
+
+    // ── LOAD ALL TRANSACTIONS ─────────────────────────────
+    async function loadTransactions() {
+        document.getElementById('txnTbody').innerHTML =
+            '<tr class="loading-row"><td colspan="7"><div class="spinner-border spinner-border-sm text-primary me-2"></div>Fetching transactions…</td></tr>';
+        try {
+            const res = await fetch(API + '/payments/transactions', { headers: authHeader() });
+            const json = await res.json();
+            allTransactions = (json.data || []);
+            updateStats();
+            renderTransactions(allTransactions);
+        } catch (e) {
+            document.getElementById('txnTbody').innerHTML =
+                '<tr><td colspan="7"><div class="empty-state"><i class="bi bi-wifi-off"></i><p>Could not connect to backend. Make sure the server is running on port 8080.</p></div></td></tr>';
+        }
+    }
+
+    // ── UPDATE STAT CHIPS ─────────────────────────────────
+    function updateStats() {
+        const succ = allTransactions.filter(t => t.transactionStatus === 'SUCCESS').length;
+        const pend = allTransactions.filter(t => t.transactionStatus === 'PENDING').length;
+        const fail = allTransactions.filter(t => ['FAILED','ROLLED_BACK'].includes(t.transactionStatus)).length;
+        const total = allTransactions.filter(t => t.transactionStatus === 'SUCCESS')
+                                     .reduce((acc, t) => acc + parseFloat(t.amount || 0), 0);
+
+        setEl('statSuccess', succ);
+        setEl('statPending',  pend);
+        setEl('statFailed',   fail);
+        setEl('statTotal',    '₹' + total.toLocaleString('en-IN'));
+    }
+
+    // ── RENDER TRANSACTIONS TABLE ─────────────────────────
+    function renderTransactions(txns) {
+        const tbody = document.getElementById('txnTbody');
+        document.getElementById('txnBadge').textContent = txns.length;
+        document.getElementById('txnCount').textContent = txns.length + ' transaction' + (txns.length !== 1 ? 's' : '');
+
+        if (!txns.length) {
+            tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state"><i class="bi bi-inbox"></i><p>No transactions found.</p></div></td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = txns.map((t, i) => `
+            <tr>
+                <td style="color:#94a3b8;font-size:.78rem;">${i + 1}</td>
+                <td><code class="txn-ref">${esc(t.transactionReference || '—')}</code></td>
+                <td class="txn-amount">₹${parseFloat(t.amount || 0).toLocaleString('en-IN')}</td>
+                <td><span class="badge-status ${esc(t.transactionStatus)}">${statusIcon(t.transactionStatus)} ${esc(t.transactionStatus)}</span></td>
+                <td><span class="gw-badge">${esc(t.gatewayName || '—')}</span></td>
+                <td style="color:#64748b;font-size:.78rem;">${formatDate(t.transactionDate)}</td>
+                <td>${t.receiptNumber
+                    ? `<a href="receipt.html?transactionId=${t.transactionId}" class="btn-receipt"><i class="bi bi-download me-1"></i>${esc(t.receiptNumber)}</a>`
+                    : '<span style="color:#94a3b8;font-size:.75rem;">—</span>'}</td>
+            </tr>`).join('');
+    }
+
+    // ── FILTER TABLE ──────────────────────────────────────
+    function filterTable() {
+        const q      = document.getElementById('searchInput').value.toLowerCase();
+        const status = document.getElementById('statusFilter').value;
+        const filtered = allTransactions.filter(t => {
+            const matchQ = !q ||
+                (t.transactionReference || '').toLowerCase().includes(q) ||
+                (t.receiptNumber || '').toLowerCase().includes(q) ||
+                (t.gatewayName || '').toLowerCase().includes(q);
+            const matchS = !status || t.transactionStatus === status;
+            return matchQ && matchS;
+        });
+        renderTransactions(filtered);
+    }
+
+    // ── RECEIPTS TAB ──────────────────────────────────────
+    function renderReceiptsTab() {
+        const receipts = allTransactions.filter(t => t.receiptNumber);
+        const tbody = document.getElementById('receiptsTbody');
+        if (!receipts.length) {
+            tbody.innerHTML = '<tr><td colspan="5"><div class="empty-state"><i class="bi bi-receipt"></i><p>No receipts generated yet. Complete a payment first.</p></div></td></tr>';
+            return;
+        }
+        tbody.innerHTML = receipts.map(t => `
+            <tr>
+                <td><code class="txn-ref" style="color:#16a34a;">${esc(t.receiptNumber)}</code></td>
+                <td><code class="txn-ref">${esc(t.transactionReference || '—')}</code></td>
+                <td class="txn-amount">₹${parseFloat(t.amount || 0).toLocaleString('en-IN')}</td>
+                <td style="color:#64748b;font-size:.78rem;">${formatDate(t.receiptGeneratedDate || t.transactionDate)}</td>
+                <td>
+                    <a href="receipt.html?transactionId=${t.transactionId}" class="btn-receipt me-1">
+                        <i class="bi bi-eye me-1"></i>View
+                    </a>
+                    <a href="receipt.html?transactionId=${t.transactionId}&print=1" class="btn-receipt">
+                        <i class="bi bi-printer me-1"></i>Print
+                    </a>
+                </td>
+            </tr>`).join('');
+    }
+
+    // ── GATEWAY LOGS ──────────────────────────────────────
+    async function loadGatewayLogs(page = 0) {
+        currentLogPage = Math.max(0, page);
+        const tbody = document.getElementById('gatewayLogsTbody');
+        tbody.innerHTML = '<tr class="loading-row"><td colspan="6"><div class="spinner-border spinner-border-sm text-warning me-2"></div>Loading gateway logs…</td></tr>';
+
+        try {
+            const res  = await fetch(`${API}/payments/gateway-logs?page=${currentLogPage}&size=${LOG_PAGE_SIZE}`, { headers: authHeader() });
+            const json = await res.json();
+            const data = json.data || {};
+            const logs = data.logs || [];
+
+            document.getElementById('logPageInfo').textContent = `Page ${currentLogPage + 1} of ${data.totalPages || 1}`;
+            document.getElementById('btnLogPrev').disabled = currentLogPage === 0;
+            document.getElementById('btnLogNext').disabled = currentLogPage >= (data.totalPages || 1) - 1;
+
+            if (!logs.length) {
+                tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><i class="bi bi-journal"></i><p>No gateway logs recorded yet.</p></div></td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = logs.map(l => `
+                <tr>
+                    <td style="color:#94a3b8;font-size:.75rem;">#${l.gateway_log_id}</td>
+                    <td style="font-size:.78rem;">${l.transaction_id ? '#' + l.transaction_id : '—'}</td>
+                    <td><span class="gw-badge">${esc(l.gateway_name)}</span></td>
+                    <td><span class="badge-status ${gwStatusClass(l.status)}" style="font-size:.65rem;">${esc(l.status)}</span></td>
+                    <td style="color:#64748b;font-size:.72rem;">${formatDate(l.log_time)}</td>
+                    <td style="font-size:.72rem;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#475569;" title="${esc(l.response_data || '')}">${esc(l.response_data || '—')}</td>
+                </tr>`).join('');
+        } catch (e) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-3">Failed to load gateway logs.</td></tr>';
+        }
+    }
+
+    // ── QUEUE STATUS ──────────────────────────────────────
+    async function loadQueueStatus() {
+        try {
+            const res  = await fetch(API + '/payments/queue/status', { headers: authHeader() });
+            const json = await res.json();
+            const d    = json.data || {};
+
+            setEl('queueDepth',    d.queueDepth ?? '—');
+            setEl('activeWorkers', d.activeWorkers ?? '—');
+            setEl('availableSlots', d.availableSlots ?? '—');
+            setEl('totalEnqueued', d.totalEnqueued ?? '—');
+            setEl('queueSucceeded', d.totalSucceeded ?? '—');
+            setEl('queueFailed',   (d.totalFailed || 0) + ' / ' + (d.rejectedPayments || 0));
+
+            // Colour available slots
+            const avail = d.availableSlots ?? 5;
+            const el = document.getElementById('availableSlots');
+            if (el) { el.className = 'queue-metric-val ' + (avail > 2 ? 'green' : avail > 0 ? 'yellow' : 'red'); }
+
+            // Slot bar visualisation
+            renderSlotBar(d.activeWorkers || 0, d.maxConcurrentSlots || 5);
+
+            // Event log
+            renderQueueEvents(d.recentEvents || []);
+        } catch (e) { /* backend might be starting */ }
+    }
+
+    function renderSlotBar(active, total) {
+        const bar = document.getElementById('slotBar');
+        if (!bar) return;
+        bar.innerHTML = Array.from({ length: total }, (_, i) =>
+            `<div class="slot ${i < active ? 'busy' : 'free'}">S${i + 1}</div>`
+        ).join('');
+    }
+
+    function renderQueueEvents(events) {
+        const el = document.getElementById('queueEvents');
+        if (!el) return;
+        if (!events.length) { el.innerHTML = '<div style="font-size:.72rem;color:#475569;text-align:center;padding:.75rem;">No events yet</div>'; return; }
+        el.innerHTML = events.map(e => `
+            <div class="event-log-item ${esc(e.event)}">
+                <span class="ev-tag" style="color:${evColor(e.event)}">${esc(e.event)}</span>
+                <span class="ev-id">${esc((e.correlationId || '').slice(-8))}</span>
+                <span class="ev-detail">${esc(e.detail || '')}</span>
+            </div>`).join('');
+    }
+
+    // ── ENQUEUE TEST PAYMENT ──────────────────────────────
+    async function enqueueTestPayment() {
+        const btn    = document.getElementById('btnEnqueue');
+        const result = document.getElementById('queueResult');
+        const amount = parseFloat(document.getElementById('queueAmount').value || 5000);
+        if (amount < 100) { alert('Minimum ₹100'); return; }
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Enqueuing…';
+        result.style.display = 'none';
+
+        try {
+            const res  = await fetch(API + '/payments/queue', {
+                method: 'POST', headers: authHeader(),
+                body: JSON.stringify({ amount, description: 'Queue Demo Payment' })
+            });
+            const json = await res.json();
+            const ticket = json.data || {};
+            result.style.display = '';
+            result.innerHTML = `
+                <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:.6rem .8rem;">
+                    <div class="fw-600 text-success mb-1"><i class="bi bi-check-circle me-1"></i>Enqueued!</div>
+                    <div>ID: <code>${esc(ticket.correlationId || '')}</code></div>
+                    <div>Queue #${ticket.queueNumber} | Depth: ${ticket.currentQueueDepth}</div>
+                </div>`;
+            setTimeout(loadQueueStatus, 1000);
+            setTimeout(loadTransactions, 3000); // Refresh after async processing completes
+        } catch (e) {
+            result.style.display = '';
+            result.innerHTML = `<div style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:.6rem;color:#b91c1c;">Failed: ${e.message}</div>`;
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-send me-1"></i>Enqueue Payment';
+        }
+    }
+
+    // ── HELPERS ───────────────────────────────────────────
+    function setEl(id, val) { const el = document.getElementById(id); if (el) el.textContent = val; }
+    function esc(s) { if (!s) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+    function formatDate(s) {
+        if (!s) return '—';
+        try { return new Date(s).toLocaleString('en-IN', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }); }
+        catch { return String(s).substring(0, 16); }
+    }
+    function statusIcon(s) {
+        const map = { SUCCESS:'✅', PENDING:'⏳', PROCESSING:'⚙️', FAILED:'❌', ROLLED_BACK:'↩️', REFUNDED:'💸' };
+        return map[s] || '●';
+    }
+    function gwStatusClass(s) {
+        if (!s) return '';
+        if (s.includes('SUCCESS') || s.includes('VERIFIED')) return 'SUCCESS';
+        if (s.includes('FAILED') || s.includes('ERROR')) return 'FAILED';
+        if (s.includes('ROLLBACK')) return 'ROLLED_BACK';
+        return 'PENDING';
+    }
+    function evColor(e) {
+        const map = { SUCCESS:'#4ade80', FAILED:'#f87171', ENQUEUED:'#60a5fa', PROCESSING:'#facc15', TIMEOUT:'#f87171' };
+        return map[e] || '#94a3b8';
+    }
+    </script>
+</body>
+</html>

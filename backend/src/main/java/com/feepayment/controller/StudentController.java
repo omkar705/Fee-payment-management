@@ -32,4 +32,17 @@ public class StudentController {
             return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
         }
     }
+
+    /**
+     * Lightweight fee-status endpoint — called after payment to refresh the UI
+     * without reloading the full dashboard.
+     */
+    @GetMapping("/fee-status")
+    public ResponseEntity<?> getFeeStatus() {
+        try {
+            return ResponseEntity.ok(ApiResponse.ok("Fee status retrieved.", studentService.getFeeStatus()));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
+        }
+    }
 }

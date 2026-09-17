@@ -35,16 +35,24 @@ public class DataSeeder implements CommandLineRunner {
     private final PasswordEncoder passwordEncoder;
 
     @Override
-    @Transactional
     public void run(String... args) {
-        if (studentRepository.count() >= 10 && userRepository.existsByEmail("admin@mmcoe.com")) {
-            log.info("Database is already initialized with students and admin. Skipping redundant data seeding.");
-            return;
+        try {
+            if (studentRepository.count() >= 10 && userRepository.existsByEmail("admin@mmcoe.com")) {
+                log.info("Database is already initialized with students and admin. Skipping redundant data seeding.");
+                return;
+            }
+        } catch (Exception e) {
+            log.warn("Could not check student count (tables may not exist yet): {}. Proceeding with seeding.", e.getMessage());
         }
-        seedRoles();
-        seedUsers();
-        seedStudents();
-        log.info("=== Data seeding complete ===");
+        try {
+            seedRoles();
+            seedUsers();
+            seedStudents();
+            log.info("=== Data seeding complete ===");
+        } catch (Exception e) {
+            log.error("Data seeding failed: {}", e.getMessage(), e);
+            throw e;
+        }
     }
 
     private void seedRoles() {

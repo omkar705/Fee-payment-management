@@ -160,6 +160,7 @@ function initLogout() {
             localStorage.removeItem('fpm_token');
             localStorage.removeItem('fpm_role');
             localStorage.removeItem('fpm_user');
+            localStorage.removeItem('fpm_payment_history');
             sessionStorage.clear();
             window.location.href = '../login.html';
         });

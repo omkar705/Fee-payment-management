@@ -163,7 +163,7 @@
             <a href="#" id="btnViewReceipt" class="btn btn-primary py-2 fw-semibold rounded-3 shadow-sm d-flex align-items-center justify-content-center gap-2" style="background-color:var(--primary);border-color:var(--primary);">
                 <i class="bi bi-file-earmark-text-fill"></i> View & Print Official Receipt
             </a>
-            <a href="dashboard.html" class="btn btn-outline-secondary py-2 fw-semibold rounded-3 d-flex align-items-center justify-content-center gap-2">
+            <a href="dashboard.html" id="btnReturnDashboard" class="btn btn-outline-secondary py-2 fw-semibold rounded-3 d-flex align-items-center justify-content-center gap-2">
                 <i class="bi bi-arrow-left"></i> Return to Student Dashboard
             </a>
         </div>
@@ -190,6 +190,19 @@ document.addEventListener('DOMContentLoaded', () => {
         btnReceipt.href = `receipt.html?transactionId=${txnId}`;
     } else {
         btnReceipt.href = `receipt.html?receiptNo=${encodeURIComponent(rcpt)}`;
+    }
+
+    // Set flag so dashboard refreshes when returning
+    sessionStorage.setItem('fpm_payment_done', '1');
+
+    // Explicitly set flag on Return button click (covers normal navigation)
+    const btnReturn = document.getElementById('btnReturnDashboard');
+    if (btnReturn) {
+        btnReturn.addEventListener('click', (e) => {
+            e.preventDefault();
+            sessionStorage.setItem('fpm_payment_done', '1');
+            window.location.href = 'dashboard.html';
+        });
     }
 });
 </script>

@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.PreparedStatement;
 import java.sql.Statement;
+import java.util.List;
 import java.util.Map;
 
 import javax.crypto.Mac;
@@ -224,28 +225,17 @@ public class PaymentService {
             }
         } else {
             try {
-                KeyHolder kh = new GeneratedKeyHolder();
                 Long finalStudentId = studentId;
-                jdbc.update(con -> {
-                    PreparedStatement ps = con.prepareStatement(
-                        "INSERT INTO fee_payments (student_id, amount_paid, payment_method, status, payment_date) VALUES (?, ?, 'RAZORPAY', 'SUCCESS', ?)",
-                        Statement.RETURN_GENERATED_KEYS
-                    );
-                    if (finalStudentId != null) ps.setLong(1, finalStudentId);
-                    else ps.setNull(1, java.sql.Types.BIGINT);
-                    ps.setBigDecimal(2, request.getAmount());
-                    ps.setString(3, todayDate);
-                    return ps;
-                }, kh);
-                Map<String, Object> keys = kh.getKeys();
-                if (keys != null && !keys.isEmpty()) {
-                    Object val = keys.get("payment_id");
-                    if (val == null) val = keys.get("PAYMENT_ID");
-                    if (val == null) val = keys.values().iterator().next();
-                    if (val instanceof Number n) feePaymentId = n.longValue();
-                } else if (kh.getKey() != null) {
-                    feePaymentId = kh.getKey().longValue();
-                }
+                jdbc.update(
+                    "INSERT INTO fee_payments (student_id, amount_paid, payment_method, status, payment_date) " +
+                    "VALUES (?, ?, 'RAZORPAY', 'SUCCESS', ?::date)",
+                    finalStudentId, request.getAmount(), todayDate
+                );
+                // Retrieve the generated id via a SELECT
+                feePaymentId = jdbc.queryForObject(
+                    "SELECT MAX(payment_id) FROM fee_payments WHERE student_id = ?",
+                    Long.class, finalStudentId
+                );
             } catch (Exception e) {
                 log.warn("Could not insert fee_payments entry: {}", e.getMessage());
             }
@@ -381,28 +371,16 @@ public class PaymentService {
             }
         } else {
             try {
-                KeyHolder kh = new GeneratedKeyHolder();
                 Long finalStudentId = studentId;
-                jdbc.update(con -> {
-                    PreparedStatement ps = con.prepareStatement(
-                        "INSERT INTO fee_payments (student_id, amount_paid, payment_method, status, payment_date) VALUES (?, ?, 'ONLINE_SIMULATED', 'SUCCESS', ?)",
-                        Statement.RETURN_GENERATED_KEYS
-                    );
-                    if (finalStudentId != null) ps.setLong(1, finalStudentId);
-                    else ps.setNull(1, java.sql.Types.BIGINT);
-                    ps.setBigDecimal(2, request.getAmount());
-                    ps.setString(3, todayDate);
-                    return ps;
-                }, kh);
-                Map<String, Object> keys = kh.getKeys();
-                if (keys != null && !keys.isEmpty()) {
-                    Object val = keys.get("payment_id");
-                    if (val == null) val = keys.get("PAYMENT_ID");
-                    if (val == null) val = keys.values().iterator().next();
-                    if (val instanceof Number n) feePaymentId = n.longValue();
-                } else if (kh.getKey() != null) {
-                    feePaymentId = kh.getKey().longValue();
-                }
+                jdbc.update(
+                    "INSERT INTO fee_payments (student_id, amount_paid, payment_method, status, payment_date) " +
+                    "VALUES (?, ?, 'ONLINE_SIMULATED', 'SUCCESS', ?::date)",
+                    finalStudentId, request.getAmount(), todayDate
+                );
+                feePaymentId = jdbc.queryForObject(
+                    "SELECT MAX(payment_id) FROM fee_payments WHERE student_id = ?",
+                    Long.class, finalStudentId
+                );
             } catch (Exception e) {
                 log.warn("Could not insert fee_payments entry: {}", e.getMessage());
             }

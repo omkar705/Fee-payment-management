@@ -17,8 +17,50 @@
 
     <!-- Design System Stylesheet -->
     <link href="../assets/css/dashboard.css" rel="stylesheet">
+
+    <!-- Razorpay Standard Checkout SDK -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+    <style>
+        .payment-method-card {
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 1.25rem 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+            background: #ffffff;
+            height: 100%;
+        }
+        .payment-method-card:hover {
+            border-color: #93c5fd;
+            background: #f8fafc;
+        }
+        .payment-method-card.selected {
+            border-color: #2563eb;
+            background: #eff6ff;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
+        }
+        .payment-method-card .method-icon {
+            font-size: 2rem;
+            color: #2563eb;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+        .installment-select-card {
+            border: 1.5px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #ffffff;
+        }
+        .installment-select-card:hover {
+            border-color: #3b82f6;
+        }
+    </style>
 </head>
-<body>
+<body data-page="student-dashboard">
 
 <div class="erp-dashboard-layout">
 
@@ -101,6 +143,7 @@
                     </a>
                 </li>
             </ul>
+
         </div>
 
         <!-- Sidebar Footer -->
@@ -193,21 +236,21 @@
                 <!-- Welcome Hero Area -->
                 <div class="dashboard-welcome-hero" style="background: linear-gradient(135deg, #09172c 0%, #0e2f59 60%, #1e56a0 100%);">
                     <div class="welcome-hero-content">
-                        <h2>Good Morning, Manan 👋</h2>
+                        <h2 id="welcomeGreeting">Good Morning 👋</h2>
                         <p>Track your academic fee ledger, upcoming installments, and payment authorizations.</p>
                     </div>
                     <div class="hero-quick-meta">
                         <div class="hero-meta-item">
                             <i class="bi bi-person-badge"></i>
-                            <span>PRN: <strong>B25IT2010</strong></span>
+                            <span>PRN: <strong id="heroPrn">—</strong></span>
                         </div>
                         <div class="hero-meta-item">
                             <i class="bi bi-building"></i>
-                            <span>Information Technology (SE - Div A)</span>
+                            <span id="heroDept">—</span>
                         </div>
                         <div class="hero-meta-item">
-                            <i class="bi bi-patch-check-fill text-success" id="heroStatusIcon"></i>
-                            <span id="heroPaymentStatus">Status: <strong>INSTALLMENT 1 PAID (50%)</strong></span>
+                            <i id="heroStatusIcon" class="bi bi-patch-check-fill text-success"></i>
+                            <span id="heroPaymentStatus">Status: <strong>Loading...</strong></span>
                         </div>
                     </div>
                 </div>
@@ -222,9 +265,9 @@
                                     <i class="bi bi-wallet2"></i>
                                 </div>
                             </div>
-                            <div class="stat-card-value" id="feeTotalAmount">₹1,20,000</div>
+                            <div class="stat-card-value" id="feeTotalAmount">Loading...</div>
                             <div class="stat-card-footer">
-                                <span class="trend-badge trend-neutral">B.Tech IT</span>
+                                <span class="trend-badge trend-neutral" id="feeCourseLabel">B.Tech IT</span>
                                 <span>AY 2025-26</span>
                             </div>
                         </div>
@@ -238,9 +281,9 @@
                                     <i class="bi bi-check2-circle"></i>
                                 </div>
                             </div>
-                            <div class="stat-card-value text-success" id="feePaidAmount">₹60,000</div>
+                            <div class="stat-card-value text-success" id="feePaidAmount">Loading...</div>
                             <div class="stat-card-footer">
-                                <span class="trend-badge trend-positive" id="feePaidSubtext">Installment 1 Paid</span>
+                                <span class="trend-badge trend-positive" id="feePaidSubtext">Paid</span>
                                 <span>Receipt on file</span>
                             </div>
                         </div>
@@ -254,10 +297,10 @@
                                     <i class="bi bi-hourglass-bottom" id="feePendingIcon"></i>
                                 </div>
                             </div>
-                            <div class="stat-card-value text-warning" id="feePendingAmount">₹60,000</div>
+                            <div class="stat-card-value text-warning" id="feePendingAmount">Loading...</div>
                             <div class="stat-card-footer">
-                                <span class="trend-badge trend-warning" id="feePendingSubtext">Installment 2</span>
-                                <span id="feePendingDueDate">Due: 15 Nov 2025</span>
+                                <span class="trend-badge trend-warning" id="feePendingSubtext">Pending</span>
+                                <span id="feePendingDueDate">—</span>
                             </div>
                         </div>
                     </div>
@@ -270,7 +313,7 @@
                                     <i class="bi bi-calendar3-range"></i>
                                 </div>
                             </div>
-                            <div class="stat-card-value" style="font-size:1.5rem;">2-Installment</div>
+                            <div class="stat-card-value" id="feeSchemeLabel" style="font-size:1.5rem;">2-Installment</div>
                             <div class="stat-card-footer">
                                 <span class="trend-badge trend-positive">Standard Plan</span>
                                 <span>Inst 1 + Inst 2</span>
@@ -283,20 +326,20 @@
                 <div class="fee-progress-card">
                     <div class="d-flex justify-content-between align-items-center mb-1">
                         <div>
-                            <h5 class="fw-bold text-dark mb-0">Annual Fee Clearance Progress — Two Installments</h5>
-                            <span class="text-muted small" id="feeProgressSubtext">50% Cleared • ₹60,000 Paid of ₹1,20,000 Total</span>
+                            <h5 class="fw-bold text-dark mb-0">Annual Fee Clearance Progress</h5>
+                            <span class="text-muted small" id="feeProgressSubtext">Loading...</span>
                         </div>
                         <span id="feeProgressBadge" class="badge bg-warning-subtle text-warning border border-warning-subtle px-3 py-2 fw-bold">
-                            <i class="bi bi-hourglass-split me-1"></i>Installment 2 Pending
+                            <i class="bi bi-hourglass-split me-1"></i>Loading...
                         </span>
                     </div>
                     <div class="progress-milestone-bar">
-                        <div class="progress-fill-active" id="feeProgressBar" style="width: 50%;"></div>
+                        <div class="progress-fill-active" id="feeProgressBar" style="width: 0%;"></div>
                     </div>
                     <div class="progress-milestone-markers">
                         <span>₹0 (Start)</span>
-                        <span class="text-success fw-bold">₹60,000 (Inst 1 • PAID ✓)</span>
-                        <span class="text-danger fw-bold" id="markerInst2">₹1,20,000 (Inst 2 • Due 15 Nov)</span>
+                        <span class="text-success fw-bold" id="markerInst1">₹60,000 (Inst 1)</span>
+                        <span class="text-danger fw-bold" id="markerInst2">₹1,20,000 (Inst 2)</span>
                     </div>
                 </div>
 
@@ -307,27 +350,27 @@
                         <div class="erp-table-container">
                             <div class="table-header-toolbar">
                                 <div class="table-title-group">
-                                    <h3 id="upcomingBoxHeader">Upcoming Installment</h3>
-                                    <p id="upcomingBoxSub">Next required milestone clearance</p>
+                                    <h3>Upcoming Installment</h3>
+                                    <p>Next required milestone clearance</p>
                                 </div>
-                                <span class="status-pill status-pill-pending" id="upcomingActionPill">ACTION REQUIRED</span>
+                                <span class="status-pill status-pill-pending" id="upcomingActionPill">LOADING...</span>
                             </div>
-                            <div class="p-4" id="upcomingInstallmentCard">
+                            <div class="p-4">
                                 <div class="d-flex justify-content-between align-items-center mb-3">
                                     <div>
                                         <span class="text-muted small d-block">Installment Number</span>
-                                        <h5 class="fw-bold text-dark mb-0" id="upcomingInstTitle">Installment 2 (Final)</h5>
+                                        <h5 class="fw-bold text-dark mb-0" id="upcomingInstTitle">Loading...</h5>
                                     </div>
                                     <div class="text-end">
                                         <span class="text-muted small d-block">Amount Due</span>
-                                        <h4 class="fw-bold text-primary mb-0" id="upcomingInstAmount">₹60,000</h4>
+                                        <h4 class="fw-bold text-primary mb-0" id="upcomingInstAmount">...</h4>
                                     </div>
                                 </div>
 
-                                <div class="p-3 bg-light rounded-3 mb-3" style="font-size:0.85rem;" id="upcomingDetailsBox">
+                                <div class="p-3 bg-light rounded-3 mb-3" style="font-size:0.85rem;">
                                     <div class="d-flex justify-content-between mb-1">
                                         <span class="text-muted">Due Deadline:</span>
-                                        <strong class="text-danger">15 November 2025</strong>
+                                        <strong class="text-danger" id="upcomingDueDate">—</strong>
                                     </div>
                                     <div class="d-flex justify-content-between">
                                         <span class="text-muted">Late Fee Surcharge:</span>
@@ -336,9 +379,7 @@
                                 </div>
 
                                 <div id="upcomingPayBtnContainer">
-                                    <button class="btn-erp-primary w-100 py-2 justify-content-center" onclick="initiatePaymentModal(60000, 'Installment 2 (Final)')">
-                                        <i class="bi bi-lock-fill"></i> Pay ₹60,000 Now via Gateway
-                                    </button>
+                                    <div class="text-center py-2 text-muted small">Loading payment options...</div>
                                 </div>
                             </div>
                         </div>
@@ -370,23 +411,9 @@
                                     </thead>
                                     <tbody id="dashboardReceiptsTbody">
                                         <tr>
-                                            <td><span class="prn-code-badge">REC-2025-0812</span></td>
-                                            <td><strong>Installment 1 (Term 1)</strong></td>
-                                            <td>₹40,000</td>
-                                            <td>15 June 2025</td>
-                                            <td><span class="status-pill status-pill-paid">PAID</span></td>
-                                            <td>
-                                                <button class="btn-icon-action" title="Download Official PDF" onclick="alert('Downloading Receipt REC-2025-0812 PDF...');"><i class="bi bi-file-earmark-pdf"></i></button>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td><span class="prn-code-badge">REC-2025-0945</span></td>
-                                            <td><strong>Installment 2 (Term 1)</strong></td>
-                                            <td>₹40,000</td>
-                                            <td>10 August 2025</td>
-                                            <td><span class="status-pill status-pill-paid">PAID</span></td>
-                                            <td>
-                                                <button class="btn-icon-action" title="Download Official PDF" onclick="alert('Downloading Receipt REC-2025-0945 PDF...');"><i class="bi bi-file-earmark-pdf"></i></button>
+                                            <td colspan="6" class="text-center py-3 text-muted">
+                                                <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                                                Loading receipts...
                                             </td>
                                         </tr>
                                     </tbody>
@@ -560,27 +587,18 @@
                                     <th>Installment</th>
                                     <th>Amount</th>
                                     <th>Due Date</th>
+                                    <th>Paid On</th>
                                     <th>Status</th>
                                     <th>Receipt Ref</th>
                                     <th>Action</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody id="installmentScheduleTbody">
                                 <tr>
-                                    <td><strong>Installment 1 (50%)</strong></td>
-                                    <td>₹60,000</td>
-                                    <td>15 June 2025</td>
-                                    <td><span class="status-pill status-pill-paid">PAID</span></td>
-                                    <td><code>REC-2025-0812</code></td>
-                                    <td><button class="btn-icon-action" title="Download PDF" onclick="alert('Downloading REC-2025-0812...');"><i class="bi bi-file-earmark-pdf"></i></button></td>
-                                </tr>
-                                <tr>
-                                    <td><strong>Installment 2 (50%)</strong></td>
-                                    <td>₹60,000</td>
-                                    <td>15 November 2025</td>
-                                    <td><span class="status-pill status-pill-pending">DUE</span></td>
-                                    <td><span class="text-muted">—</span></td>
-                                    <td><button class="btn-erp-primary btn-sm py-1" onclick="initiatePaymentModal(60000, 'Installment 2 (Final)')"><i class="bi bi-credit-card me-1"></i>Pay Now</button></td>
+                                    <td colspan="7" class="text-center py-3 text-muted">
+                                        <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                                        Loading installment status...
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
@@ -593,32 +611,155 @@
                  ================================================================ -->
             <section id="sec-student-pay-fee" class="dashboard-section d-none">
                 <div class="erp-table-container">
-                    <div class="table-header-toolbar">
+                    <div class="table-header-toolbar d-flex justify-content-between align-items-center flex-wrap gap-2">
                         <div class="table-title-group">
-                            <h3>Initiate Fee Payment via Gateway</h3>
-                            <p>Clear outstanding installment balance securely</p>
+                            <h3 class="fw-bold"><i class="bi bi-shield-lock-fill text-primary me-2"></i>Fee Payment Terminal</h3>
+                            <p class="text-muted mb-0">Authorized Gateway by Razorpay • 256-Bit SSL Encrypted</p>
                         </div>
-                    </div>
-                    <div class="p-4">
-                        <div class="alert alert-info d-flex align-items-center gap-2 mb-4">
-                            <i class="bi bi-info-circle-fill fs-5"></i>
-                            <div>Outstanding Balance: <strong>₹40,000 (Installment 3)</strong> due on <strong>30 Sept 2025</strong>.</div>
-                        </div>
-
-                        <div class="row g-3 mb-4">
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold small">Choose Payment Mode</label>
-                                <select class="form-select">
-                                    <option>UPI (Google Pay, PhonePe, Paytm, BHIM)</option>
-                                    <option>Net Banking (SBI, HDFC, ICICI, Axis & 50+ Banks)</option>
-                                    <option>Debit / Credit Card (Visa, MasterCard, RuPay)</option>
-                                </select>
+                        <div class="d-flex align-items-center gap-3">
+                            <span class="badge bg-light text-muted border">
+                                <i class="bi bi-bank me-1"></i> Merchant: MMCOE PUNE
+                            </span>
+                            <div class="form-check form-switch mb-0 small">
+                                <input class="form-check-input" type="checkbox" role="switch" id="toggleSimulationMode">
+                                <label class="form-check-label fw-semibold text-primary" for="toggleSimulationMode" title="Direct instant processing without OTP prompt">Instant Direct Mode (No OTP)</label>
                             </div>
                         </div>
+                    </div>
 
-                        <button class="btn-erp-primary" onclick="initiatePaymentModal(40000, 'Installment 3 (Final)')">
-                            <i class="bi bi-shield-lock-fill"></i> Proceed to Pay ₹40,000 Securely
-                        </button>
+                    <div class="p-4">
+                        <!-- Dynamic Alert Area -->
+                        <div id="paymentAlertArea"></div>
+
+                        <div class="row g-4">
+                            <!-- Left Column: Installment and Mode Selection -->
+                            <div class="col-lg-7">
+                                <!-- Step 1: Select Installment -->
+                                <div class="mb-4">
+                                    <label class="form-label fw-bold text-dark mb-2">
+                                        <span class="badge bg-primary me-1">1</span> Select Installment to Clear
+                                    </label>
+                                    <div class="d-flex flex-column gap-2">
+                                        <label class="installment-select-card d-flex align-items-center justify-content-between" for="instOption2">
+                                            <div class="d-flex align-items-center gap-3">
+                                                <input type="radio" class="form-check-input mt-0" name="installmentSelection" id="instOption2" value="60000" data-desc="Installment 2 (Final)" checked>
+                                                <div>
+                                                    <strong class="d-block text-dark">Installment 2 (AY 2025-26)</strong>
+                                                    <small class="text-muted">Balance due on 15 November 2025 • Term 2 Tuition</small>
+                                                </div>
+                                            </div>
+                                            <div class="text-end">
+                                                <span class="fs-5 fw-bold text-primary">₹60,000</span>
+                                                <span class="badge bg-warning-subtle text-warning-emphasis d-block small">PENDING DUE</span>
+                                            </div>
+                                        </label>
+
+                                        <label class="installment-select-card d-flex align-items-center justify-content-between" for="instOptionCustom">
+                                            <div class="d-flex align-items-center gap-3">
+                                                <input type="radio" class="form-check-input mt-0" name="installmentSelection" id="instOptionCustom" value="custom">
+                                                <div>
+                                                    <strong class="d-block text-dark">Custom Partial Amount</strong>
+                                                    <small class="text-muted">Pay any customized partial fee amount</small>
+                                                </div>
+                                            </div>
+                                            <span class="text-muted small">Flexible Entry</span>
+                                        </label>
+
+                                        <div id="customAmountContainer" class="p-3 border rounded-3 bg-light d-none">
+                                            <label class="form-label small fw-semibold text-muted">Enter Amount to Pay (INR)</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text fw-bold">₹</span>
+                                                <input type="number" id="customAmountInput" class="form-control" value="10000" min="500" max="60000" step="500">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Step 2: Payment Gateway Method -->
+                                <div class="mb-4">
+                                    <label class="form-label fw-bold text-dark mb-2">
+                                        <span class="badge bg-primary me-1">2</span> Choose Payment Gateway Method
+                                    </label>
+                                    <div class="row g-3">
+                                        <div class="col-sm-4">
+                                            <div class="payment-method-card selected" id="methodCardUpi">
+                                                <input type="radio" name="paymentModeMethod" value="upi" class="d-none" checked>
+                                                <i class="bi bi-qr-code-scan method-icon"></i>
+                                                <strong class="d-block small">UPI / QR Code</strong>
+                                                <small class="text-muted" style="font-size: 0.72rem;">GPay, PhonePe, Paytm</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <div class="payment-method-card" id="methodCardCard">
+                                                <input type="radio" name="paymentModeMethod" value="card" class="d-none">
+                                                <i class="bi bi-credit-card-2-front method-icon"></i>
+                                                <strong class="d-block small">Debit / Credit Card</strong>
+                                                <small class="text-muted" style="font-size: 0.72rem;">Visa, Master, RuPay</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <div class="payment-method-card" id="methodCardNet">
+                                                <input type="radio" name="paymentModeMethod" value="netbanking" class="d-none">
+                                                <i class="bi bi-bank method-icon"></i>
+                                                <strong class="d-block small">Net Banking</strong>
+                                                <small class="text-muted" style="font-size: 0.72rem;">50+ Indian Banks</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Right Column: Summary & Checkout Button -->
+                            <div class="col-lg-5">
+                                <div class="p-4 border rounded-3 bg-light">
+                                    <h5 class="fw-bold text-dark mb-3">Fee Particulars Summary</h5>
+                                    <ul class="list-unstyled small mb-3">
+                                        <li class="d-flex justify-content-between py-1 border-bottom">
+                                            <span class="text-muted">Tuition Fee (Term 2)</span>
+                                            <strong>₹47,500.00</strong>
+                                        </li>
+                                        <li class="d-flex justify-content-between py-1 border-bottom">
+                                            <span class="text-muted">Development & Infrastructure</span>
+                                            <strong>₹7,500.00</strong>
+                                        </li>
+                                        <li class="d-flex justify-content-between py-1 border-bottom">
+                                            <span class="text-muted">Examination & Lab Assessment</span>
+                                            <strong>₹3,500.00</strong>
+                                        </li>
+                                        <li class="d-flex justify-content-between py-1 border-bottom">
+                                            <span class="text-muted">Digital Library Resources</span>
+                                            <strong>₹1,500.00</strong>
+                                        </li>
+                                        <li class="d-flex justify-content-between pt-2 fs-5 fw-bold text-primary">
+                                            <span>Total Due:</span>
+                                            <span id="terminalTotalAmount">₹60,000</span>
+                                        </li>
+                                    </ul>
+
+                                    <!-- Gateway Notice Card -->
+                                    <div class="p-3 border rounded-3 bg-white mt-3 d-flex align-items-start gap-2 text-muted small">
+                                        <i class="bi bi-shield-check text-success fs-5"></i>
+                                        <div>
+                                            <strong class="text-dark d-block">Test Gateway Mode Active</strong>
+                                            Razorpay test mode will open with your chosen payment method. For card test, OTP is bypassed using <strong>OTP Bypass</strong> or toggling <strong>Instant Direct Mode</strong> above.
+                                        </div>
+                                    </div>
+
+
+
+                                    <button id="btnSubmitFeePayment" class="btn btn-erp-primary w-100 py-3 fs-6 fw-bold shadow-sm">
+                                        <span id="paySpinner" class="spinner-border spinner-border-sm me-2 d-none" role="status"></span>
+                                        <span id="payBtnLabel"><i class="bi bi-shield-lock-fill me-1"></i> Proceed to Pay <span id="payBtnAmountText">₹60,000</span></span>
+                                    </button>
+
+                                    <div class="text-center mt-2">
+                                        <small class="text-muted" style="font-size:0.75rem;">
+                                            Instant receipt generated on transaction completion
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -628,46 +769,33 @@
                  ================================================================ -->
             <section id="sec-student-payment-history" class="dashboard-section d-none">
                 <div class="erp-table-container">
-                    <div class="table-header-toolbar">
+                    <div class="table-header-toolbar d-flex justify-content-between align-items-center">
                         <div class="table-title-group">
                             <h3>Complete Transaction History</h3>
                             <p>Lifetime audit record of all fees paid to MMCOE</p>
                         </div>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="loadStudentTransactionHistory()">
+                            <i class="bi bi-arrow-clockwise me-1"></i> Refresh History
+                        </button>
                     </div>
                     <div class="table-responsive">
                         <table class="erp-data-table">
                             <thead>
                                 <tr>
-                                    <th>Receipt Number</th>
+                                    <th>Transaction Ref</th>
                                     <th>Payment Description</th>
                                     <th>Amount Paid</th>
-                                    <th>Payment Mode</th>
+                                    <th>Gateway</th>
                                     <th>Date</th>
                                     <th>Status</th>
                                     <th>Action</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody id="studentPaymentHistoryTableBody">
                                 <tr>
-                                    <td><span class="prn-code-badge">REC-2025-0812</span></td>
-                                    <td>Installment 1 (Term 1)</td>
-                                    <td><strong>₹40,000</strong></td>
-                                    <td>UPI</td>
-                                    <td>15 June 2025</td>
-                                    <td><span class="status-pill status-pill-paid">SUCCESS</span></td>
-                                    <td>
-                                        <button class="btn-icon-action" onclick="alert('Downloading Official Receipt REC-2025-0812...');"><i class="bi bi-download"></i></button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td><span class="prn-code-badge">REC-2025-0945</span></td>
-                                    <td>Installment 2 (Term 1)</td>
-                                    <td><strong>₹40,000</strong></td>
-                                    <td>Net Banking</td>
-                                    <td>10 August 2025</td>
-                                    <td><span class="status-pill status-pill-paid">SUCCESS</span></td>
-                                    <td>
-                                        <button class="btn-icon-action" onclick="alert('Downloading Official Receipt REC-2025-0945...');"><i class="bi bi-download"></i></button>
+                                    <td colspan="7" class="text-center py-4 text-muted">
+                                        <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
+                                        Loading payment history...
                                     </td>
                                 </tr>
                             </tbody>
@@ -682,10 +810,29 @@
             <section id="sec-student-track-status" class="dashboard-section d-none">
                 <div class="erp-table-container p-4">
                     <h4 class="fw-bold mb-3"><i class="bi bi-graph-up-arrow text-primary me-2"></i>Institutional Financial Status</h4>
-                    <p class="text-muted">Academic Clearance Status: <strong>INSTALLMENT 1 CLEARED — INSTALLMENT 2 PENDING</strong></p>
-                    <div class="progress mb-3" style="height: 18px; border-radius: 8px;">
-                        <div class="progress-bar bg-success" style="width: 50%;">Inst 1 Paid (₹60,000)</div>
-                        <div class="progress-bar bg-warning text-dark" style="width: 50%;">Inst 2 Pending (₹60,000)</div>
+                    <p class="text-muted" id="trackFeeStatusText">Loading status...</p>
+                    <div class="progress mb-3" style="height: 18px; border-radius: 8px;" id="trackFeeProgressBar">
+                        <div class="progress-bar bg-secondary" style="width: 100%">Loading...</div>
+                    </div>
+                    <div class="row g-3 mt-2">
+                        <div class="col-md-4">
+                            <div class="p-3 border rounded-3 text-center">
+                                <div class="text-muted small mb-1">Total Fee</div>
+                                <div class="fw-bold fs-5" id="trackTotalFee">—</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-3 border rounded-3 text-center bg-success-subtle">
+                                <div class="text-muted small mb-1">Amount Paid</div>
+                                <div class="fw-bold fs-5 text-success" id="trackPaidAmount">—</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-3 border rounded-3 text-center bg-warning-subtle">
+                                <div class="text-muted small mb-1">Balance Due</div>
+                                <div class="fw-bold fs-5 text-warning" id="trackPendingAmount">—</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -713,17 +860,11 @@
                     <span class="badge bg-light text-muted border">256-Bit SSL Encrypted</span>
                 </div>
             </div>
-            </div>
-            <div class="modal-footer d-flex justify-content-between">
+            <div class="modal-footer">
                 <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
-                <div class="d-flex gap-2">
-                    <button type="button" id="btnPayInstantSim" class="btn btn-success btn-sm d-flex align-items-center gap-1 shadow-sm" onclick="executeSimulatedPayment()">
-                        <i class="bi bi-lightning-charge-fill"></i> Instant Pay (Demo)
-                    </button>
-                    <button type="button" id="btnPayNowRazorpay" class="btn btn-erp-primary btn-sm d-flex align-items-center gap-1 shadow-sm" onclick="executeRazorpayCheckout()">
-                        <i class="bi bi-shield-lock-fill"></i> Pay via Razorpay
-                    </button>
-                </div>
+                <button type="button" class="btn btn-erp-primary btn-sm" onclick="simulatePaymentSuccess()">
+                    <i class="bi bi-check-circle-fill"></i> Simulate Payment Success
+                </button>
             </div>
         </div>
     </div>
@@ -733,94 +874,77 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <!-- Global Auth & Session Script -->
-<script src="../assets/js/auth.js"></script>
+<script src="../assets/js/auth.js?v=2"></script>
 
 <!-- Global Dashboard Script -->
-<script src="../assets/js/dashboard.js"></script>
-<script src="../assets/js/student.js"></script>
-<script src="../assets/js/payment-checkout.js"></script>
+<script src="../assets/js/dashboard.js?v=2"></script>
+<script src="../assets/js/student.js?v=2"></script>
+<script src="../assets/js/payment.js?v=2"></script>
 
 <script>
-let currentPaymentAmount = 60000;
-let currentPaymentDesc = 'Installment 2';
-
+/**
+ * initiatePaymentModal — Navigates to the real Payment Terminal section
+ * and triggers Razorpay via the existing payment.js flow.
+ */
 function initiatePaymentModal(amount, desc) {
-    currentPaymentAmount = amount || 60000;
-    currentPaymentDesc = desc || 'Installment 2';
-    document.getElementById('payModalAmount').textContent = '₹' + Number(currentPaymentAmount).toLocaleString('en-IN');
-    document.getElementById('payModalDesc').textContent = currentPaymentDesc;
-    const modalEl = document.getElementById('paymentModal');
-    const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
-    modal.show();
+    if (typeof openPaymentTerminalForInstallment === 'function') {
+        openPaymentTerminalForInstallment(amount, desc || 'Fee Payment');
+    } else {
+        document.querySelectorAll('.dashboard-section').forEach(s => s.classList.add('d-none'));
+        const paySection = document.getElementById('sec-student-pay-fee');
+        if (paySection) paySection.classList.remove('d-none');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
 }
 
 function updatePaymentAmount() {
-    // Handled in proceedPayment()
+    // Handled by payment.js
 }
 
-function proceedPayment() {
-    const sel = document.getElementById('paymentTypeSelect');
-    const amount = parseInt(sel?.value || 60000);
-    const desc   = sel?.options[sel?.selectedIndex]?.text || 'Installment 2';
-    initiatePaymentModal(amount, desc);
-}
+// ============================================================
+// DASHBOARD INIT — Force live data load on page ready
+// ============================================================
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('[Dashboard] DOMContentLoaded — forcing live data load');
 
-function executeRazorpayCheckout() {
-    const modalEl = document.getElementById('paymentModal');
-    const modal = bootstrap.Modal.getInstance(modalEl);
-    if (modal) modal.hide();
-
-    const btn = document.getElementById('btnPayNowRazorpay');
-    startRazorpayPayment({
-        amount: currentPaymentAmount,
-        description: currentPaymentDesc,
-        studentId: typeof getUserId === 'function' ? getUserId() : null
-    }, btn);
-}
-
-async function executeSimulatedPayment() {
-    const modalEl = document.getElementById('paymentModal');
-    const modal = bootstrap.Modal.getInstance(modalEl);
-    if (modal) modal.hide();
-
-    const notifArea = document.getElementById('notificationArea');
-    const showMsg = (msg, type = 'info') => {
-        if (notifArea) {
-            notifArea.innerHTML = `
-                <div class="alert alert-${type} alert-dismissible fade show d-flex align-items-center gap-2 mb-3 shadow-sm" role="alert" style="border-radius:12px;">
-                    <i class="bi bi-${type === 'danger' ? 'exclamation-octagon-fill' : 'info-circle-fill'} fs-5"></i>
-                    <div>${msg}</div>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>`;
+    // Immediately load live dashboard data from Supabase
+    setTimeout(() => {
+        if (typeof initStudentDashboard === 'function') {
+            console.log('[Dashboard] Calling initStudentDashboard()');
+            initStudentDashboard();
         } else {
-            alert(msg);
+            console.warn('[Dashboard] initStudentDashboard not found!');
         }
-    };
 
-    try {
-        showMsg('Processing instant payment...', 'info');
-        const payload = {
-            amount: currentPaymentAmount || 60000,
-            description: currentPaymentDesc || 'College Fee Payment',
-            studentId: typeof getUserId === 'function' ? getUserId() : null
-        };
+        // Load transaction history for section 8
+        if (typeof loadStudentTransactionHistory === 'function') {
+            console.log('[Dashboard] Calling loadStudentTransactionHistory()');
+            loadStudentTransactionHistory();
+        } else {
+            console.warn('[Dashboard] loadStudentTransactionHistory not found!');
+        }
+    }, 300);
 
-        const res = await apiFetch('/payments/simulate-payment', {
-            method: 'POST',
-            body: JSON.stringify(payload)
+    // Wire section-8 nav click to always fresh-load transaction history
+    document.querySelectorAll('[data-section="sec-student-payment-history"]').forEach(link => {
+        link.addEventListener('click', () => {
+            setTimeout(() => {
+                if (typeof loadStudentTransactionHistory === 'function') {
+                    loadStudentTransactionHistory();
+                }
+            }, 100);
         });
+    });
 
-        if (res && res.ok && res.data && res.data.success) {
-            const vData = res.data.data;
-            window.location.href = `payment-success.html?txnId=${vData.transactionId}&ref=${encodeURIComponent(vData.transactionReference)}&rcpt=${encodeURIComponent(vData.receiptNumber)}&amt=${payload.amount}`;
-        } else {
-            const msg = (res && res.data && res.data.message) || 'Payment simulation failed.';
-            showMsg('Error: ' + msg, 'danger');
-        }
-    } catch (err) {
-        showMsg('Payment processing error: ' + err.message, 'danger');
-    }
-}
+    // Wire section-6 nav click to refresh installment schedule
+    document.querySelectorAll('[data-section="sec-student-installment-schedule"]').forEach(link => {
+        link.addEventListener('click', () => {
+            setTimeout(() => {
+                if (typeof refreshFullDashboard === 'function') refreshFullDashboard();
+            }, 100);
+        });
+    });
+});
 </script>
 
 </body>

@@ -17,6 +17,8 @@
 
     <!-- Design System Stylesheet -->
     <link href="../assets/css/dashboard.css" rel="stylesheet">
+    <!-- Razorpay Checkout SDK — Pre-loaded for instant payment initiation -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 </head>
 <body>
 
@@ -369,26 +371,9 @@
                                         </tr>
                                     </thead>
                                     <tbody id="dashboardReceiptsTbody">
-                                        <tr>
-                                            <td><span class="prn-code-badge">REC-2025-0812</span></td>
-                                            <td><strong>Installment 1 (Term 1)</strong></td>
-                                            <td>₹40,000</td>
-                                            <td>15 June 2025</td>
-                                            <td><span class="status-pill status-pill-paid">PAID</span></td>
-                                            <td>
-                                                <button class="btn-icon-action" title="Download Official PDF" onclick="alert('Downloading Receipt REC-2025-0812 PDF...');"><i class="bi bi-file-earmark-pdf"></i></button>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td><span class="prn-code-badge">REC-2025-0945</span></td>
-                                            <td><strong>Installment 2 (Term 1)</strong></td>
-                                            <td>₹40,000</td>
-                                            <td>10 August 2025</td>
-                                            <td><span class="status-pill status-pill-paid">PAID</span></td>
-                                            <td>
-                                                <button class="btn-icon-action" title="Download Official PDF" onclick="alert('Downloading Receipt REC-2025-0945 PDF...');"><i class="bi bi-file-earmark-pdf"></i></button>
-                                            </td>
-                                        </tr>
+                                        <tr><td colspan="6" class="text-center text-muted py-3">
+                                            <span class="spinner-border spinner-border-sm me-2" role="status"></span>Loading receipts...
+                                        </td></tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -600,25 +585,18 @@
                         </div>
                     </div>
                     <div class="p-4">
-                        <div class="alert alert-info d-flex align-items-center gap-2 mb-4">
+                        <div id="payFeeOutstandingAlert" class="alert alert-info d-flex align-items-center gap-2 mb-4">
                             <i class="bi bi-info-circle-fill fs-5"></i>
-                            <div>Outstanding Balance: <strong>₹40,000 (Installment 3)</strong> due on <strong>30 Sept 2025</strong>.</div>
+                            <div>Loading outstanding balance...</div>
                         </div>
 
-                        <div class="row g-3 mb-4">
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold small">Choose Payment Mode</label>
-                                <select class="form-select">
-                                    <option>UPI (Google Pay, PhonePe, Paytm, BHIM)</option>
-                                    <option>Net Banking (SBI, HDFC, ICICI, Axis & 50+ Banks)</option>
-                                    <option>Debit / Credit Card (Visa, MasterCard, RuPay)</option>
-                                </select>
+                        <!-- Dynamic pay button - filled by student.js renderPaySection() -->
+                        <div id="payFeeMainBtnContainer">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="spinner-border spinner-border-sm text-primary" role="status"></span>
+                                <span class="text-muted small">Loading payment options...</span>
                             </div>
                         </div>
-
-                        <button class="btn-erp-primary" onclick="initiatePaymentModal(40000, 'Installment 3 (Final)')">
-                            <i class="bi bi-shield-lock-fill"></i> Proceed to Pay ₹40,000 Securely
-                        </button>
                     </div>
                 </div>
             </section>
@@ -638,39 +616,21 @@
                         <table class="erp-data-table">
                             <thead>
                                 <tr>
-                                    <th>Receipt Number</th>
-                                    <th>Payment Description</th>
-                                    <th>Amount Paid</th>
-                                    <th>Payment Mode</th>
+                                    <th>Receipt / Ref</th>
+                                    <th>Description</th>
+                                    <th>Amount</th>
+                                    <th>Gateway</th>
                                     <th>Date</th>
                                     <th>Status</th>
                                     <th>Action</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                <tr>
-                                    <td><span class="prn-code-badge">REC-2025-0812</span></td>
-                                    <td>Installment 1 (Term 1)</td>
-                                    <td><strong>₹40,000</strong></td>
-                                    <td>UPI</td>
-                                    <td>15 June 2025</td>
-                                    <td><span class="status-pill status-pill-paid">SUCCESS</span></td>
-                                    <td>
-                                        <button class="btn-icon-action" onclick="alert('Downloading Official Receipt REC-2025-0812...');"><i class="bi bi-download"></i></button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td><span class="prn-code-badge">REC-2025-0945</span></td>
-                                    <td>Installment 2 (Term 1)</td>
-                                    <td><strong>₹40,000</strong></td>
-                                    <td>Net Banking</td>
-                                    <td>10 August 2025</td>
-                                    <td><span class="status-pill status-pill-paid">SUCCESS</span></td>
-                                    <td>
-                                        <button class="btn-icon-action" onclick="alert('Downloading Official Receipt REC-2025-0945...');"><i class="bi bi-download"></i></button>
-                                    </td>
-                                </tr>
-                            </tbody>
+                            <!-- Populated dynamically by student.js from /api/student/dashboard -->
+                            <tbody id="paymentHistoryTbody">
+                                    <tr><td colspan="7" class="text-center text-muted py-4">
+                                        <span class="spinner-border spinner-border-sm me-2" role="status"></span>Loading payment history...
+                                    </td></tr>
+                                </tbody>
                         </table>
                     </div>
                 </div>
@@ -682,10 +642,12 @@
             <section id="sec-student-track-status" class="dashboard-section d-none">
                 <div class="erp-table-container p-4">
                     <h4 class="fw-bold mb-3"><i class="bi bi-graph-up-arrow text-primary me-2"></i>Institutional Financial Status</h4>
-                    <p class="text-muted">Academic Clearance Status: <strong>INSTALLMENT 1 CLEARED — INSTALLMENT 2 PENDING</strong></p>
-                    <div class="progress mb-3" style="height: 18px; border-radius: 8px;">
-                        <div class="progress-bar bg-success" style="width: 50%;">Inst 1 Paid (₹60,000)</div>
-                        <div class="progress-bar bg-warning text-dark" style="width: 50%;">Inst 2 Pending (₹60,000)</div>
+                    <!-- Dynamic status text — filled by student.js -->
+                    <p class="text-muted mb-3" id="trackStatusText">
+                        <span class="spinner-border spinner-border-sm me-2" role="status"></span>Loading fee status...
+                    </p>
+                    <div class="progress mb-3" style="height: 18px; border-radius: 8px;" id="trackProgressBar">
+                        <div class="progress-bar bg-secondary" style="width: 100%;">Loading...</div>
                     </div>
                 </div>
             </section>
@@ -712,7 +674,6 @@
                     <h2 class="text-primary fw-extrabold my-2" id="payModalAmount">₹40,000</h2>
                     <span class="badge bg-light text-muted border">256-Bit SSL Encrypted</span>
                 </div>
-            </div>
             </div>
             <div class="modal-footer d-flex justify-content-between">
                 <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
@@ -741,84 +702,234 @@
 <script src="../assets/js/payment-checkout.js"></script>
 
 <script>
-let currentPaymentAmount = 60000;
-let currentPaymentDesc = 'Installment 2';
+/* =====================================================================
+   MMCOE Fee Portal — Payment Gateway Handler
+   Complete, self-contained payment orchestration script.
+   ===================================================================== */
 
+let currentPaymentAmount = 120000;
+let currentPaymentDesc   = 'Academic Fee Payment';
+
+// ── Utility: show a banner in the notification area OR fallback to alert
+function _payBanner(html, type) {
+    const area = document.getElementById('notificationArea');
+    if (area) {
+        area.innerHTML =
+            `<div class="alert alert-${type} alert-dismissible fade show d-flex align-items-center gap-2 mb-3 shadow-sm" role="alert" style="border-radius:12px;">
+                <i class="bi bi-${type==='success'?'check-circle-fill':type==='danger'?'exclamation-octagon-fill':'info-circle-fill'} fs-5"></i>
+                <div>${html}</div>
+                <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
+             </div>`;
+        // Scroll notification area into view
+        area.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    } else {
+        // Always visible fallback
+        if (type === 'danger') alert('[Payment Error] ' + html.replace(/<[^>]+>/g, ''));
+        else console.log('[Payment]', html.replace(/<[^>]+>/g, ''));
+    }
+}
+
+// ── Open Bootstrap payment confirm modal
 function initiatePaymentModal(amount, desc) {
-    currentPaymentAmount = amount || 60000;
-    currentPaymentDesc = desc || 'Installment 2';
-    document.getElementById('payModalAmount').textContent = '₹' + Number(currentPaymentAmount).toLocaleString('en-IN');
-    document.getElementById('payModalDesc').textContent = currentPaymentDesc;
+    currentPaymentAmount = parseFloat(amount) || 120000;
+    currentPaymentDesc   = desc || 'Academic Fee Payment';
+
+    const amtEl  = document.getElementById('payModalAmount');
+    const descEl = document.getElementById('payModalDesc');
+    if (amtEl)  amtEl.textContent  = '\u20b9' + Number(currentPaymentAmount).toLocaleString('en-IN');
+    if (descEl) descEl.textContent = currentPaymentDesc;
+
     const modalEl = document.getElementById('paymentModal');
+    if (!modalEl) {
+        alert('Payment modal not found. Please refresh the page.');
+        return;
+    }
     const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
     modal.show();
 }
 
-function updatePaymentAmount() {
-    // Handled in proceedPayment()
-}
-
 function proceedPayment() {
-    const sel = document.getElementById('paymentTypeSelect');
-    const amount = parseInt(sel?.value || 60000);
-    const desc   = sel?.options[sel?.selectedIndex]?.text || 'Installment 2';
+    const sel    = document.getElementById('paymentTypeSelect');
+    const amount = parseFloat(sel?.value || currentPaymentAmount);
+    const desc   = sel?.options[sel?.selectedIndex]?.text || currentPaymentDesc;
     initiatePaymentModal(amount, desc);
 }
 
-function executeRazorpayCheckout() {
-    const modalEl = document.getElementById('paymentModal');
-    const modal = bootstrap.Modal.getInstance(modalEl);
-    if (modal) modal.hide();
-
-    const btn = document.getElementById('btnPayNowRazorpay');
-    startRazorpayPayment({
-        amount: currentPaymentAmount,
-        description: currentPaymentDesc,
-        studentId: typeof getUserId === 'function' ? getUserId() : null
-    }, btn);
-}
-
+// ── INSTANT DEMO PAYMENT (No Razorpay needed — saves to DB directly)
 async function executeSimulatedPayment() {
     const modalEl = document.getElementById('paymentModal');
-    const modal = bootstrap.Modal.getInstance(modalEl);
-    if (modal) modal.hide();
+    const bsModal = bootstrap.Modal.getInstance(modalEl);
+    if (bsModal) bsModal.hide();
 
-    const notifArea = document.getElementById('notificationArea');
-    const showMsg = (msg, type = 'info') => {
-        if (notifArea) {
-            notifArea.innerHTML = `
-                <div class="alert alert-${type} alert-dismissible fade show d-flex align-items-center gap-2 mb-3 shadow-sm" role="alert" style="border-radius:12px;">
-                    <i class="bi bi-${type === 'danger' ? 'exclamation-octagon-fill' : 'info-circle-fill'} fs-5"></i>
-                    <div>${msg}</div>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>`;
-        } else {
-            alert(msg);
-        }
-    };
+    const btn = document.getElementById('btnPayInstantSim');
+    const origHtml = btn ? btn.innerHTML : '';
+    if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Processing...'; }
+
+    _payBanner('<span class="spinner-border spinner-border-sm me-2"></span>Processing demo payment of <strong>\u20b9' + Number(currentPaymentAmount).toLocaleString('en-IN') + '</strong>...', 'info');
 
     try {
-        showMsg('Processing instant payment...', 'info');
-        const payload = {
-            amount: currentPaymentAmount || 60000,
-            description: currentPaymentDesc || 'College Fee Payment',
-            studentId: typeof getUserId === 'function' ? getUserId() : null
-        };
-
         const res = await apiFetch('/payments/simulate-payment', {
             method: 'POST',
-            body: JSON.stringify(payload)
+            body: JSON.stringify({
+                amount:      currentPaymentAmount,
+                description: currentPaymentDesc,
+                studentId:   typeof getUserId === 'function' ? getUserId() : null
+            })
         });
 
+        if (btn) { btn.disabled = false; btn.innerHTML = origHtml; }
+
         if (res && res.ok && res.data && res.data.success) {
-            const vData = res.data.data;
-            window.location.href = `payment-success.html?txnId=${vData.transactionId}&ref=${encodeURIComponent(vData.transactionReference)}&rcpt=${encodeURIComponent(vData.receiptNumber)}&amt=${payload.amount}`;
+            const d = res.data.data;
+            _payBanner(
+                '<strong>\u2713 Payment Successful!</strong> \u20b9' + Number(currentPaymentAmount).toLocaleString('en-IN') +
+                ' recorded. Receipt: <strong>' + (d.receiptNumber || 'Generated') + '</strong>. Updating dashboard...',
+                'success'
+            );
+
+            // Refresh dashboard data live (no page reload)
+            if (typeof window.refreshFeeStatus === 'function') {
+                await window.refreshFeeStatus();
+            }
+
+            // Navigate to success page
+            setTimeout(() => {
+                window.location.href =
+                    'payment-success.html?txnId=' + d.transactionId +
+                    '&ref=' + encodeURIComponent(d.transactionReference) +
+                    '&rcpt=' + encodeURIComponent(d.receiptNumber) +
+                    '&amt=' + currentPaymentAmount;
+            }, 1500);
+
         } else {
-            const msg = (res && res.data && res.data.message) || 'Payment simulation failed.';
-            showMsg('Error: ' + msg, 'danger');
+            const msg = (res && res.data && res.data.message) || 'Demo payment failed. Check server logs.';
+            _payBanner('<strong>Error:</strong> ' + msg, 'danger');
         }
     } catch (err) {
-        showMsg('Payment processing error: ' + err.message, 'danger');
+        if (btn) { btn.disabled = false; btn.innerHTML = origHtml; }
+        _payBanner('<strong>Network Error:</strong> ' + err.message, 'danger');
+        console.error('Demo payment error:', err);
+    }
+}
+
+// ── RAZORPAY LIVE PAYMENT
+async function executeRazorpayCheckout() {
+    const modalEl = document.getElementById('paymentModal');
+    const bsModal = bootstrap.Modal.getInstance(modalEl);
+    if (bsModal) bsModal.hide();
+
+    const btn = document.getElementById('btnPayNowRazorpay');
+    const origHtml = btn ? btn.innerHTML : '';
+    if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Connecting...'; }
+
+    _payBanner('<span class="spinner-border spinner-border-sm me-2"></span>Connecting to Razorpay gateway...', 'info');
+
+    try {
+        // Step 1: Ensure Razorpay SDK available
+        if (!window.Razorpay) {
+            _payBanner('Loading Razorpay SDK...', 'info');
+            await new Promise((resolve, reject) => {
+                const s = document.createElement('script');
+                s.src = 'https://checkout.razorpay.com/v1/checkout.js';
+                s.onload = () => window.Razorpay ? resolve() : reject(new Error('SDK loaded but Razorpay not available'));
+                s.onerror = () => reject(new Error('Razorpay SDK failed to load. Check internet connection.'));
+                document.head.appendChild(s);
+            });
+        }
+
+        // Step 2: Create Order via backend
+        if (btn) btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Creating Order...';
+        const orderResult = await apiFetch('/payments/create-order', {
+            method: 'POST',
+            body: JSON.stringify({
+                amount:      parseFloat(currentPaymentAmount),
+                description: currentPaymentDesc || 'Academic Fee Payment',
+                studentId:   typeof getUserId === 'function' ? getUserId() : null
+            })
+        });
+
+        if (!orderResult || !orderResult.ok || !orderResult.data || !orderResult.data.data) {
+            const msg = (orderResult && orderResult.data && orderResult.data.message) || 'Could not create Razorpay order.';
+            throw new Error(msg);
+        }
+
+        const od = orderResult.data.data; // { orderId, keyId, amountInPaise, currency, ... }
+        if (btn) { btn.disabled = false; btn.innerHTML = origHtml; }
+
+        // Step 3: Open Razorpay Checkout
+        const rzp = new window.Razorpay({
+            key:         od.keyId,
+            amount:      od.amountInPaise,
+            currency:    od.currency || 'INR',
+            name:        od.companyName || 'MMCOE Fee Portal',
+            description: od.description || 'Academic Fee Payment',
+            order_id:    od.orderId,
+            prefill: {
+                name:    od.studentName    || (typeof getName  === 'function' ? getName()  : ''),
+                email:   od.studentEmail   || (typeof getEmail === 'function' ? getEmail() : ''),
+                contact: od.studentContact || ''
+            },
+            notes: { portal: 'MMCOE_ERP', receipt: od.receiptNumber || '' },
+            theme: { color: '#1e56a0' },
+            modal: {
+                ondismiss: () => _payBanner('Checkout closed. You can retry payment anytime.', 'info'),
+                backdropclose: false
+            },
+            handler: async function(response) {
+                _payBanner('<span class="spinner-border spinner-border-sm me-2"></span>Verifying payment with bank...', 'info');
+                try {
+                    const verifyResult = await apiFetch('/payments/verify-payment', {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            razorpayOrderId:   response.razorpay_order_id,
+                            razorpayPaymentId: response.razorpay_payment_id,
+                            razorpaySignature: response.razorpay_signature,
+                            amount:            parseFloat(currentPaymentAmount),
+                            studentId:         typeof getUserId === 'function' ? getUserId() : null
+                        })
+                    });
+
+                    if (verifyResult && verifyResult.ok && verifyResult.data && verifyResult.data.success) {
+                        const vd = verifyResult.data.data;
+                        _payBanner(
+                            '<strong>\u2713 Payment Verified!</strong> \u20b9' + Number(currentPaymentAmount).toLocaleString('en-IN') +
+                            ' paid. Receipt: <strong>' + (vd.receiptNumber || 'Generated') + '</strong>. Updating dashboard...',
+                            'success'
+                        );
+                        if (typeof window.refreshFeeStatus === 'function') await window.refreshFeeStatus();
+                        setTimeout(() => {
+                            window.location.href =
+                                'payment-success.html?txnId=' + vd.transactionId +
+                                '&ref=' + encodeURIComponent(vd.transactionReference) +
+                                '&rcpt=' + encodeURIComponent(vd.receiptNumber) +
+                                '&amt=' + currentPaymentAmount;
+                        }, 1200);
+                    } else {
+                        const msg = (verifyResult && verifyResult.data && verifyResult.data.message) || 'Verification failed.';
+                        _payBanner('<strong>Verification Failed:</strong> ' + msg, 'danger');
+                    }
+                } catch (err) {
+                    _payBanner('<strong>Verification Error:</strong> ' + err.message, 'danger');
+                }
+            }
+        });
+
+        rzp.on('payment.failed', (r) => {
+            const desc = r.error ? r.error.description : 'Payment was declined.';
+            _payBanner('<strong>Payment Failed:</strong> ' + desc, 'danger');
+        });
+        rzp.open();
+
+    } catch (err) {
+        if (btn) { btn.disabled = false; btn.innerHTML = origHtml; }
+        _payBanner(
+            '<strong>Razorpay Error:</strong> ' + err.message +
+            '<br><small>Switching to Instant Pay (Demo) instead...</small>',
+            'warning'
+        );
+        console.error('Razorpay checkout error:', err);
+        // Auto-fallback to simulated payment after 2 seconds
+        setTimeout(() => executeSimulatedPayment(), 2000);
     }
 }
 </script>

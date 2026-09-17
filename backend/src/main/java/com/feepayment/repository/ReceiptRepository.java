@@ -5,16 +5,12 @@ import com.feepayment.model.ReceiptDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
-import java.sql.PreparedStatement;
-import java.sql.Statement;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 
 @Repository
@@ -95,33 +91,26 @@ public class ReceiptRepository {
 
     public Receipt save(Receipt receipt) {
         if (receipt.getReceiptId() == null) {
-            String sql = "INSERT INTO receipts (receipt_number, transaction_id, student_id, receipt_url, generated_date) " +
-                         "VALUES (?, ?, ?, ?, ?)";
-            KeyHolder keyHolder = new GeneratedKeyHolder();
             LocalDateTime now = LocalDateTime.now();
 
-            jdbc.update(con -> {
-                PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-                ps.setString(1, receipt.getReceiptNumber());
-                ps.setLong(2, receipt.getTransactionId());
-                if (receipt.getStudentId() != null) ps.setLong(3, receipt.getStudentId());
-                else ps.setNull(3, java.sql.Types.BIGINT);
-                ps.setString(4, receipt.getReceiptUrl());
-                ps.setTimestamp(5, Timestamp.valueOf(now));
-                return ps;
-            }, keyHolder);
+            // Use RETURNING to get generated ID — compatible with Supabase PgBouncer
+            String sql = "INSERT INTO receipts (receipt_number, transaction_id, student_id, receipt_url, generated_date) " +
+                         "VALUES (?, ?, ?, ?, ?) RETURNING receipt_id";
 
-            Map<String, Object> keys = keyHolder.getKeys();
-            Long generatedId;
-            if (keys != null && !keys.isEmpty()) {
-                Object val = keys.get("receipt_id");
-                if (val == null) val = keys.get("RECEIPT_ID");
-                if (val == null) val = keys.values().iterator().next();
-                generatedId = ((Number) val).longValue();
-            } else {
-                generatedId = Objects.requireNonNull(keyHolder.getKey()).longValue();
+            List<Map<String, Object>> rows = jdbc.queryForList(sql,
+                receipt.getReceiptNumber(),
+                receipt.getTransactionId(),
+                receipt.getStudentId(),
+                receipt.getReceiptUrl(),
+                Timestamp.valueOf(now)
+            );
+
+            if (rows != null && !rows.isEmpty()) {
+                Object val = rows.get(0).get("receipt_id");
+                if (val instanceof Number n) {
+                    receipt.setReceiptId(n.longValue());
+                }
             }
-            receipt.setReceiptId(generatedId);
             receipt.setGeneratedDate(now);
         }
         return receipt;

@@ -137,21 +137,21 @@
                     <label class="form-label fw-bold" style="font-size:0.82rem; color:var(--text-title);">Select Account Category</label>
                     <div class="role-pill-selector">
                         <label class="role-radio-label">
-                            <input type="radio" name="roleSelector" value="ADMIN" checked onchange="document.getElementById('role').value = 'ADMIN'">
+                            <input type="radio" name="roleSelector" value="ADMIN" onchange="syncRoleSelection('ADMIN')">
                             <div class="role-box">
                                 <i class="bi bi-shield-shaded"></i>
                                 <span>Admin</span>
                             </div>
                         </label>
                         <label class="role-radio-label">
-                            <input type="radio" name="roleSelector" value="STUDENT" onchange="document.getElementById('role').value = 'STUDENT'">
+                            <input type="radio" name="roleSelector" value="STUDENT" checked onchange="syncRoleSelection('STUDENT')">
                             <div class="role-box">
                                 <i class="bi bi-mortarboard"></i>
                                 <span>Student</span>
                             </div>
                         </label>
                         <label class="role-radio-label">
-                            <input type="radio" name="roleSelector" value="ACCOUNTS" onchange="document.getElementById('role').value = 'ACCOUNTS'">
+                            <input type="radio" name="roleSelector" value="ACCOUNTS" onchange="syncRoleSelection('ACCOUNTS')">
                             <div class="role-box">
                                 <i class="bi bi-bank"></i>
                                 <span>Accounts</span>
@@ -160,8 +160,8 @@
                     </div>
                     <!-- Hidden Select for Script Compatibility -->
                     <select id="role" class="d-none" required>
-                        <option value="ADMIN" selected>ADMIN</option>
-                        <option value="STUDENT">STUDENT</option>
+                        <option value="ADMIN">ADMIN</option>
+                        <option value="STUDENT" selected>STUDENT</option>
                         <option value="ACCOUNTS">ACCOUNTS</option>
                     </select>
                 </div>
@@ -307,13 +307,18 @@
 <script src="assets/js/login.js"></script>
 
 <script>
+function syncRoleSelection(role) {
+    const select = document.getElementById('role');
+    const radio = document.querySelector(`input[name="roleSelector"][value="${role}"]`);
+    if (select) select.value = role;
+    if (radio) radio.checked = true;
+}
+
 // Quick auto-fill helper function
 function fillCredentials(user, pass, role) {
     document.getElementById('username').value = user;
     document.getElementById('password').value = pass;
-    document.getElementById('role').value = role;
-    const radio = document.querySelector(`input[name="roleSelector"][value="${role}"]`);
-    if (radio) radio.checked = true;
+    syncRoleSelection(role);
 }
 </script>
 
