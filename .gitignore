@@ -25,3 +25,7 @@ replay_pid*
 node_modules
 target/
 backend/target/
+.vscode/
+.idea/
+*.DS_Store
+

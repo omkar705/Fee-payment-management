@@ -45,4 +45,25 @@ public class StudentController {
             return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
         }
     }
+
+    @PostMapping("/apply-installment")
+    public ResponseEntity<?> applyInstallment(@RequestBody java.util.Map<String, String> body) {
+        try {
+            String reason = body != null ? body.get("reason") : "Requested 2-installment payment plan.";
+            studentService.applyForInstallment(reason);
+            return ResponseEntity.ok(ApiResponse.ok("2-Installment plan applied successfully."));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
+        }
+    }
+
+    @GetMapping("/installment-plan")
+    public ResponseEntity<?> getInstallmentPlan() {
+        try {
+            return ResponseEntity.ok(ApiResponse.ok("Installment plan retrieved.", studentService.getInstallmentPlan()));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
+        }
+    }
 }
+

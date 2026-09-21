@@ -33,9 +33,17 @@ public class DataSeeder implements CommandLineRunner {
     private final UserRepository userRepository;
     private final StudentRepository studentRepository;
     private final PasswordEncoder passwordEncoder;
+    private final org.springframework.jdbc.core.JdbcTemplate jdbc;
 
     @Override
     public void run(String... args) {
+        try {
+            ensureTablesExist();
+            seedFeeStructures();
+        } catch (Exception e) {
+            log.warn("Table verification / fee structure seeding warning: {}", e.getMessage());
+        }
+
         try {
             if (studentRepository.count() >= 10 && userRepository.existsByEmail("admin@mmcoe.com")) {
                 log.info("Database is already initialized with students and admin. Skipping redundant data seeding.");
@@ -52,6 +60,48 @@ public class DataSeeder implements CommandLineRunner {
         } catch (Exception e) {
             log.error("Data seeding failed: {}", e.getMessage(), e);
             throw e;
+        }
+    }
+
+    private void ensureTablesExist() {
+        jdbc.execute("""
+            CREATE TABLE IF NOT EXISTS fee_structures (
+                id              SERIAL PRIMARY KEY,
+                department      VARCHAR(100) NOT NULL,
+                category        VARCHAR(50)  NOT NULL DEFAULT 'OPEN',
+                tuition_fee     NUMERIC(10, 2) NOT NULL,
+                development_fee NUMERIC(10, 2) NOT NULL,
+                exam_fee        NUMERIC(10, 2) NOT NULL,
+                total_amount    NUMERIC(10, 2) NOT NULL,
+                academic_year   VARCHAR(20)  NOT NULL,
+                status          VARCHAR(20)  NOT NULL DEFAULT 'ACTIVE'
+            );
+        """);
+
+        jdbc.execute("""
+            CREATE TABLE IF NOT EXISTS installment_requests (
+                id            SERIAL PRIMARY KEY,
+                student_id    BIGINT       NOT NULL REFERENCES students(id) ON DELETE CASCADE,
+                academic_year VARCHAR(20)  NOT NULL,
+                reason        VARCHAR(255),
+                status        VARCHAR(20)  NOT NULL DEFAULT 'PENDING' CHECK (status IN ('PENDING', 'APPROVED', 'REJECTED')),
+                applied_date  TIMESTAMP    NOT NULL DEFAULT NOW(),
+                reviewed_by   VARCHAR(100),
+                reviewed_date TIMESTAMP
+            );
+        """);
+    }
+
+    private void seedFeeStructures() {
+        Integer count = jdbc.queryForObject("SELECT COUNT(*) FROM fee_structures", Integer.class);
+        if (count == null || count == 0) {
+            jdbc.update("INSERT INTO fee_structures (department, category, tuition_fee, development_fee, exam_fee, total_amount, academic_year, status) VALUES " +
+                "('Information Technology', 'OPEN', 95000, 15000, 10000, 120000, '2025-26', 'ACTIVE')," +
+                "('Computer Science', 'OPEN', 95000, 15000, 10000, 120000, '2025-26', 'ACTIVE')," +
+                "('Mechanical', 'OPEN', 85000, 15000, 10000, 110000, '2025-26', 'ACTIVE')," +
+                "('Civil', 'OPEN', 80000, 15000, 10000, 105000, '2025-26', 'ACTIVE')," +
+                "('Electronics', 'OPEN', 88000, 15000, 10000, 113000, '2025-26', 'ACTIVE')");
+            log.info("Default fee structures seeded.");
         }
     }
 

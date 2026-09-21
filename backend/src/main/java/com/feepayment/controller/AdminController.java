@@ -95,4 +95,36 @@ public class AdminController {
             return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
         }
     }
+
+    // ============================================================
+    // Fee Structure Endpoints
+    // ============================================================
+    @GetMapping("/fee-structures")
+    public ResponseEntity<?> getAllFeeStructures() {
+        return ResponseEntity.ok(ApiResponse.ok("Fee structures retrieved.", adminService.getAllFeeStructures()));
+    }
+
+    @GetMapping("/fee-structures/{id}")
+    public ResponseEntity<?> getFeeStructure(@PathVariable Long id) {
+        try {
+            return ResponseEntity.ok(ApiResponse.ok("Fee structure retrieved.", adminService.getFeeStructureById(id)));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.error(e.getMessage()));
+        }
+    }
+
+    @PostMapping("/fee-structures")
+    public ResponseEntity<?> createFeeStructure(@RequestBody com.feepayment.model.FeeStructure feeStructure) {
+        feeStructure.setId(null);
+        com.feepayment.model.FeeStructure saved = adminService.saveFeeStructure(feeStructure);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.ok("Fee structure created.", saved));
+    }
+
+    @PutMapping("/fee-structures/{id}")
+    public ResponseEntity<?> updateFeeStructure(@PathVariable Long id, @RequestBody com.feepayment.model.FeeStructure feeStructure) {
+        feeStructure.setId(id);
+        com.feepayment.model.FeeStructure saved = adminService.saveFeeStructure(feeStructure);
+        return ResponseEntity.ok(ApiResponse.ok("Fee structure updated.", saved));
+    }
 }
+

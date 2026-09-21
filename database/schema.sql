@@ -123,3 +123,36 @@ CREATE INDEX IF NOT EXISTS idx_receipts_txn ON receipts (transaction_id);
 CREATE INDEX IF NOT EXISTS idx_settlements_transaction ON payment_settlements (transaction_id);
 CREATE INDEX IF NOT EXISTS idx_settlements_status ON payment_settlements (settlement_status);
 
+-- ============================================================
+-- TABLE: fee_structures (College Fee Slabs)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS fee_structures (
+    id              SERIAL PRIMARY KEY,
+    department      VARCHAR(100) NOT NULL,
+    category        VARCHAR(50)  NOT NULL DEFAULT 'OPEN',
+    tuition_fee     NUMERIC(10, 2) NOT NULL,
+    development_fee NUMERIC(10, 2) NOT NULL,
+    exam_fee        NUMERIC(10, 2) NOT NULL,
+    total_amount    NUMERIC(10, 2) NOT NULL,
+    academic_year   VARCHAR(20)  NOT NULL,
+    status          VARCHAR(20)  NOT NULL DEFAULT 'ACTIVE'
+);
+
+-- ============================================================
+-- TABLE: installment_requests (2-Installment Application)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS installment_requests (
+    id            SERIAL PRIMARY KEY,
+    student_id    BIGINT       NOT NULL REFERENCES students(id) ON DELETE CASCADE,
+    academic_year VARCHAR(20)  NOT NULL,
+    reason        VARCHAR(255),
+    status        VARCHAR(20)  NOT NULL DEFAULT 'PENDING' CHECK (status IN ('PENDING', 'APPROVED', 'REJECTED')),
+    applied_date  TIMESTAMP    NOT NULL DEFAULT NOW(),
+    reviewed_by   VARCHAR(100),
+    reviewed_date TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_fee_structures_dept ON fee_structures (department);
+CREATE INDEX IF NOT EXISTS idx_installment_requests_student ON installment_requests (student_id);
+
+

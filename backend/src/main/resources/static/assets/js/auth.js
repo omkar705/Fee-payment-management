@@ -32,6 +32,9 @@ function clearSession() {
     localStorage.removeItem('fpm_role');
     localStorage.removeItem('fpm_name');
     localStorage.removeItem('fpm_userId');
+    localStorage.removeItem('fpm_payment_history');
+    sessionStorage.removeItem('fpm_payment_history');
+    sessionStorage.removeItem('fpm_payment_done');
 }
 
 function isLoggedIn() {
@@ -67,6 +70,7 @@ function redirectToDashboard() {
 // ============================================================
 function logout() {
     clearSession();
+    sessionStorage.clear();
     window.location.href = '/login.html';
 }
 

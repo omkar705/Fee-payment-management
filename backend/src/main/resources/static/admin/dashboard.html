@@ -3,515 +3,206 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Administrator ERP Portal — Fee Payment Management | MMCOE</title>
-
-    <!-- Google Fonts: Plus Jakarta Sans -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <title>Admin Dashboard — Fee Payment Management | MMCOE</title>
 
     <!-- Bootstrap 5.3.3 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons 1.11.3 -->
+    <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
-
-    <!-- Design System Stylesheet -->
+    <!-- Dashboard CSS -->
     <link href="../assets/css/dashboard.css" rel="stylesheet">
 </head>
-<body>
+<body data-page="admin-dashboard">
 
-<div class="erp-dashboard-layout">
+<div class="dashboard-layout">
 
-    <!-- ====================================================================
-         INSTITUTIONAL SIDEBAR
-         ==================================================================== -->
-    <aside class="erp-sidebar" id="erpSidebar">
-        <!-- Sidebar Header -->
-        <div class="erp-sidebar-header">
-            <div class="sidebar-emblem">
-                <i class="bi bi-shield-shaded"></i>
-            </div>
-            <div class="sidebar-brand-text">
-                <h1>MMCOE ERP</h1>
-                <span>Admin Administration</span>
+    <!-- ============================================================
+         SIDEBAR
+         ============================================================ -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <i class="bi bi-mortarboard-fill"></i>
+            <div>
+                <div class="sidebar-brand-title">MMCOE Admin</div>
+                <div class="sidebar-brand-sub">Fee Management System</div>
             </div>
         </div>
 
-        <!-- Sidebar Navigation -->
-        <div class="erp-sidebar-nav">
-            <div class="sidebar-group-label">Core Modules</div>
-            <ul class="erp-nav-list">
-                <li class="erp-nav-item">
-                    <a class="erp-nav-link active" href="#dashboard" data-section="sec-admin-dashboard">
-                        <i class="bi bi-grid-1x2-fill"></i>
-                        <span>Dashboard Overview</span>
-                    </a>
-                </li>
-                <li class="erp-nav-item">
-                    <a class="erp-nav-link" href="#students" data-section="sec-admin-students">
-                        <i class="bi bi-people-fill"></i>
-                        <span>Manage Students</span>
-                        <span class="erp-nav-badge" style="background:#e0e7ff; color:#3730a3; border-color:#c7d2fe;">1.2k</span>
-                    </a>
-                </li>
-                <li class="erp-nav-item">
-                    <a class="erp-nav-link" href="#fee-structure" data-section="sec-admin-fee-structure">
-                        <i class="bi bi-cash-stack"></i>
-                        <span>Manage Fee Structure</span>
-                    </a>
-                </li>
-                <li class="erp-nav-item">
-                    <a class="erp-nav-link" href="#user-accounts" data-section="sec-admin-user-accounts">
-                        <i class="bi bi-person-gear"></i>
-                        <span>Manage User Accounts</span>
-                    </a>
-                </li>
-                <li class="erp-nav-item">
-                    <a class="erp-nav-link" href="#roles" data-section="sec-admin-roles">
-                        <i class="bi bi-person-badge-fill"></i>
-                        <span>Roles & Permissions</span>
-                    </a>
-                </li>
-                <li class="erp-nav-item">
-                    <a class="erp-nav-link" href="../reports/reports.html">
-                        <i class="bi bi-bar-chart-line-fill"></i>
-                        <span>Reports & Analysis</span>
-                    </a>
-                </li>
-            </ul>
+        <nav class="sidebar-nav">
+            <div class="sidebar-nav-header">Main Menu</div>
+            <a href="#dashboard" class="nav-link-custom active" data-section="sec-admin-dashboard" onclick="showSection('sec-admin-dashboard')">
+                <i class="bi bi-speedometer2"></i> Dashboard Overview
+            </a>
+            <a href="#students" class="nav-link-custom" data-section="sec-admin-students" onclick="showSection('sec-admin-students')">
+                <i class="bi bi-people"></i> Manage Students
+            </a>
+            <a href="#fee-structure" class="nav-link-custom" data-section="sec-admin-fee-structure" onclick="showSection('sec-admin-fee-structure')">
+                <i class="bi bi-cash-stack"></i> Manage Fee Structure
+            </a>
+            <a href="../reports/reports.html" class="nav-link-custom">
+                <i class="bi bi-file-earmark-bar-graph"></i> Reports &amp; Analysis
+            </a>
 
-            <div class="sidebar-group-label">System & Security</div>
-            <ul class="erp-nav-list">
-                <li class="erp-nav-item">
-                    <a class="erp-nav-link" href="#audit-logs" data-section="sec-admin-audit-logs">
-                        <i class="bi bi-journal-text"></i>
-                        <span>Audit Logs</span>
-                    </a>
-                </li>
-                <li class="erp-nav-item">
-                    <a class="erp-nav-link" href="#security" data-section="sec-admin-security">
-                        <i class="bi bi-shield-check"></i>
-                        <span>Security Monitoring</span>
-                    </a>
-                </li>
-                <li class="erp-nav-item">
-                    <a class="erp-nav-link" href="#backup" data-section="sec-admin-backup">
-                        <i class="bi bi-database-down"></i>
-                        <span>Backup & Restore</span>
-                    </a>
-                </li>
-            </ul>
-        </div>
+            <div class="sidebar-nav-header">Account</div>
+            <a href="profile.html" class="nav-link-custom">
+                <i class="bi bi-person-circle"></i> My Profile
+            </a>
+            <a href="#" class="nav-link-custom text-danger" onclick="logout()">
+                <i class="bi bi-box-arrow-right"></i> Sign Out
+            </a>
+        </nav>
 
-        <!-- Sidebar Footer -->
-        <div class="erp-sidebar-footer">
-            <div class="sidebar-user-card">
-                <div class="user-avatar-circle user-avatar-display">AD</div>
-                <div class="user-meta-info">
-                    <div class="name user-name-display">Administrator</div>
-                    <div class="role user-role-display">System Admin</div>
-                </div>
-            </div>
-            <button class="btn-sidebar-signout logout-btn" id="logoutBtn">
-                <i class="bi bi-box-arrow-right"></i>
-                <span>Sign Out of Portal</span>
-            </button>
+        <div class="sidebar-footer">
+            <span>AY 2025-26 &bull; Pune University</span>
         </div>
     </aside>
 
-    <!-- ====================================================================
-         MAIN VIEWPORT
-         ==================================================================== -->
-    <div class="erp-main-wrapper">
+    <!-- ============================================================
+         MAIN CONTENT AREA
+         ============================================================ -->
+    <div class="main-content">
 
-        <!-- Sticky Topbar -->
-        <header class="erp-topbar">
+        <!-- Topbar -->
+        <header class="topbar">
             <div class="topbar-left">
-                <button class="mobile-menu-toggle" id="sidebarToggleBtn" aria-label="Toggle Sidebar Menu">
+                <button class="btn btn-outline-secondary btn-sm d-lg-none" type="button" id="sidebarToggleBtn" onclick="toggleSidebar()">
                     <i class="bi bi-list"></i>
                 </button>
-                <div class="breadcrumb-nav">
-                    <a href="#">MMCOE ERP</a>
-                    <i class="bi bi-chevron-right" style="font-size:0.7rem;"></i>
-                    <a href="#">Administration</a>
-                    <i class="bi bi-chevron-right" style="font-size:0.7rem;"></i>
-                    <span class="active-crumb" id="topbarCrumb">Dashboard Overview</span>
-                </div>
+                <h1 class="topbar-title" id="pageHeaderTitle">Admin Dashboard</h1>
             </div>
-
             <div class="topbar-right">
-                <!-- Academic Term Chip -->
-                <div class="academic-term-chip">
-                    <i class="bi bi-mortarboard-fill"></i>
-                    <span>AY 2025-26 • Sem I</span>
-                </div>
-
-                <!-- Notifications Dropdown -->
-                <div class="dropdown">
-                    <button class="notification-dropdown-btn" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Notifications">
-                        <i class="bi bi-bell"></i>
-                        <span class="notification-unread-dot"></span>
-                    </button>
-                    <div class="dropdown-menu dropdown-menu-end notification-popover-menu">
-                        <div class="notification-header">
-                            <h6 class="mb-0 fw-bold" style="font-size:0.88rem;">System Alerts & Updates</h6>
-                            <span class="badge bg-primary-subtle text-primary">3 New</span>
-                        </div>
-                        <a href="#" class="notification-item">
-                            <div class="notif-icon-box notif-icon-green"><i class="bi bi-check2-circle"></i></div>
-                            <div>
-                                <div class="fw-bold" style="font-size:0.8rem;">Daily Fee Ledger Reconciled</div>
-                                <div class="text-muted" style="font-size:0.72rem;">₹82,50,000 matched across 1,126 payments.</div>
-                            </div>
-                        </a>
-                        <a href="#" class="notification-item">
-                            <div class="notif-icon-box notif-icon-amber"><i class="bi bi-hourglass-split"></i></div>
-                            <div>
-                                <div class="fw-bold" style="font-size:0.8rem;">8 Installment Requests Pending</div>
-                                <div class="text-muted" style="font-size:0.72rem;">Accounts Office requires verification approval.</div>
-                            </div>
-                        </a>
-                        <a href="#" class="notification-item">
-                            <div class="notif-icon-box notif-icon-blue"><i class="bi bi-shield-check"></i></div>
-                            <div>
-                                <div class="fw-bold" style="font-size:0.8rem;">Security Audit Completed</div>
-                                <div class="text-muted" style="font-size:0.72rem;">Zero authentication vulnerabilities logged.</div>
-                            </div>
-                        </a>
+                <div class="user-badge">
+                    <div class="user-avatar">A</div>
+                    <div>
+                        <div class="user-name" id="topbarUserName">Administrator</div>
+                        <div class="user-role">System Admin</div>
                     </div>
                 </div>
-
-                <!-- Role Badge -->
-                <span class="topbar-role-badge badge-role-admin">
-                    <i class="bi bi-shield-check"></i> Administrator
-                </span>
+                <button class="btn btn-outline-danger btn-sm" onclick="logout()" title="Sign Out">
+                    <i class="bi bi-box-arrow-right me-1"></i> Sign Out
+                </button>
             </div>
         </header>
 
-        <!-- Canvas Body -->
-        <main class="erp-content-canvas">
-            <div id="notificationArea"></div>
+        <!-- Page Body -->
+        <main class="page-body">
 
-            <!-- ================================================================
+            <!-- ========================================================
                  SECTION 1: DASHBOARD OVERVIEW
-                 ================================================================ -->
-            <!-- ================================================================
-                 SECTION 1: DASHBOARD OVERVIEW
-                 ================================================================ -->
-            <section id="sec-admin-dashboard" class="dashboard-section">
+                 ======================================================== -->
+            <div id="sec-admin-dashboard" class="admin-section">
 
-                <!-- Welcome Hero Area -->
-                <div class="dashboard-welcome-hero">
-                    <div class="welcome-hero-content">
-                        <h2 id="dashboardGreeting">Good Morning, Administrator 👋</h2>
-                        <p>Welcome to the MMCOE Central Fee Payment &amp; Academic Accounts Management Portal.</p>
-                    </div>
-                    <div class="hero-quick-meta">
-                        <div class="hero-meta-item">
-                            <i class="bi bi-calendar3"></i>
-                            <span id="liveDate">Academic Year 2025-26</span>
-                        </div>
-                        <div class="hero-meta-item">
-                            <i class="bi bi-database-check"></i>
-                            <span>H2 / PostgreSQL Sync: Online</span>
-                        </div>
-                        <div class="hero-meta-item">
-                            <i class="bi bi-lock-fill"></i>
-                            <span>BCrypt Security Active</span>
-                        </div>
+                <!-- Welcome Note -->
+                <div class="alert alert-primary d-flex align-items-center mb-4" role="alert">
+                    <i class="bi bi-info-circle-fill fs-5 me-3"></i>
+                    <div>
+                        <strong id="dashboardGreeting">Welcome, Administrator</strong> &mdash; Academic Year 2025-26 Fee Payment Summary.
                     </div>
                 </div>
 
-                <!-- ── KPI Cards Row ──────────────────────────────────────────────────────── -->
+                <!-- 2 Useful KPI Cards: Total Students & Total Collection -->
                 <div class="row g-3 mb-4">
-                    <div class="col-xl-3 col-sm-6">
-                        <div class="erp-stat-card">
-                            <div class="stat-card-header">
-                                <span class="stat-card-label">Total Students</span>
-                                <div class="stat-icon-wrapper stat-icon-blue">
-                                    <i class="bi bi-people-fill"></i>
-                                </div>
+                    <div class="col-md-6">
+                        <div class="stat-card border-start border-primary border-4">
+                            <div class="stat-card-title text-primary">
+                                <i class="bi bi-people-fill me-1"></i> Total Registered Students
                             </div>
-                            <div class="stat-card-value" id="statTotalStudents">—</div>
-                            <div class="stat-card-footer">
-                                <span class="trend-badge trend-positive"><i class="bi bi-arrow-up-short"></i> +12 new</span>
-                                <span>Enrolled AY 2025-26</span>
-                            </div>
+                            <div class="stat-card-value" id="statTotalStudents">&mdash;</div>
+                            <div class="stat-card-desc text-muted">Active database records across all departments</div>
                         </div>
                     </div>
-
-                    <div class="col-xl-3 col-sm-6">
-                        <div class="erp-stat-card">
-                            <div class="stat-card-header">
-                                <span class="stat-card-label">Active User Accounts</span>
-                                <div class="stat-icon-wrapper stat-icon-purple">
-                                    <i class="bi bi-person-check-fill"></i>
-                                </div>
+                    <div class="col-md-6">
+                        <div class="stat-card border-start border-success border-4">
+                            <div class="stat-card-title text-success">
+                                <i class="bi bi-currency-rupee me-1"></i> Total Fee Collection
                             </div>
-                            <div class="stat-card-value" id="statActiveAccounts">—</div>
-                            <div class="stat-card-footer">
-                                <span class="trend-badge trend-positive">100% Verified</span>
-                                <span>Admin, Accounts, Students</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-xl-3 col-sm-6">
-                        <div class="erp-stat-card">
-                            <div class="stat-card-header">
-                                <span class="stat-card-label">Total Fee Collection</span>
-                                <div class="stat-icon-wrapper stat-icon-green">
-                                    <i class="bi bi-currency-rupee"></i>
-                                </div>
-                            </div>
-                            <div class="stat-card-value">₹82,50,000</div>
-                            <div class="stat-card-footer">
-                                <span class="trend-badge trend-positive"><i class="bi bi-graph-up-arrow"></i> 85.3%</span>
-                                <span>Target Clearance Met</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-xl-3 col-sm-6">
-                        <div class="erp-stat-card">
-                            <div class="stat-card-header">
-                                <span class="stat-card-label">Pending Installments</span>
-                                <div class="stat-icon-wrapper stat-icon-amber">
-                                    <i class="bi bi-hourglass-split"></i>
-                                </div>
-                            </div>
-                            <div class="stat-card-value">₹14,25,000</div>
-                            <div class="stat-card-footer">
-                                <span class="trend-badge trend-warning">42 Overdue</span>
-                                <span>Due 30 September 2025</span>
-                            </div>
+                            <div class="stat-card-value text-success" id="statTotalFeeCollection">&#8377;82,50,000</div>
+                            <div class="stat-card-desc text-muted">Total collected for AY 2025-26</div>
                         </div>
                     </div>
                 </div>
 
-                <!-- ── Fee Collection Analytics + Right Panel ──────────────────────────── -->
-                <div class="row g-4 mb-4">
-
-                    <!-- Analytics Chart -->
-                    <div class="col-lg-8">
-                        <div class="erp-table-container" style="height:100%;">
-                            <div class="table-header-toolbar align-items-start">
-                                <div class="table-title-group">
-                                    <h3>
-                                        <i class="bi bi-bar-chart-line-fill me-2" style="color:var(--primary-500);font-size:1rem;"></i>
-                                        Fee Collection Analytics
-                                    </h3>
-                                    <p id="analyticsSubtitle">Monthly fee collection &mdash; Academic Year 2025-26</p>
-                                </div>
-                                <div class="d-flex align-items-center gap-2 flex-shrink-0">
-                                    <label for="analyticsPeriod" class="text-muted small mb-0 fw-semibold" style="white-space:nowrap;">View by:</label>
-                                    <select id="analyticsPeriod"
-                                            class="form-select form-select-sm"
-                                            style="width:auto;min-width:110px;font-size:0.83rem;border-radius:8px;border-color:var(--border-color);font-weight:600;"
-                                            onchange="onAnalyticsPeriodChange(this.value)">
-                                        <option value="year" selected>Year</option>
-                                        <option value="month">Month</option>
-                                        <option value="week">Week</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <!-- Summary strip -->
-                            <div class="d-flex gap-4 px-4 pb-3 pt-1 border-bottom" id="analyticsSummaryStrip" style="background:var(--bg-subtle);font-size:0.82rem;">
-                                <div>
-                                    <span class="text-muted">Total Collected</span><br>
-                                    <strong class="text-success" id="analyticsTotalCollected" style="font-size:1.05rem;">—</strong>
-                                </div>
-                                <div>
-                                    <span class="text-muted">Period</span><br>
-                                    <strong id="analyticsPeriodLabel" style="font-size:1.05rem;">Annual (AY 2025-26)</strong>
-                                </div>
-                                <div>
-                                    <span class="text-muted">Data</span><br>
-                                    <span class="badge rounded-pill" style="background:#e0f2fe;color:#0369a1;font-size:0.75rem;font-weight:600;">Sample / Demo</span>
-                                </div>
-                            </div>
-
-                            <!-- Chart Canvas -->
-                            <div class="p-4" style="position:relative; min-height:260px;">
-                                <div id="analyticsLoading" class="d-flex align-items-center justify-content-center" style="height:240px;display:none!important;">
-                                    <div class="spinner-border spinner-border-sm text-primary me-2"></div>
-                                    <span class="text-muted small">Loading analytics...</span>
-                                </div>
-                                <canvas id="feeAnalyticsChart" style="max-height:260px;width:100%;"></canvas>
-                            </div>
-                        </div>
+                <!-- Recent Student Registrations Table -->
+                <div class="content-card mb-4">
+                    <div class="content-card-header">
+                        <h3><i class="bi bi-clock-history text-primary"></i> Recent Student Registrations</h3>
+                        <a href="#students" class="btn btn-sm btn-outline-primary" onclick="showSection('sec-admin-students')">
+                            View All Students
+                        </a>
                     </div>
-
-                    <!-- Right panel: Quick Actions + Recent Audit Trail -->
-                    <div class="col-lg-4">
-                        <div class="erp-table-container mb-4">
-                            <div class="table-header-toolbar">
-                                <div class="table-title-group">
-                                    <h3>Quick Actions</h3>
-                                    <p>Standard administrative functions</p>
-                                </div>
-                            </div>
-                            <div class="p-3 d-flex flex-column gap-2">
-                                <button class="btn btn-erp-outline w-100 justify-content-start py-2" data-bs-toggle="modal" data-bs-target="#addStudentModal">
-                                    <i class="bi bi-person-plus-fill text-primary"></i>
-                                    <span>+ Add New Student Account</span>
-                                </button>
-                                <button class="btn btn-erp-outline w-100 justify-content-start py-2" onclick="document.querySelector('[data-section=\'sec-admin-fee-structure\']').click();">
-                                    <i class="bi bi-cash-stack text-success"></i>
-                                    <span>+ Configure Fee Slabs</span>
-                                </button>
-                                <button class="btn btn-erp-outline w-100 justify-content-start py-2" onclick="document.querySelector('[data-section=\'sec-admin-user-accounts\']').click();">
-                                    <i class="bi bi-person-gear text-purple"></i>
-                                    <span>+ Create Staff / Officer Account</span>
-                                </button>
-                                <button class="btn btn-erp-outline w-100 justify-content-start py-2" onclick="alert('Exporting Master Financial Summary (AY 2025-26) to PDF...');">
-                                    <i class="bi bi-file-earmark-pdf-fill text-danger"></i>
-                                    <span>View Master Reports</span>
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Mini Audit Snippet -->
-                        <div class="erp-table-container">
-                            <div class="table-header-toolbar">
-                                <div class="table-title-group">
-                                    <h3>Recent Audit Trail</h3>
-                                    <p>Live security events log</p>
-                                </div>
-                            </div>
-                            <div class="p-3" style="font-size:0.8rem;">
-                                <div class="d-flex align-items-start gap-2 mb-3">
-                                    <i class="bi bi-check-circle-fill text-success mt-1"></i>
-                                    <div>
-                                        <div class="fw-bold">Student Account Created</div>
-                                        <div class="text-muted small">PRN: B25IT2011 (Nikhil Deshmukh)</div>
-                                    </div>
-                                </div>
-                                <div class="d-flex align-items-start gap-2 mb-3">
-                                    <i class="bi bi-shield-lock-fill text-primary mt-1"></i>
-                                    <div>
-                                        <div class="fw-bold">Admin Signed In</div>
-                                        <div class="text-muted small">admin@mmcoe.com (127.0.0.1)</div>
-                                    </div>
-                                </div>
-                                <div class="d-flex align-items-start gap-2">
-                                    <i class="bi bi-database-fill-check text-info mt-1"></i>
-                                    <div>
-                                        <div class="fw-bold">Daily DB Backup Snapshot</div>
-                                        <div class="text-muted small">Automated snapshot verified</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover table-bordered mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>PRN</th>
+                                    <th>Student Name</th>
+                                    <th>Department</th>
+                                    <th>Course</th>
+                                    <th>Academic Year</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recentStudentsTbody">
+                                <tr>
+                                    <td colspan="6" class="text-center text-muted py-3">Loading student records...</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
-                <!-- ── Recent Student Registrations (full-width table, below chart) ──────── -->
+                <!-- Fee Collection Summary & Department-wise Collection -->
                 <div class="row g-4">
-                    <div class="col-12">
-                        <div class="erp-table-container">
-                            <div class="table-header-toolbar">
-                                <div class="table-title-group">
-                                    <h3>Recent Student Registrations</h3>
-                                    <p>Official student profiles registered for current academic term</p>
-                                </div>
-                                <button class="btn-erp-primary" onclick="document.querySelector('[data-section=\'sec-admin-students\']').click();">
-                                    <i class="bi bi-list-ul"></i> View All Students
-                                </button>
+                    <div class="col-lg-6">
+                        <div class="content-card h-100">
+                            <div class="content-card-header">
+                                <h3><i class="bi bi-bar-chart-line text-primary"></i> Fee Collection Summary</h3>
+                                <span class="badge bg-light text-dark border">AY 2025-26</span>
+                            </div>
+                            <div class="content-card-body">
+                                <canvas id="adminFeeChart" height="200"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="content-card h-100">
+                            <div class="content-card-header">
+                                <h3><i class="bi bi-building text-primary"></i> Department-wise Collection</h3>
                             </div>
                             <div class="table-responsive">
-                                <table class="erp-data-table">
-                                    <thead>
+                                <table class="table table-hover table-bordered mb-0">
+                                    <thead class="table-light">
                                         <tr>
-                                            <th>Student Name</th>
-                                            <th>PRN Number</th>
                                             <th>Department</th>
-                                            <th>Year</th>
-                                            <th>Status</th>
-                                            <th>Actions</th>
+                                            <th>Students</th>
+                                            <th>Amount Collected</th>
                                         </tr>
                                     </thead>
-                                    <tbody id="recentStudentsTbody">
+                                    <tbody id="deptWiseCollectionTbody">
                                         <tr>
-                                            <td>
-                                                <div class="student-avatar-inline">
-                                                    <div class="avatar-initials-badge">MT</div>
-                                                    <div>
-                                                        <div class="student-name-text">Manan Vivekanand Tote</div>
-                                                        <div class="student-sub-text">b25it2010@mmcoe.com</div>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td><span class="prn-code-badge">B25IT2010</span></td>
                                             <td>Information Technology</td>
-                                            <td>Second Year (SE)</td>
-                                            <td><span class="status-pill status-pill-active"><i class="bi bi-circle-fill" style="font-size:0.4rem;"></i> ACTIVE</span></td>
-                                            <td>
-                                                <button class="btn-icon-action" onclick="viewStudentModal('Manan Vivekanand Tote', 'B25IT2010', 'b25it2010@mmcoe.com', 'Information Technology', 'Second Year', 'A', 'ACTIVE')">
-                                                    <i class="bi bi-eye"></i>
-                                                </button>
-                                            </td>
+                                            <td>280</td>
+                                            <td><strong>&#8377;31,50,000</strong></td>
                                         </tr>
                                         <tr>
-                                            <td>
-                                                <div class="student-avatar-inline">
-                                                    <div class="avatar-initials-badge">AS</div>
-                                                    <div>
-                                                        <div class="student-name-text">Aarav Sharma</div>
-                                                        <div class="student-sub-text">b25it2001@mmcoe.com</div>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td><span class="prn-code-badge">B25IT2001</span></td>
-                                            <td>Information Technology</td>
-                                            <td>Second Year (SE)</td>
-                                            <td><span class="status-pill status-pill-active"><i class="bi bi-circle-fill" style="font-size:0.4rem;"></i> ACTIVE</span></td>
-                                            <td>
-                                                <button class="btn-icon-action" onclick="viewStudentModal('Aarav Sharma', 'B25IT2001', 'b25it2001@mmcoe.com', 'Information Technology', 'Second Year', 'A', 'ACTIVE')">
-                                                    <i class="bi bi-eye"></i>
-                                                </button>
-                                            </td>
+                                            <td>Computer Science</td>
+                                            <td>260</td>
+                                            <td><strong>&#8377;29,50,000</strong></td>
                                         </tr>
                                         <tr>
-                                            <td>
-                                                <div class="student-avatar-inline">
-                                                    <div class="avatar-initials-badge">PD</div>
-                                                    <div>
-                                                        <div class="student-name-text">Priya Desai</div>
-                                                        <div class="student-sub-text">b25it2002@mmcoe.com</div>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td><span class="prn-code-badge">B25IT2002</span></td>
-                                            <td>Computer Engineering</td>
-                                            <td>Third Year (TE)</td>
-                                            <td><span class="status-pill status-pill-active"><i class="bi bi-circle-fill" style="font-size:0.4rem;"></i> ACTIVE</span></td>
-                                            <td>
-                                                <button class="btn-icon-action" onclick="viewStudentModal('Priya Desai', 'B25IT2002', 'b25it2002@mmcoe.com', 'Computer Engineering', 'Third Year', 'B', 'ACTIVE')">
-                                                    <i class="bi bi-eye"></i>
-                                                </button>
-                                            </td>
+                                            <td>Mechanical Engineering</td>
+                                            <td>140</td>
+                                            <td><strong>&#8377;11,20,000</strong></td>
                                         </tr>
                                         <tr>
-                                            <td>
-                                                <div class="student-avatar-inline">
-                                                    <div class="avatar-initials-badge" style="background:#fee2e2; color:#991b1b;">AM</div>
-                                                    <div>
-                                                        <div class="student-name-text">Ananya Mehta</div>
-                                                        <div class="student-sub-text">b25it2006@mmcoe.com</div>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td><span class="prn-code-badge">B25IT2006</span></td>
-                                            <td>Information Technology</td>
-                                            <td>Second Year (SE)</td>
-                                            <td><span class="status-pill status-pill-inactive"><i class="bi bi-circle-fill" style="font-size:0.4rem;"></i> INACTIVE</span></td>
-                                            <td>
-                                                <button class="btn-icon-action" onclick="viewStudentModal('Ananya Mehta', 'B25IT2006', 'b25it2006@mmcoe.com', 'Information Technology', 'Second Year', 'A', 'INACTIVE')">
-                                                    <i class="bi bi-eye"></i>
-                                                </button>
-                                            </td>
+                                            <td>Electronics &amp; Telecom</td>
+                                            <td>120</td>
+                                            <td><strong>&#8377;8,20,000</strong></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Civil Engineering</td>
+                                            <td>95</td>
+                                            <td><strong>&#8377;5,10,000</strong></td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -520,777 +211,240 @@
                     </div>
                 </div>
 
-            </section>
+            </div>
 
-            <!-- ================================================================
+            <!-- ========================================================
                  SECTION 2: MANAGE STUDENTS
-                 ================================================================ -->
-            <section id="sec-admin-students" class="dashboard-section d-none">
-                <div class="erp-table-container">
-                    <div class="table-header-toolbar">
-                        <div class="table-title-group">
-                            <h3>Student Information Roster</h3>
-                            <p>Complete directory of authenticated college student profiles</p>
-                        </div>
-                        <div class="table-toolbar-actions">
-                            <div class="table-search-input">
-                                <i class="bi bi-search"></i>
-                                <input type="text" placeholder="Search by name, PRN..." onkeyup="filterTable(this, 'allStudentsTable')">
-                            </div>
-                            <button class="btn-erp-primary" data-bs-toggle="modal" data-bs-target="#addStudentModal">
-                                <i class="bi bi-person-plus-fill"></i> Add Student
-                            </button>
-                        </div>
+                 ======================================================== -->
+            <div id="sec-admin-students" class="admin-section d-none">
+                <div class="content-card">
+                    <div class="content-card-header">
+                        <h3><i class="bi bi-people-fill text-primary"></i> Student Directory</h3>
+                        <a href="add-student.html" class="btn btn-primary btn-sm">
+                            <i class="bi bi-person-plus me-1"></i> Add New Student
+                        </a>
                     </div>
-                    <div class="table-responsive">
-                        <table class="erp-data-table" id="allStudentsTable">
-                            <thead>
-                                <tr>
-                                    <th>Student Name</th>
-                                    <th>PRN</th>
-                                    <th>Official Email</th>
-                                    <th>Department</th>
-                                    <th>Program</th>
-                                    <th>Status</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        <div class="student-avatar-inline">
-                                            <div class="avatar-initials-badge">MT</div>
-                                            <div class="student-name-text">Manan Vivekanand Tote</div>
-                                        </div>
-                                    </td>
-                                    <td><span class="prn-code-badge">B25IT2010</span></td>
-                                    <td>manan@mmcoe.com</td>
-                                    <td>Information Technology</td>
-                                    <td>B.Tech (SE)</td>
-                                    <td><span class="status-pill status-pill-active">ACTIVE</span></td>
-                                    <td>
-                                        <div class="table-action-btns">
-                                            <button class="btn-icon-action" title="View Details" onclick="viewStudentModal('Manan Vivekanand Tote', 'B25IT2010', 'manan@mmcoe.com', 'Information Technology', 'Second Year', 'A', 'ACTIVE')"><i class="bi bi-eye"></i></button>
-                                            <button class="btn-icon-action" title="Deactivate" onclick="alert('Student status toggled.');"><i class="bi bi-person-x"></i></button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <div class="student-avatar-inline">
-                                            <div class="avatar-initials-badge">AS</div>
-                                            <div class="student-name-text">Aarav Sharma</div>
-                                        </div>
-                                    </td>
-                                    <td><span class="prn-code-badge">B25IT2001</span></td>
-                                    <td>b25it2001@mmcoe.com</td>
-                                    <td>Information Technology</td>
-                                    <td>B.Tech (SE)</td>
-                                    <td><span class="status-pill status-pill-active">ACTIVE</span></td>
-                                    <td>
-                                        <div class="table-action-btns">
-                                            <button class="btn-icon-action" title="View Details" onclick="viewStudentModal('Aarav Sharma', 'B25IT2001', 'b25it2001@mmcoe.com', 'Information Technology', 'Second Year', 'A', 'ACTIVE')"><i class="bi bi-eye"></i></button>
-                                            <button class="btn-icon-action" title="Deactivate" onclick="alert('Student status toggled.');"><i class="bi bi-person-x"></i></button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <div class="student-avatar-inline">
-                                            <div class="avatar-initials-badge">PD</div>
-                                            <div class="student-name-text">Priya Desai</div>
-                                        </div>
-                                    </td>
-                                    <td><span class="prn-code-badge">B25IT2002</span></td>
-                                    <td>b25it2002@mmcoe.com</td>
-                                    <td>Computer Engineering</td>
-                                    <td>B.Tech (TE)</td>
-                                    <td><span class="status-pill status-pill-active">ACTIVE</span></td>
-                                    <td>
-                                        <div class="table-action-btns">
-                                            <button class="btn-icon-action" title="View Details" onclick="viewStudentModal('Priya Desai', 'B25IT2002', 'b25it2002@mmcoe.com', 'Computer Engineering', 'Third Year', 'B', 'ACTIVE')"><i class="bi bi-eye"></i></button>
-                                            <button class="btn-icon-action" title="Deactivate" onclick="alert('Student status toggled.');"><i class="bi bi-person-x"></i></button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <div class="student-avatar-inline">
-                                            <div class="avatar-initials-badge">RK</div>
-                                            <div class="student-name-text">Rohan Kulkarni</div>
-                                        </div>
-                                    </td>
-                                    <td><span class="prn-code-badge">B25IT2003</span></td>
-                                    <td>b25it2003@mmcoe.com</td>
-                                    <td>Mechanical Engineering</td>
-                                    <td>B.Tech (FE)</td>
-                                    <td><span class="status-pill status-pill-active">ACTIVE</span></td>
-                                    <td>
-                                        <div class="table-action-btns">
-                                            <button class="btn-icon-action" title="View Details" onclick="viewStudentModal('Rohan Kulkarni', 'B25IT2003', 'b25it2003@mmcoe.com', 'Mechanical Engineering', 'First Year', 'C', 'ACTIVE')"><i class="bi bi-eye"></i></button>
-                                            <button class="btn-icon-action" title="Deactivate" onclick="alert('Student status toggled.');"><i class="bi bi-person-x"></i></button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <div class="student-avatar-inline">
-                                            <div class="avatar-initials-badge">ND</div>
-                                            <div class="student-name-text">Nikhil Deshmukh</div>
-                                        </div>
-                                    </td>
-                                    <td><span class="prn-code-badge">B25IT2011</span></td>
-                                    <td>b25it2011@mmcoe.com</td>
-                                    <td>Information Technology</td>
-                                    <td>B.Tech (SE)</td>
-                                    <td><span class="status-pill status-pill-active">ACTIVE</span></td>
-                                    <td>
-                                        <div class="table-action-btns">
-                                            <button class="btn-icon-action" title="View Details" onclick="viewStudentModal('Nikhil Deshmukh', 'B25IT2011', 'b25it2011@mmcoe.com', 'Information Technology', 'Second Year', 'A', 'ACTIVE')"><i class="bi bi-eye"></i></button>
-                                            <button class="btn-icon-action" title="Deactivate" onclick="alert('Student status toggled.');"><i class="bi bi-person-x"></i></button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                    <div class="content-card-body">
+                        <!-- Filters -->
+                        <div class="row g-2 mb-3">
+                            <div class="col-md-5">
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text bg-light"><i class="bi bi-search"></i></span>
+                                    <input type="text" class="form-control" id="searchInput" placeholder="Search by name, PRN, or email..." oninput="filterStudentsTable()">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <select class="form-select form-select-sm" id="filterDept" onchange="filterStudentsTable()">
+                                    <option value="">All Departments</option>
+                                    <option value="Information Technology">Information Technology</option>
+                                    <option value="Computer Science">Computer Science</option>
+                                    <option value="Mechanical">Mechanical</option>
+                                    <option value="Civil">Civil</option>
+                                    <option value="Electronics">Electronics</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <button class="btn btn-outline-secondary btn-sm w-100" onclick="resetFilters()">
+                                    <i class="bi bi-arrow-counterclockwise me-1"></i> Reset Filters
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Students Table -->
+                        <div class="table-responsive">
+                            <table class="table table-hover table-bordered mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>PRN</th>
+                                        <th>Name</th>
+                                        <th>Department</th>
+                                        <th>Email</th>
+                                        <th>Status</th>
+                                        <th style="width: 140px;">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="studentsTbody">
+                                    <tr>
+                                        <td colspan="6" class="text-center text-muted py-4">Loading students...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
-            </section>
+            </div>
 
-            <!-- ================================================================
+            <!-- ========================================================
                  SECTION 3: MANAGE FEE STRUCTURE
-                 ================================================================ -->
-            <section id="sec-admin-fee-structure" class="dashboard-section d-none">
-                <div class="erp-table-container">
-                    <div class="table-header-toolbar">
-                        <div class="table-title-group">
-                            <h3>Approved Institutional Fee Slabs (AY 2025-26)</h3>
-                            <p>Tuition, development, and examination breakdown sanctioned by Governing Council</p>
-                        </div>
-                        <button class="btn-erp-primary" onclick="alert('Fee slab creation modal simulated.');">
-                            <i class="bi bi-plus-circle"></i> Add Fee Structure
+                 ======================================================== -->
+            <div id="sec-admin-fee-structure" class="admin-section d-none">
+                <div class="content-card">
+                    <div class="content-card-header">
+                        <h3><i class="bi bi-cash-stack text-primary"></i> Institutional Fee Structures</h3>
+                        <button class="btn btn-primary btn-sm" onclick="openAddFeeStructureModal()">
+                            <i class="bi bi-plus-circle me-1"></i> Add Fee Structure
                         </button>
                     </div>
-                    <div class="table-responsive">
-                        <table class="erp-data-table">
-                            <thead>
-                                <tr>
-                                    <th>Program / Course</th>
-                                    <th>Tuition Fee (₹)</th>
-                                    <th>Development Fee (₹)</th>
-                                    <th>Exam Fee (₹)</th>
-                                    <th>Total Annual Fee (₹)</th>
-                                    <th>Installments Allowed</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td><strong>B.Tech — Information Technology</strong></td>
-                                    <td>₹95,000</td>
-                                    <td>₹15,000</td>
-                                    <td>₹10,000</td>
-                                    <td><strong class="text-primary">₹1,20,000</strong></td>
-                                    <td><span class="badge bg-light text-dark border">Up to 3</span></td>
-                                </tr>
-                                <tr>
-                                    <td><strong>B.Tech — Computer Engineering</strong></td>
-                                    <td>₹95,000</td>
-                                    <td>₹15,000</td>
-                                    <td>₹10,000</td>
-                                    <td><strong class="text-primary">₹1,20,000</strong></td>
-                                    <td><span class="badge bg-light text-dark border">Up to 3</span></td>
-                                </tr>
-                                <tr>
-                                    <td><strong>B.Tech — Mechanical Engineering</strong></td>
-                                    <td>₹85,000</td>
-                                    <td>₹15,000</td>
-                                    <td>₹10,000</td>
-                                    <td><strong class="text-primary">₹1,10,000</strong></td>
-                                    <td><span class="badge bg-light text-dark border">Up to 3</span></td>
-                                </tr>
-                                <tr>
-                                    <td><strong>M.Tech — Computer Science</strong></td>
-                                    <td>₹1,10,000</td>
-                                    <td>₹20,000</td>
-                                    <td>₹15,000</td>
-                                    <td><strong class="text-primary">₹1,45,000</strong></td>
-                                    <td><span class="badge bg-light text-dark border">Up to 2</span></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-
-            <!-- ================================================================
-                 SECTION 4: MANAGE USER ACCOUNTS
-                 ================================================================ -->
-            <section id="sec-admin-user-accounts" class="dashboard-section d-none">
-                <div class="erp-table-container">
-                    <div class="table-header-toolbar">
-                        <div class="table-title-group">
-                            <h3>User Accounts Administration</h3>
-                            <p>Authentication credentials and access status across all portals</p>
-                        </div>
-                    </div>
-                    <div class="table-responsive">
-                        <table class="erp-data-table">
-                            <thead>
-                                <tr>
-                                    <th>Registered Email</th>
-                                    <th>Role Name</th>
-                                    <th>Encryption</th>
-                                    <th>Status</th>
-                                    <th>Created Date</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td><code>admin@mmcoe.com</code></td>
-                                    <td><span class="topbar-role-badge badge-role-admin">ADMIN</span></td>
-                                    <td><span class="badge bg-light text-muted border">BCrypt (10)</span></td>
-                                    <td><span class="status-pill status-pill-active">ACTIVE</span></td>
-                                    <td>2025-08-17</td>
-                                </tr>
-                                <tr>
-                                    <td><code>accounts@mmcoe.com</code></td>
-                                    <td><span class="topbar-role-badge badge-role-accounts">ACCOUNTS</span></td>
-                                    <td><span class="badge bg-light text-muted border">BCrypt (10)</span></td>
-                                    <td><span class="status-pill status-pill-active">ACTIVE</span></td>
-                                    <td>2025-08-17</td>
-                                </tr>
-                                <tr>
-                                    <td><code>b25it2010@mmcoe.com</code></td>
-                                    <td><span class="topbar-role-badge badge-role-student">STUDENT</span></td>
-                                    <td><span class="badge bg-light text-muted border">BCrypt (10)</span></td>
-                                    <td><span class="status-pill status-pill-active">ACTIVE</span></td>
-                                    <td>2025-08-17</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-
-            <!-- ================================================================
-                 SECTION 5: ROLES & PERMISSIONS
-                 ================================================================ -->
-            <section id="sec-admin-roles" class="dashboard-section d-none">
-                <div class="erp-table-container p-4">
-                    <h4 class="fw-bold mb-3"><i class="bi bi-person-badge text-primary me-2"></i>Institutional Privilege Matrix</h4>
-                    <p class="text-muted mb-4">RBAC (Role-Based Access Control) enforces strict boundaries between academic categories.</p>
-
-                    <div class="row g-3">
-                        <div class="col-md-4">
-                            <div class="p-3 border rounded-3 bg-light">
-                                <div class="d-flex align-items-center gap-2 mb-2">
-                                    <span class="topbar-role-badge badge-role-admin">ADMIN</span>
-                                    <span class="fw-bold">Administrator</span>
-                                </div>
-                                <ul class="text-muted small mb-0 ps-3">
-                                    <li>Student Account Registration</li>
-                                    <li>Fee Structure Slabs Management</li>
-                                    <li>System Audit & Security Logs</li>
-                                    <li>Disaster Recovery Snapshot</li>
-                                </ul>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="p-3 border rounded-3 bg-light">
-                                <div class="d-flex align-items-center gap-2 mb-2">
-                                    <span class="topbar-role-badge badge-role-accounts">ACCOUNTS</span>
-                                    <span class="fw-bold">Accounts Officer</span>
-                                </div>
-                                <ul class="text-muted small mb-0 ps-3">
-                                    <li>Review Installment Schemes</li>
-                                    <li>Verify Bank NEFT/RTGS Settlements</li>
-                                    <li>Approve / Reject Concessions</li>
-                                    <li>Generate Financial Statements</li>
-                                </ul>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="p-3 border rounded-3 bg-light">
-                                <div class="d-flex align-items-center gap-2 mb-2">
-                                    <span class="topbar-role-badge badge-role-student">STUDENT</span>
-                                    <span class="fw-bold">Student</span>
-                                </div>
-                                <ul class="text-muted small mb-0 ps-3">
-                                    <li>Personal Fee Status Ledger</li>
-                                    <li>Apply for Fee Installments</li>
-                                    <li>Initiate Payment Gateway</li>
-                                    <li>Download Official Receipts</li>
-                                </ul>
-                            </div>
+                    <div class="content-card-body">
+                        <p class="text-secondary small mb-3">
+                            Configured annual fee slabs by department and admission quota/category.
+                        </p>
+                        <div class="table-responsive">
+                            <table class="table table-hover table-bordered mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Department</th>
+                                        <th>Category</th>
+                                        <th>Tuition Fee</th>
+                                        <th>Dev. Fee</th>
+                                        <th>Exam Fee</th>
+                                        <th>Total Annual Fee</th>
+                                        <th>Academic Year</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="feeStructureTbody">
+                                    <tr>
+                                        <td colspan="9" class="text-center text-muted py-3">Loading fee structures...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
-            </section>
-
-            <!-- ================================================================
-                 SECTION 6: AUDIT LOGS
-                 ================================================================ -->
-            <section id="sec-admin-audit-logs" class="dashboard-section d-none">
-                <div class="erp-table-container">
-                    <div class="table-header-toolbar">
-                        <div class="table-title-group">
-                            <h3>Immutable System Audit Logs</h3>
-                            <p>Real-time forensic security record of operations and authentications</p>
-                        </div>
-                    </div>
-                    <div class="table-responsive">
-                        <table class="erp-data-table" style="font-family:monospace; font-size:0.82rem;">
-                            <thead>
-                                <tr>
-                                    <th>Timestamp</th>
-                                    <th>Actor</th>
-                                    <th>Event Action</th>
-                                    <th>IP Address</th>
-                                    <th>Outcome</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>2026-08-18 00:07:05</td>
-                                    <td>admin@mmcoe.com</td>
-                                    <td>AUTHENTICATION_SUCCESS</td>
-                                    <td>127.0.0.1</td>
-                                    <td><span class="status-pill status-pill-paid">SUCCESS</span></td>
-                                </tr>
-                                <tr>
-                                    <td>2026-08-17 22:48:42</td>
-                                    <td>admin@mmcoe.com</td>
-                                    <td>CREATE_STUDENT_ACCOUNT (B25IT2011)</td>
-                                    <td>127.0.0.1</td>
-                                    <td><span class="status-pill status-pill-paid">SUCCESS</span></td>
-                                </tr>
-                                <tr>
-                                    <td>2026-08-17 22:41:57</td>
-                                    <td>SYSTEM_DATA_SEEDER</td>
-                                    <td>INITIALIZE_STUDENT_DATABASE</td>
-                                    <td>localhost</td>
-                                    <td><span class="status-pill status-pill-paid">SUCCESS</span></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-
-            <!-- ================================================================
-                 SECTION 7: SECURITY MONITORING
-                 ================================================================ -->
-            <section id="sec-admin-security" class="dashboard-section d-none">
-                <div class="erp-table-container p-4">
-                    <h4 class="fw-bold mb-3"><i class="bi bi-shield-check text-success me-2"></i>Security & Compliance Monitoring</h4>
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <div class="p-3 border rounded-3">
-                                <div class="fw-bold text-primary mb-1"><i class="bi bi-key-fill me-2"></i>Stateless JWT Authentication</div>
-                                <p class="text-muted small mb-0">HS256/384 signed cryptographic tokens with 24-hour time-to-live and automatic role enforcement.</p>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="p-3 border rounded-3">
-                                <div class="fw-bold text-success mb-1"><i class="bi bi-lock-fill me-2"></i>BCrypt Salt & Hashing</div>
-                                <p class="text-muted small mb-0">10-round adaptive cryptographic hashing protects all institutional passwords against brute force.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- ================================================================
-                 SECTION 8: BACKUP & RESTORE
-                 ================================================================ -->
-            <section id="sec-admin-backup" class="dashboard-section d-none">
-                <div class="erp-table-container p-4">
-                    <h4 class="fw-bold mb-2"><i class="bi bi-database-down text-primary me-2"></i>Disaster Recovery & PostgreSQL Snapshots</h4>
-                    <p class="text-muted mb-4">Database: <code>fee_payment_db</code> on port 5432</p>
-
-                    <button class="btn-erp-primary" onclick="alert('PostgreSQL snapshot triggered. Snapshot stored to /backups/fee_payment_db_latest.dump');">
-                        <i class="bi bi-cloud-arrow-down-fill"></i> Trigger Database Backup Snapshot
-                    </button>
-                </div>
-            </section>
+            </div>
 
         </main>
     </div>
-
 </div>
 
-<!-- ====================================================================
-     MODAL: VIEW STUDENT DETAILS
-     ==================================================================== -->
-<div class="modal fade erp-modal" id="studentDetailModal" tabindex="-1" aria-hidden="true">
+<!-- ============================================================
+     MODAL: View Student Details
+     ============================================================ -->
+<div class="modal fade" id="viewStudentModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <div class="d-flex align-items-center gap-2">
-                    <div class="avatar-initials-badge" id="modalStudentAvatar">MT</div>
-                    <div>
-                        <h6 class="modal-title fw-bold" id="modalStudentName">Student Profile</h6>
-                        <span class="text-muted small" id="modalStudentPRN">PRN</span>
-                    </div>
-                </div>
+                <h5 class="modal-title fs-6 fw-bold">
+                    <i class="bi bi-person-badge text-primary me-2"></i>Student Details
+                </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
-                <div class="row g-3">
-                    <div class="col-6">
-                        <span class="text-muted small d-block">Department</span>
-                        <strong id="modalStudentDept">-</strong>
-                    </div>
-                    <div class="col-6">
-                        <span class="text-muted small d-block">Academic Year</span>
-                        <strong id="modalStudentYear">-</strong>
-                    </div>
-                    <div class="col-6">
-                        <span class="text-muted small d-block">Division</span>
-                        <strong id="modalStudentDiv">-</strong>
-                    </div>
-                    <div class="col-6">
-                        <span class="text-muted small d-block">Status</span>
-                        <span id="modalStudentStatus" class="status-pill status-pill-active">ACTIVE</span>
-                    </div>
-                    <div class="col-12">
-                        <span class="text-muted small d-block">Registered Email</span>
-                        <code id="modalStudentEmail" class="text-primary">-</code>
-                    </div>
-                </div>
+            <div class="modal-body" id="viewStudentModalBody">
+                <!-- Injected via JS -->
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
 </div>
 
-<!-- ====================================================================
-     MODAL: ADD NEW STUDENT ACCOUNT — Full Schema Form
-     ==================================================================== -->
-<div class="modal fade erp-modal" id="addStudentModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
+<!-- ============================================================
+     MODAL: Add / Edit Fee Structure
+     ============================================================ -->
+<div class="modal fade" id="feeStructureModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <div class="d-flex align-items-center gap-2">
-                    <div style="width:34px;height:34px;background:var(--accent-indigo);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1rem;">
-                        <i class="bi bi-person-plus-fill"></i>
-                    </div>
-                    <div>
-                        <h6 class="modal-title fw-bold mb-0">Register New Student Account</h6>
-                        <div class="text-muted" style="font-size:0.73rem;">Default password: <code>Student@123</code> — student must change on first login</div>
-                    </div>
-                </div>
+                <h5 class="modal-title fs-6 fw-bold" id="feeStructureModalTitle">
+                    <i class="bi bi-cash-coin text-primary me-2"></i>Add Fee Structure
+                </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form id="addStudentForm" novalidate>
+            <form id="feeStructureForm" onsubmit="handleSaveFeeStructure(event)">
+                <input type="hidden" id="feeStructureId">
                 <div class="modal-body">
-                    <div id="addStudentAlert" class="d-none mb-3"></div>
-
-                    <!-- Personal Information -->
-                    <div class="mb-3">
-                        <div class="text-muted fw-semibold" style="font-size:0.72rem;letter-spacing:.06em;text-transform:uppercase;margin-bottom:0.5rem;">Personal Information</div>
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold small" for="addName">Student Full Name <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="addName" name="name"
-                                       placeholder="e.g. Rahul Dinesh Patil"
-                                       minlength="2" maxlength="255" required>
-                                <div class="invalid-feedback">Full name is required (2–255 characters).</div>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold small" for="addMobile">Mobile Number <span class="text-danger">*</span></label>
-                                <input type="tel" class="form-control" id="addMobile" name="mobile"
-                                       placeholder="e.g. 9876543210"
-                                       pattern="[6-9]\d{9}" maxlength="10" required>
-                                <div class="invalid-feedback">Enter valid 10-digit Indian mobile (starts with 6–9).</div>
-                            </div>
+                    <div class="mb-2">
+                        <label for="feeDepartment" class="form-label">Department</label>
+                        <select id="feeDepartment" class="form-select form-select-sm" required>
+                            <option value="Information Technology">Information Technology</option>
+                            <option value="Computer Science">Computer Science</option>
+                            <option value="Mechanical">Mechanical</option>
+                            <option value="Civil">Civil</option>
+                            <option value="Electronics">Electronics</option>
+                        </select>
+                    </div>
+                    <div class="mb-2">
+                        <label for="feeCategory" class="form-label">Category / Quota</label>
+                        <select id="feeCategory" class="form-select form-select-sm" required>
+                            <option value="OPEN">OPEN / General</option>
+                            <option value="OBC">OBC</option>
+                            <option value="SC">SC</option>
+                            <option value="ST">ST</option>
+                            <option value="EWS">EWS</option>
+                            <option value="TFWS">TFWS</option>
+                        </select>
+                    </div>
+                    <div class="row g-2 mb-2">
+                        <div class="col-md-4">
+                            <label for="feeTuition" class="form-label">Tuition Fee (&#8377;)</label>
+                            <input type="number" class="form-control form-control-sm" id="feeTuition" min="0" required oninput="calcFeeTotal()">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="feeDev" class="form-label">Dev Fee (&#8377;)</label>
+                            <input type="number" class="form-control form-control-sm" id="feeDev" min="0" required oninput="calcFeeTotal()">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="feeExam" class="form-label">Exam Fee (&#8377;)</label>
+                            <input type="number" class="form-control form-control-sm" id="feeExam" min="0" required oninput="calcFeeTotal()">
                         </div>
                     </div>
-
-                    <!-- Academic Identity -->
-                    <div class="mb-3">
-                        <div class="text-muted fw-semibold" style="font-size:0.72rem;letter-spacing:.06em;text-transform:uppercase;margin-bottom:0.5rem;">Academic Identity</div>
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold small" for="addPrn">PRN Number <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control text-uppercase" id="addPrn" name="prn"
-                                       placeholder="e.g. B25IT2012"
-                                       pattern="^B\d{2}[A-Z]{2,4}\d{4}$" maxlength="20" required>
-                                <div class="form-text">Format: B + YY + Dept + 4 digits (e.g. B25IT2012)</div>
-                                <div class="invalid-feedback">Invalid PRN. Example: B25IT2012</div>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold small" for="addEmail">Official Email <span class="text-danger">*</span></label>
-                                <input type="email" class="form-control" id="addEmail" name="email"
-                                       placeholder="e.g. b25it2012@mmcoe.com"
-                                       pattern="^[a-zA-Z0-9._%+\-]+@mmcoe\.com$" required>
-                                <div class="form-text">Must be @mmcoe.com</div>
-                                <div class="invalid-feedback">Use a valid MMCOE email (e.g. student@mmcoe.com).</div>
-                            </div>
-                        </div>
+                    <div class="mb-2">
+                        <label class="form-label">Total Annual Fee (&#8377;)</label>
+                        <input type="text" class="form-control form-control-sm bg-light fw-bold" id="feeTotalDisplay" readonly value="&#8377;0">
                     </div>
-
-                    <!-- Program Details -->
-                    <div class="mb-3">
-                        <div class="text-muted fw-semibold" style="font-size:0.72rem;letter-spacing:.06em;text-transform:uppercase;margin-bottom:0.5rem;">Program Details</div>
-                        <div class="row g-3">
-                            <div class="col-md-4">
-                                <label class="form-label fw-semibold small" for="addDepartment">Department <span class="text-danger">*</span></label>
-                                <select class="form-select" id="addDepartment" name="department" required>
-                                    <option value="" disabled selected>Select Department</option>
-                                    <option>Information Technology</option>
-                                    <option>Computer Engineering</option>
-                                    <option>Mechanical Engineering</option>
-                                    <option>Electronics & Telecommunication</option>
-                                    <option>Civil Engineering</option>
-                                    <option>Computer Science & Engineering (AI/ML)</option>
-                                </select>
-                                <div class="invalid-feedback">Department is required.</div>
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label fw-semibold small" for="addCourse">Course / Program <span class="text-danger">*</span></label>
-                                <select class="form-select" id="addCourse" name="course" required>
-                                    <option value="" disabled selected>Select Course</option>
-                                    <option>B.Tech</option>
-                                    <option>M.Tech</option>
-                                    <option>MBA</option>
-                                    <option>MCA</option>
-                                    <option>Diploma</option>
-                                </select>
-                                <div class="invalid-feedback">Course is required.</div>
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label fw-semibold small" for="addAcademicYear">Academic Year <span class="text-danger">*</span></label>
-                                <select class="form-select" id="addAcademicYear" name="academicYear" required>
-                                    <option value="" disabled selected>Select Year</option>
-                                    <option>First Year (FE)</option>
-                                    <option>Second Year (SE)</option>
-                                    <option>Third Year (TE)</option>
-                                    <option>Fourth Year (BE)</option>
-                                    <option>First Year PG</option>
-                                    <option>Second Year PG</option>
-                                </select>
-                                <div class="invalid-feedback">Academic year is required.</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Account Status -->
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold small" for="addStatus">Account Status</label>
-                            <select class="form-select" id="addStatus" name="status">
-                                <option value="ACTIVE" selected>ACTIVE</option>
-                                <option value="PENDING">PENDING</option>
-                                <option value="INACTIVE">INACTIVE</option>
-                            </select>
-                        </div>
-                        <div class="col-md-6 d-flex align-items-end">
-                            <div class="alert alert-info mb-0 py-2 px-3 w-100" style="font-size:0.78rem;border-radius:8px;">
-                                <i class="bi bi-info-circle me-1"></i> Default password <code>Student@123</code> will be set. Student must change it on first login.
-                            </div>
-                        </div>
+                    <div class="mb-2">
+                        <label for="feeYear" class="form-label">Academic Year</label>
+                        <input type="text" class="form-control form-control-sm" id="feeYear" value="2025-26" required>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal" id="cancelAddStudentBtn">Cancel</button>
-                    <button type="submit" class="btn btn-erp-primary btn-sm" id="submitAddStudentBtn">
-                        <i class="bi bi-person-plus-fill me-1"></i>Create Student Account
-                    </button>
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary btn-sm">Save Fee Structure</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-<!-- Chart.js for Fee Analytics -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
-
 <!-- Bootstrap 5 Bundle JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
-<!-- Global Auth & Session Script -->
+<!-- Auth & Admin Scripts -->
 <script src="../assets/js/auth.js"></script>
-
-<!-- Global Dashboard Script -->
-<script src="../assets/js/dashboard.js"></script>
-
 <script src="../assets/js/admin.js"></script>
+
 <script>
-// ── Dashboard Greeting ──────────────────────────────────────────────────────
-function setDashboardGreeting() {
-    const hour = new Date().getHours();
-    const greet = hour < 12 ? 'Good Morning' : hour < 17 ? 'Good Afternoon' : 'Good Evening';
-    const el = document.getElementById('dashboardGreeting');
-    if (el) el.textContent = greet + ', Administrator \u{1F44B}';
-}
+// Simple section switcher
+function showSection(sectionId) {
+    document.querySelectorAll('.admin-section').forEach(sec => sec.classList.add('d-none'));
+    const target = document.getElementById(sectionId);
+    if (target) target.classList.remove('d-none');
 
-// ── Fee Collection Analytics ────────────────────────────────────────────────
-let _analyticsChart = null;
-
-const ANALYTICS_DATA = {
-    year: {
-        labels:  ['Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar'],
-        amounts: [825000, 612000, 490000, 278000, 935000, 1150000, 720000, 480000, 390000, 1050000, 680000, 540000],
-        subtitle: 'Monthly fee collection \u2014 Academic Year 2025-26',
-        periodLabel: 'Annual (AY 2025-26)'
-    },
-    month: {
-        labels:  ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
-        amounts: [185000, 240000, 310000, 195000],
-        subtitle: 'Weekly fee collection \u2014 August 2025',
-        periodLabel: 'Monthly (Aug 2025)'
-    },
-    week: {
-        labels:  ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-        amounts: [42000, 67000, 38000, 91000, 55000, 14000, 0],
-        subtitle: 'Daily fee collection \u2014 Current Week',
-        periodLabel: 'This Week'
-    }
-};
-
-function formatINR(n) {
-    if (n >= 10000000) return '\u20b9' + (n / 10000000).toFixed(2) + ' Cr';
-    if (n >= 100000)   return '\u20b9' + (n / 100000).toFixed(2) + ' L';
-    if (n >= 1000)     return '\u20b9' + (n / 1000).toFixed(1) + 'K';
-    return '\u20b9' + n.toLocaleString('en-IN');
-}
-
-function renderAnalyticsChart(period) {
-    const d = ANALYTICS_DATA[period] || ANALYTICS_DATA.year;
-    const ctx = document.getElementById('feeAnalyticsChart');
-    if (!ctx) return;
-
-    // Update text summaries
-    const totalRaw = d.amounts.reduce((a, b) => a + b, 0);
-    const totalEl  = document.getElementById('analyticsTotalCollected');
-    const subtitleEl = document.getElementById('analyticsSubtitle');
-    const periodLbl  = document.getElementById('analyticsPeriodLabel');
-    if (totalEl)   totalEl.textContent = '\u20b9' + totalRaw.toLocaleString('en-IN');
-    if (subtitleEl) subtitleEl.textContent = d.subtitle;
-    if (periodLbl) periodLbl.textContent = d.periodLabel;
-
-    // Destroy previous chart
-    if (_analyticsChart) { _analyticsChart.destroy(); _analyticsChart = null; }
-
-    const maxVal = Math.max(...d.amounts);
-    const gradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 260);
-    gradient.addColorStop(0,   'rgba(37, 99, 235, 0.85)');
-    gradient.addColorStop(0.6, 'rgba(37, 99, 235, 0.45)');
-    gradient.addColorStop(1,   'rgba(37, 99, 235, 0.05)');
-
-    _analyticsChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: d.labels,
-            datasets: [{
-                label: 'Fee Collected (\u20b9)',
-                data: d.amounts,
-                backgroundColor: gradient,
-                borderColor: 'rgba(37, 99, 235, 0.9)',
-                borderWidth: 1.5,
-                borderRadius: 6,
-                borderSkipped: false,
-                hoverBackgroundColor: 'rgba(59, 130, 246, 0.95)',
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: true,
-            animation: { duration: 500, easing: 'easeInOutQuart' },
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    callbacks: {
-                        label: ctx => ' ' + formatINR(ctx.parsed.y)
-                    },
-                    backgroundColor: 'rgba(10,25,47,0.92)',
-                    titleFont: { family: "'Plus Jakarta Sans', sans-serif", size: 12 },
-                    bodyFont:  { family: "'Plus Jakarta Sans', sans-serif", size: 13 },
-                    padding: 10,
-                    cornerRadius: 8
-                }
-            },
-            scales: {
-                x: {
-                    grid: { display: false },
-                    border: { display: false },
-                    ticks: { font: { family: "'Plus Jakarta Sans', sans-serif", size: 11 }, color: '#64748b' }
-                },
-                y: {
-                    grid: { color: 'rgba(100,116,139,0.08)', drawBorder: false },
-                    border: { display: false, dash: [4, 4] },
-                    ticks: {
-                        font: { family: "'Plus Jakarta Sans', sans-serif", size: 11 },
-                        color: '#64748b',
-                        callback: v => formatINR(v)
-                    },
-                    beginAtZero: true
-                }
-            }
-        }
+    document.querySelectorAll('.nav-link-custom').forEach(link => {
+        link.classList.toggle('active', link.getAttribute('data-section') === sectionId);
     });
-}
 
-function onAnalyticsPeriodChange(period) {
-    renderAnalyticsChart(period);
-}
-
-// ── Load live stats from backend ────────────────────────────────────────────
-async function loadAdminDashboardStats() {
-    try {
-        const token = localStorage.getItem('fpm_token');
-        if (!token) return;
-        const url = (typeof API_BASE !== 'undefined' ? API_BASE : '/api') + '/admin/dashboard';
-        const res = await fetch(url, {
-            headers: { 'Authorization': 'Bearer ' + token }
-        });
-        if (!res.ok) return;
-        const json = await res.json();
-        const data = json.data || {};
-        const ts = document.getElementById('statTotalStudents');
-        const aa = document.getElementById('statActiveAccounts');
-        if (ts) ts.textContent = Number(data.totalStudents || 0).toLocaleString('en-IN');
-        if (aa) aa.textContent = Number((data.activeStudents || 0) + 3).toLocaleString('en-IN'); // +3 for admin+accounts+system
-    } catch (e) {
-        const ts = document.getElementById('statTotalStudents');
-        const aa = document.getElementById('statActiveAccounts');
-        if (ts) ts.textContent = '10';
-        if (aa) aa.textContent = '13';
+    const titleEl = document.getElementById('pageHeaderTitle');
+    if (titleEl) {
+        if (sectionId === 'sec-admin-students') titleEl.textContent = 'Manage Students';
+        else if (sectionId === 'sec-admin-fee-structure') titleEl.textContent = 'Manage Fee Structure';
+        else titleEl.textContent = 'Admin Dashboard';
     }
 }
 
-// ── Init on load ─────────────────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', () => {
-    setDashboardGreeting();
-    renderAnalyticsChart('year');
-    loadAdminDashboardStats();
+function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('show');
+}
+
+// Check hash on load
+window.addEventListener('DOMContentLoaded', () => {
+    const hash = window.location.hash;
+    if (hash === '#students') showSection('sec-admin-students');
+    else if (hash === '#fee-structure') showSection('sec-admin-fee-structure');
+    else showSection('sec-admin-dashboard');
 });
-
-// ── Utility functions ────────────────────────────────────────────────────────
-function viewStudentModal(name, prn, email, dept, year, div, status) {
-    document.getElementById('modalStudentName').textContent = name;
-    document.getElementById('modalStudentPRN').textContent = prn;
-    document.getElementById('modalStudentEmail').textContent = email;
-    document.getElementById('modalStudentDept').textContent = dept;
-    document.getElementById('modalStudentYear').textContent = year;
-    document.getElementById('modalStudentDiv').textContent = div;
-    document.getElementById('modalStudentAvatar').textContent = name.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
-    const statEl = document.getElementById('modalStudentStatus');
-    statEl.textContent = status;
-    statEl.className = status === 'ACTIVE' ? 'status-pill status-pill-active' : 'status-pill status-pill-inactive';
-    new bootstrap.Modal(document.getElementById('studentDetailModal')).show();
-}
-
-function filterTable(input, tableId) {
-    const term = input.value.toLowerCase();
-    const rows = document.querySelectorAll(`#${tableId} tbody tr`);
-    rows.forEach(r => {
-        r.style.display = r.textContent.toLowerCase().includes(term) ? '' : 'none';
-    });
-}
 </script>
 
 </body>

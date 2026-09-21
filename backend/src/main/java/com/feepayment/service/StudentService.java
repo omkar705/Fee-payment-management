@@ -23,9 +23,11 @@ public class StudentService {
     private final StudentRepository studentRepository;
     private final UserRepository userRepository;
     private final JdbcTemplate jdbc;
+    private final com.feepayment.repository.InstallmentRequestRepository installmentRequestRepository;
 
     // Total annual fee per student (can be made configurable per course later)
     private static final BigDecimal TOTAL_FEE = new BigDecimal("120000.00");
+
 
     public StudentData getProfile() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -238,4 +240,46 @@ public class StudentService {
         }
         return data;
     }
+
+    // ============================================================
+    // Exactly 2-Installment Plan Methods
+    // ============================================================
+    public void applyForInstallment(String reason) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        Student student = studentRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("Student not found."));
+
+        installmentRequestRepository.create(student.getId(), student.getAcademicYear(), reason);
+    }
+
+    public Map<String, Object> getInstallmentPlan() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        Student student = studentRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("Student not found."));
+
+        Map<String, Object> plan = new HashMap<>();
+        var opt = installmentRequestRepository.findLatestByStudentId(student.getId());
+
+        if (opt.isPresent()) {
+            var ir = opt.get();
+            plan.put("hasRequest", true);
+            plan.put("status", ir.getStatus());
+            plan.put("reason", ir.getReason());
+            plan.put("appliedDate", ir.getAppliedDate() != null ? ir.getAppliedDate().toString() : "");
+            plan.put("reviewedBy", ir.getReviewedBy());
+        } else {
+            plan.put("hasRequest", false);
+            plan.put("status", "NOT_APPLIED");
+        }
+
+        // Exactly 2 installments schedule
+        plan.put("installmentCount", 2);
+        plan.put("installments", List.of(
+            Map.of("installmentNumber", 1, "amount", 60000, "dueDate", "15 Oct 2025", "term", "Semester 1 (50%)"),
+            Map.of("installmentNumber", 2, "amount", 60000, "dueDate", "15 Feb 2026", "term", "Semester 2 (50%)")
+        ));
+
+        return plan;
+    }
 }
+

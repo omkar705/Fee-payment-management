@@ -3,48 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Add New Student — MMCOE Fee Payment Management">
     <title>Add Student — Fee Payment Management | MMCOE</title>
 
+    <!-- Bootstrap 5.3.3 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link href="../assets/css/style.css" rel="stylesheet">
+    <!-- Dashboard CSS -->
     <link href="../assets/css/dashboard.css" rel="stylesheet">
 </head>
 <body data-page="admin-add-student">
 
-<div class="sidebar-overlay" id="sidebarOverlay"></div>
-
 <div class="dashboard-layout">
 
     <!-- SIDEBAR -->
-    <nav class="sidebar" id="sidebar">
+    <aside class="sidebar" id="sidebar">
         <div class="sidebar-brand">
-            <div class="sidebar-brand-icon"><i class="bi bi-mortarboard-fill"></i></div>
-            <div class="sidebar-brand-text">
-                <div class="brand-name">FPM Platform</div>
-                <div class="brand-sub">MMCOE</div>
+            <i class="bi bi-mortarboard-fill"></i>
+            <div>
+                <div class="sidebar-brand-title">MMCOE Admin</div>
+                <div class="sidebar-brand-sub">Fee Management System</div>
             </div>
         </div>
-        <div class="sidebar-user">
-            <div class="sidebar-user-avatar" id="sidebarUserAvatar">A</div>
-            <div class="sidebar-user-info">
-                <div class="user-name" id="sidebarUserName">Administrator</div>
-                <div class="user-role" id="sidebarUserRole">Admin</div>
-            </div>
-        </div>
+
         <nav class="sidebar-nav">
-            <div class="sidebar-nav-label">Navigation</div>
-            <a href="dashboard.html" class="sidebar-nav-item"><i class="bi bi-speedometer2"></i> Dashboard</a>
-            <a href="students.html" class="sidebar-nav-item"><i class="bi bi-people"></i> Students</a>
-            <a href="add-student.html" class="sidebar-nav-item active"><i class="bi bi-person-plus"></i> Add Student</a>
-            <div class="sidebar-nav-label">Account</div>
-            <a href="profile.html" class="sidebar-nav-item"><i class="bi bi-person-circle"></i> My Profile</a>
-            <a href="#" class="sidebar-nav-item logout" data-action="logout"><i class="bi bi-box-arrow-right"></i> Sign Out</a>
+            <div class="sidebar-nav-header">Main Menu</div>
+            <a href="dashboard.html" class="nav-link-custom">
+                <i class="bi bi-speedometer2"></i> Dashboard Overview
+            </a>
+            <a href="students.html" class="nav-link-custom">
+                <i class="bi bi-people"></i> Manage Students
+            </a>
+            <a href="dashboard.html#fee-structure" class="nav-link-custom">
+                <i class="bi bi-cash-stack"></i> Manage Fee Structure
+            </a>
+            <a href="add-student.html" class="nav-link-custom active">
+                <i class="bi bi-person-plus"></i> Add Student
+            </a>
+            <a href="../reports/reports.html" class="nav-link-custom">
+                <i class="bi bi-file-earmark-bar-graph"></i> Reports &amp; Analysis
+            </a>
+
+            <div class="sidebar-nav-header">Account</div>
+            <a href="profile.html" class="nav-link-custom">
+                <i class="bi bi-person-circle"></i> My Profile
+            </a>
+            <a href="#" class="nav-link-custom text-danger" onclick="logout()">
+                <i class="bi bi-box-arrow-right"></i> Sign Out
+            </a>
         </nav>
-        <div class="sidebar-footer"><div class="version">Milestone 1 · v1.0.0</div></div>
-    </nav>
+
+        <div class="sidebar-footer">
+            <span>AY 2025-26 &bull; Pune University</span>
+        </div>
+    </aside>
 
     <!-- MAIN CONTENT -->
     <div class="main-content">
@@ -52,218 +64,161 @@
         <!-- Topbar -->
         <header class="topbar">
             <div class="topbar-left">
-                <button class="topbar-toggle" id="sidebarToggle"><i class="bi bi-list"></i></button>
-                <span class="topbar-title">Add New Student</span>
+                <button class="btn btn-outline-secondary btn-sm d-lg-none" type="button" onclick="document.getElementById('sidebar').classList.toggle('show')">
+                    <i class="bi bi-list"></i>
+                </button>
+                <h1 class="topbar-title">Add New Student</h1>
             </div>
             <div class="topbar-right">
-                <div class="topbar-user">
-                    <div class="user-avatar" id="topbarAvatar">A</div>
-                    <div class="user-info d-none d-md-block">
-                        <div class="name" id="topbarUserName">Administrator</div>
-                        <div class="role-tag" id="topbarUserRole">Admin</div>
+                <a href="students.html" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-arrow-left me-1"></i> Back to Directory
+                </a>
+                <div class="user-badge">
+                    <div class="user-avatar">A</div>
+                    <div>
+                        <div class="user-name">Administrator</div>
+                        <div class="user-role">System Admin</div>
                     </div>
                 </div>
             </div>
         </header>
 
-        <main class="page-content">
-            <div class="page-header">
-                <h1>Add New Student</h1>
-                <ol class="breadcrumb mb-0">
-                    <li class="breadcrumb-item text-muted">Home</li>
-                    <li class="breadcrumb-item"><a href="students.html" style="color:inherit;text-decoration:none;">Students</a></li>
-                    <li class="breadcrumb-item active">Add Student</li>
-                </ol>
-            </div>
-
+        <!-- Page Body -->
+        <main class="page-body">
             <div class="row justify-content-center">
                 <div class="col-lg-8">
-
-                    <!-- Info Banner -->
-                    <div class="alert alert-info d-flex gap-2 mb-3" style="font-size:0.875rem;">
-                        <i class="bi bi-info-circle-fill mt-1 flex-shrink-0"></i>
-                        <div>
-                            <strong>Student Account Creation</strong> — Fill in the form below to create a new student account.
-                            The student will receive their login credentials at their MMCOE email address.
-                            Default password is <code>Student@123</code> (student should change on first login).
+                    <div class="content-card">
+                        <div class="content-card-header">
+                            <h3><i class="bi bi-person-plus text-primary"></i> Student Registration Form</h3>
                         </div>
-                    </div>
+                        <div class="content-card-body">
+                            <div id="addStudentAlert" class="alert d-none py-2 px-3 mb-3"></div>
 
-                    <!-- Form Alerts -->
-                    <div id="formSuccess" class="alert alert-success d-none align-items-center gap-2" style="display:none !important;font-size:0.875rem;">
-                        <i class="bi bi-check-circle-fill"></i> <span></span>
-                    </div>
-                    <div id="formError" class="alert alert-danger d-none align-items-center gap-2" style="display:none !important;font-size:0.875rem;">
-                        <i class="bi bi-exclamation-circle-fill"></i> <span></span>
-                    </div>
-
-                    <!-- Add Student Form -->
-                    <div class="section-card">
-                        <div class="section-card-header">
-                            <h2><i class="bi bi-person-plus"></i> Student Information</h2>
-                        </div>
-                        <div class="card-body p-4">
-                            <form id="addStudentForm" novalidate>
-
-                                <!-- Row 1: Name + PRN -->
-                                <div class="row g-3 mb-3">
+                            <form id="addStudentForm" onsubmit="handleRegisterStudent(event)">
+                                <div class="row g-3">
                                     <div class="col-md-6">
-                                        <label class="form-label" for="fullName">
-                                            Full Name <span class="text-danger">*</span>
-                                        </label>
-                                        <input type="text" class="form-control" id="fullName"
-                                               placeholder="e.g., Manan Tote" required>
-                                        <div class="invalid-feedback" id="fullNameFeedback"></div>
+                                        <label for="studentName" class="form-label">Full Name <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="studentName" placeholder="e.g. Ramesh Kumar Sharma" required>
                                     </div>
                                     <div class="col-md-6">
-                                        <label class="form-label" for="prn">
-                                            PRN (Student ID) <span class="text-danger">*</span>
-                                        </label>
-                                        <input type="text" class="form-control" id="prn"
-                                               placeholder="e.g., B25IT2010" required maxlength="12"
-                                               style="text-transform:uppercase; font-family:monospace;">
-                                        <div class="invalid-feedback" id="prnFeedback">Enter a valid PRN. Example: B25IT2010</div>
-                                        <div class="form-text">Format: B + 2 digits + dept code + 4 digits</div>
-                                    </div>
-                                </div>
-
-                                <!-- Row 2: Email + Mobile -->
-                                <div class="row g-3 mb-3">
-                                    <div class="col-md-6">
-                                        <label class="form-label" for="studentEmail">
-                                            MMCOE Email <span class="text-danger">*</span>
-                                        </label>
-                                        <input type="email" class="form-control" id="studentEmail"
-                                               placeholder="e.g., student@mmcoe.com" required>
-                                        <div class="invalid-feedback" id="studentEmailFeedback">Must be an @mmcoe.com email.</div>
+                                        <label for="studentPrn" class="form-label">PRN Number <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control text-uppercase" id="studentPrn" placeholder="e.g. B25IT2011" required>
                                     </div>
                                     <div class="col-md-6">
-                                        <label class="form-label" for="mobile">
-                                            Mobile Number <span class="text-danger">*</span>
-                                        </label>
-                                        <div class="input-group">
-                                            <span class="input-group-text bg-white">+91</span>
-                                            <input type="tel" class="form-control" id="mobile"
-                                                   placeholder="10-digit mobile number" required maxlength="10">
-                                        </div>
-                                        <div class="invalid-feedback" id="mobileFeedback">Enter a valid Indian mobile number.</div>
+                                        <label for="studentEmail" class="form-label">Email Address <span class="text-danger">*</span></label>
+                                        <input type="email" class="form-control" id="studentEmail" placeholder="e.g. ramesh@mmcoe.com" required>
                                     </div>
-                                </div>
-
-                                <!-- Row 3: Department + Course -->
-                                <div class="row g-3 mb-3">
                                     <div class="col-md-6">
-                                        <label class="form-label" for="department">
-                                            Department <span class="text-danger">*</span>
-                                        </label>
-                                        <select class="form-select" id="department" required>
-                                            <option value="">Select department</option>
+                                        <label for="studentMobile" class="form-label">Mobile Number <span class="text-danger">*</span></label>
+                                        <input type="tel" class="form-control" id="studentMobile" placeholder="e.g. 9876543210" pattern="[0-9]{10}" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="studentDept" class="form-label">Department <span class="text-danger">*</span></label>
+                                        <select class="form-select" id="studentDept" required>
+                                            <option value="">Select Department</option>
                                             <option value="Information Technology">Information Technology</option>
                                             <option value="Computer Science">Computer Science</option>
-                                            <option value="Mechanical">Mechanical Engineering</option>
-                                            <option value="Civil">Civil Engineering</option>
-                                            <option value="Electronics">Electronics & Telecom</option>
-                                            <option value="Artificial Intelligence">Artificial Intelligence</option>
+                                            <option value="Mechanical">Mechanical</option>
+                                            <option value="Civil">Civil</option>
+                                            <option value="Electronics">Electronics</option>
                                         </select>
-                                        <div class="invalid-feedback" id="departmentFeedback">Please select a department.</div>
                                     </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label" for="course">
-                                            Course <span class="text-danger">*</span>
-                                        </label>
-                                        <select class="form-select" id="course" required>
-                                            <option value="">Select course</option>
-                                            <option value="B.Tech">B.Tech</option>
+                                    <div class="col-md-3">
+                                        <label for="studentCourse" class="form-label">Course</label>
+                                        <select class="form-select" id="studentCourse">
+                                            <option value="B.Tech" selected>B.Tech</option>
                                             <option value="M.Tech">M.Tech</option>
-                                            <option value="MBA">MBA</option>
-                                            <option value="MCA">MCA</option>
                                         </select>
-                                        <div class="invalid-feedback" id="courseFeedback">Please select a course.</div>
                                     </div>
-                                </div>
-
-                                <!-- Row 4: Academic Year + Role -->
-                                <div class="row g-3 mb-4">
-                                    <div class="col-md-6">
-                                        <label class="form-label" for="academicYear">
-                                            Academic Year <span class="text-danger">*</span>
-                                        </label>
-                                        <select class="form-select" id="academicYear" required>
-                                            <option value="">Select academic year</option>
-                                            <option value="2025-26">2025-26</option>
+                                    <div class="col-md-3">
+                                        <label for="studentYear" class="form-label">Academic Year</label>
+                                        <select class="form-select" id="studentYear">
+                                            <option value="2025-26" selected>2025-26</option>
                                             <option value="2024-25">2024-25</option>
-                                            <option value="2023-24">2023-24</option>
-                                            <option value="2022-23">2022-23</option>
                                         </select>
-                                        <div class="invalid-feedback" id="academicYearFeedback">Please select academic year.</div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label">Role</label>
-                                        <div class="form-control" style="background:#f8fafc;cursor:not-allowed;color:#6b7280;">
-                                            <i class="bi bi-person-badge me-2 text-primary"></i>
-                                            Student <span class="badge bg-primary ms-1" style="border-radius:30px;font-size:0.72rem;">Auto-assigned</span>
-                                        </div>
-                                        <div class="form-text">Role is automatically set to Student.</div>
                                     </div>
                                 </div>
 
-                                <!-- Buttons -->
-                                <div class="d-flex gap-3 justify-content-end pt-3 border-top">
-                                    <button type="button" class="btn btn-outline-secondary" id="cancelBtn">
-                                        <i class="bi bi-x-circle me-1"></i> Cancel
-                                    </button>
-                                    <button type="submit" class="btn btn-primary px-4" id="submitBtn">
-                                        <i class="bi bi-person-plus me-1"></i> Create Student
+                                <hr class="my-4 text-muted">
+
+                                <div class="d-flex justify-content-end gap-2">
+                                    <a href="students.html" class="btn btn-secondary">Cancel</a>
+                                    <button type="submit" class="btn btn-primary" id="saveStudentBtn">
+                                        <i class="bi bi-check2-circle me-1"></i> Register Student
                                     </button>
                                 </div>
-
                             </form>
                         </div>
                     </div>
-
-                    <!-- Validation Reference Card -->
-                    <div class="section-card mt-3">
-                        <div class="section-card-header">
-                            <h2><i class="bi bi-question-circle"></i> Validation Reference</h2>
-                        </div>
-                        <div class="card-body p-3">
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <div style="background:#f0f4ff;border-radius:8px;padding:0.85rem;">
-                                        <div class="fw-semibold mb-1" style="font-size:0.85rem;color:#1a56db;">
-                                            <i class="bi bi-card-text me-1"></i>PRN Format
-                                        </div>
-                                        <code style="font-size:0.8rem;">B25IT2010</code>
-                                        <div style="font-size:0.78rem;color:#6b7280;margin-top:0.25rem;">
-                                            B + 2-digit year + dept code + 4-digit number
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div style="background:#f0f4ff;border-radius:8px;padding:0.85rem;">
-                                        <div class="fw-semibold mb-1" style="font-size:0.85rem;color:#1a56db;">
-                                            <i class="bi bi-envelope me-1"></i>Email Format
-                                        </div>
-                                        <code style="font-size:0.8rem;">student@mmcoe.com</code>
-                                        <div style="font-size:0.78rem;color:#6b7280;margin-top:0.25rem;">
-                                            Must end with @mmcoe.com
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
                 </div>
             </div>
         </main>
     </div>
 </div>
 
-<div class="toast-container"></div>
-
+<!-- Bootstrap 5 Bundle JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="../assets/js/auth.js"></script>
-<script src="../assets/js/admin.js"></script>
+
+<script>
+async function handleRegisterStudent(e) {
+    e.preventDefault();
+
+    const name = document.getElementById('studentName').value.trim();
+    const prn = document.getElementById('studentPrn').value.trim().toUpperCase();
+    const email = document.getElementById('studentEmail').value.trim();
+    const mobile = document.getElementById('studentMobile').value.trim();
+    const department = document.getElementById('studentDept').value;
+    const course = document.getElementById('studentCourse').value;
+    const academicYear = document.getElementById('studentYear').value;
+
+    const alertEl = document.getElementById('addStudentAlert');
+    const submitBtn = document.getElementById('saveStudentBtn');
+
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Saving...';
+
+    const payload = {
+        name,
+        prn,
+        email,
+        mobile,
+        department,
+        course,
+        academicYear,
+        status: 'ACTIVE'
+    };
+
+    try {
+        const result = await apiFetch('/admin/students', {
+            method: 'POST',
+            body: JSON.stringify(payload)
+        });
+
+        if (result && result.ok) {
+            alertEl.className = 'alert alert-success py-2 px-3 mb-3';
+            alertEl.textContent = 'Student registered successfully! Redirecting...';
+            alertEl.classList.remove('d-none');
+            setTimeout(() => {
+                window.location.href = 'students.html';
+            }, 1200);
+            return;
+        } else {
+            const msg = result && result.data && result.data.message ? result.data.message : 'Failed to register student.';
+            alertEl.className = 'alert alert-danger py-2 px-3 mb-3';
+            alertEl.textContent = msg;
+            alertEl.classList.remove('d-none');
+        }
+    } catch (err) {
+        alertEl.className = 'alert alert-danger py-2 px-3 mb-3';
+        alertEl.textContent = 'Error connecting to server. Please try again.';
+        alertEl.classList.remove('d-none');
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="bi bi-check2-circle me-1"></i> Register Student';
+    }
+}
+</script>
+
 </body>
 </html>
