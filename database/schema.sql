@@ -76,11 +76,14 @@ CREATE INDEX idx_prt_user_id       ON password_reset_tokens(user_id);
 CREATE TABLE IF NOT EXISTS transactions (
     transaction_id BIGSERIAL PRIMARY KEY,
     payment_id BIGINT NOT NULL,
+    student_id BIGINT REFERENCES students(id) ON DELETE SET NULL,
+    order_id VARCHAR(255),
     transaction_reference VARCHAR(255) NOT NULL UNIQUE,
-    gateway_name VARCHAR(100) NOT NULL,
+    gateway_name VARCHAR(100) NOT NULL DEFAULT 'RAZORPAY',
     transaction_status VARCHAR(50) NOT NULL,
     transaction_date TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     amount NUMERIC(12, 2) NOT NULL,
+    currency VARCHAR(10) NOT NULL DEFAULT 'INR',
     verified_by VARCHAR(100),
     version BIGINT NOT NULL DEFAULT 1,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
@@ -102,8 +105,23 @@ CREATE TABLE IF NOT EXISTS receipts (
     transaction_id BIGINT NOT NULL UNIQUE REFERENCES transactions(transaction_id) ON DELETE CASCADE,
     student_id BIGINT NOT NULL,
     generated_date TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    receipt_url VARCHAR(500)
+    receipt_url VARCHAR(500),
+    receipt_number VARCHAR(100)
 );
+
+CREATE TABLE IF NOT EXISTS fee_payments (
+    payment_id     BIGSERIAL PRIMARY KEY,
+    student_id     BIGINT NOT NULL REFERENCES students(id) ON DELETE CASCADE,
+    amount_paid    NUMERIC(12, 2) NOT NULL,
+    payment_method VARCHAR(50) NOT NULL DEFAULT 'RAZORPAY',
+    status         VARCHAR(20) NOT NULL DEFAULT 'PENDING',
+    payment_date   DATE,
+    description    VARCHAR(255),
+    created_at     TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_fee_payments_student ON fee_payments(student_id);
+CREATE INDEX IF NOT EXISTS idx_fee_payments_status  ON fee_payments(status);
 
 CREATE TABLE IF NOT EXISTS payment_settlements (
     settlement_id BIGSERIAL PRIMARY KEY,

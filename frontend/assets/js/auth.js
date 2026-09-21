@@ -25,6 +25,15 @@ function getRole()   { return localStorage.getItem('fpm_role'); }
 function getName()   { return localStorage.getItem('fpm_name'); }
 function getEmail()  { return localStorage.getItem('fpm_email'); }
 function getUserId() { return localStorage.getItem('fpm_userId'); }
+function getUser() {
+    if (!isLoggedIn()) return null;
+    return {
+        email: getEmail(),
+        role: getRole(),
+        name: getName(),
+        userId: getUserId()
+    };
+}
 
 function clearSession() {
     localStorage.removeItem('fpm_token');

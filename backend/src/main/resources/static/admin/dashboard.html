@@ -44,9 +44,6 @@
             </a>
 
             <div class="sidebar-nav-header">Account</div>
-            <a href="profile.html" class="nav-link-custom">
-                <i class="bi bi-person-circle"></i> My Profile
-            </a>
             <a href="#" class="nav-link-custom text-danger" onclick="logout()">
                 <i class="bi bi-box-arrow-right"></i> Sign Out
             </a>
@@ -337,6 +334,71 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================
+     MODAL: Edit Student
+     ============================================================ -->
+<div class="modal fade" id="editStudentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fs-6 fw-bold">
+                    <i class="bi bi-pencil-square text-primary me-2"></i>Edit Student Information
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="editStudentForm" onsubmit="handleSaveStudent(event)">
+                <input type="hidden" id="editStudentId">
+                <div class="modal-body">
+                    <div class="mb-2">
+                        <label for="editStudentPrn" class="form-label small fw-semibold">PRN</label>
+                        <input type="text" class="form-control form-control-sm bg-light" id="editStudentPrn" readonly>
+                    </div>
+                    <div class="mb-2">
+                        <label for="editStudentName" class="form-label small fw-semibold">Full Name</label>
+                        <input type="text" class="form-control form-control-sm" id="editStudentName" required>
+                    </div>
+                    <div class="mb-2">
+                        <label for="editStudentEmail" class="form-label small fw-semibold">Email Address</label>
+                        <input type="email" class="form-control form-control-sm" id="editStudentEmail" required>
+                    </div>
+                    <div class="mb-2">
+                        <label for="editStudentMobile" class="form-label small fw-semibold">Mobile Number</label>
+                        <input type="tel" class="form-control form-control-sm" id="editStudentMobile" required>
+                    </div>
+                    <div class="mb-2">
+                        <label for="editStudentDept" class="form-label small fw-semibold">Department</label>
+                        <select id="editStudentDept" class="form-select form-select-sm" required>
+                            <option value="Information Technology">Information Technology</option>
+                            <option value="Computer Science">Computer Science</option>
+                            <option value="Mechanical">Mechanical</option>
+                            <option value="Civil">Civil</option>
+                            <option value="Electronics">Electronics</option>
+                        </select>
+                    </div>
+                    <div class="row g-2 mb-2">
+                        <div class="col-6">
+                            <label for="editStudentCourse" class="form-label small fw-semibold">Course</label>
+                            <input type="text" class="form-control form-control-sm" id="editStudentCourse" value="B.Tech" required>
+                        </div>
+                        <div class="col-6">
+                            <label for="editStudentStatus" class="form-label small fw-semibold">Status</label>
+                            <select id="editStudentStatus" class="form-select form-select-sm">
+                                <option value="ACTIVE">ACTIVE</option>
+                                <option value="INACTIVE">INACTIVE</option>
+                                <option value="PENDING">PENDING</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary btn-sm">Save Changes</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

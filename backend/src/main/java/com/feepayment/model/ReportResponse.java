@@ -3,22 +3,22 @@ package com.feepayment.model;
 import java.math.BigDecimal;
 
 /**
- * ReportResponse — Model for Reports & Analytics outputs.
+ * ReportResponse — Simple DTO models for Reports & Analytics outputs.
  */
 public class ReportResponse {
 
     public static class SummaryKpi {
         private BigDecimal totalFeeCollection;
         private BigDecimal totalOutstandingFee;
-        private Double paymentSuccessRate;
+        private Long totalSuccessfulPayments;
         private Long pendingInstallments;
 
         public SummaryKpi() {}
 
-        public SummaryKpi(BigDecimal totalFeeCollection, BigDecimal totalOutstandingFee, Double paymentSuccessRate, Long pendingInstallments) {
+        public SummaryKpi(BigDecimal totalFeeCollection, BigDecimal totalOutstandingFee, Long totalSuccessfulPayments, Long pendingInstallments) {
             this.totalFeeCollection = totalFeeCollection;
             this.totalOutstandingFee = totalOutstandingFee;
-            this.paymentSuccessRate = paymentSuccessRate;
+            this.totalSuccessfulPayments = totalSuccessfulPayments;
             this.pendingInstallments = pendingInstallments;
         }
 
@@ -28,136 +28,87 @@ public class ReportResponse {
         public BigDecimal getTotalOutstandingFee() { return totalOutstandingFee; }
         public void setTotalOutstandingFee(BigDecimal totalOutstandingFee) { this.totalOutstandingFee = totalOutstandingFee; }
 
-        public Double getPaymentSuccessRate() { return paymentSuccessRate; }
-        public void setPaymentSuccessRate(Double paymentSuccessRate) { this.paymentSuccessRate = paymentSuccessRate; }
+        public Long getTotalSuccessfulPayments() { return totalSuccessfulPayments; }
+        public void setTotalSuccessfulPayments(Long totalSuccessfulPayments) { this.totalSuccessfulPayments = totalSuccessfulPayments; }
 
         public Long getPendingInstallments() { return pendingInstallments; }
         public void setPendingInstallments(Long pendingInstallments) { this.pendingInstallments = pendingInstallments; }
     }
 
-    public static class FeeCollectionRow {
-        private Long paymentId;
-        private Long installmentId;
-        private Long studentId;
-        private String prn;
-        private String fullName;
+    public static class DepartmentCollectionRow {
         private String department;
-        private String program;
-        private String yearSemester;
-        private String feeType;
-        private String academicYear;
-        private BigDecimal totalAmount;
-        private BigDecimal amountPaid;
-        private String paymentMethod;
-        private String paymentDate;
-        private String status;
+        private Long totalStudents;
+        private BigDecimal collectedAmount;
+        private BigDecimal pendingAmount;
 
-        public FeeCollectionRow() {}
+        public DepartmentCollectionRow() {}
 
-        public Long getPaymentId() { return paymentId; }
-        public void setPaymentId(Long paymentId) { this.paymentId = paymentId; }
-
-        public Long getInstallmentId() { return installmentId; }
-        public void setInstallmentId(Long installmentId) { this.installmentId = installmentId; }
-
-        public Long getStudentId() { return studentId; }
-        public void setStudentId(Long studentId) { this.studentId = studentId; }
-
-        public String getPrn() { return prn; }
-        public void setPrn(String prn) { this.prn = prn; }
-
-        public String getFullName() { return fullName; }
-        public void setFullName(String fullName) { this.fullName = fullName; }
+        public DepartmentCollectionRow(String department, Long totalStudents, BigDecimal collectedAmount, BigDecimal pendingAmount) {
+            this.department = department;
+            this.totalStudents = totalStudents;
+            this.collectedAmount = collectedAmount;
+            this.pendingAmount = pendingAmount;
+        }
 
         public String getDepartment() { return department; }
         public void setDepartment(String department) { this.department = department; }
 
-        public String getProgram() { return program; }
-        public void setProgram(String program) { this.program = program; }
+        public Long getTotalStudents() { return totalStudents; }
+        public void setTotalStudents(Long totalStudents) { this.totalStudents = totalStudents; }
 
-        public String getYearSemester() { return yearSemester; }
-        public void setYearSemester(String yearSemester) { this.yearSemester = yearSemester; }
+        public BigDecimal getCollectedAmount() { return collectedAmount; }
+        public void setCollectedAmount(BigDecimal collectedAmount) { this.collectedAmount = collectedAmount; }
 
-        public String getFeeType() { return feeType; }
-        public void setFeeType(String feeType) { this.feeType = feeType; }
+        public BigDecimal getPendingAmount() { return pendingAmount; }
+        public void setPendingAmount(BigDecimal pendingAmount) { this.pendingAmount = pendingAmount; }
+    }
+
+    public static class PaymentReportRow {
+        private Long transactionId;
+        private String transactionReference;
+        private String prn;
+        private String studentName;
+        private String department;
+        private String academicYear;
+        private BigDecimal amount;
+        private String paymentDate;
+        private String status;
+        private String gatewayName;
+        private String receiptNumber;
+
+        public PaymentReportRow() {}
+
+        public Long getTransactionId() { return transactionId; }
+        public void setTransactionId(Long transactionId) { this.transactionId = transactionId; }
+
+        public String getTransactionReference() { return transactionReference; }
+        public void setTransactionReference(String transactionReference) { this.transactionReference = transactionReference; }
+
+        public String getPrn() { return prn; }
+        public void setPrn(String prn) { this.prn = prn; }
+
+        public String getStudentName() { return studentName; }
+        public void setStudentName(String studentName) { this.studentName = studentName; }
+
+        public String getDepartment() { return department; }
+        public void setDepartment(String department) { this.department = department; }
 
         public String getAcademicYear() { return academicYear; }
         public void setAcademicYear(String academicYear) { this.academicYear = academicYear; }
 
-        public BigDecimal getTotalAmount() { return totalAmount; }
-        public void setTotalAmount(BigDecimal totalAmount) { this.totalAmount = totalAmount; }
-
-        public BigDecimal getAmountPaid() { return amountPaid; }
-        public void setAmountPaid(BigDecimal amountPaid) { this.amountPaid = amountPaid; }
-
-        public String getPaymentMethod() { return paymentMethod; }
-        public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
+        public BigDecimal getAmount() { return amount; }
+        public void setAmount(BigDecimal amount) { this.amount = amount; }
 
         public String getPaymentDate() { return paymentDate; }
         public void setPaymentDate(String paymentDate) { this.paymentDate = paymentDate; }
 
         public String getStatus() { return status; }
         public void setStatus(String status) { this.status = status; }
-    }
 
-    public static class PendingFeeRow {
-        private Long assignmentId;
-        private Long studentId;
-        private String prn;
-        private String fullName;
-        private String department;
-        private String program;
-        private String yearSemester;
-        private String feeType;
-        private String academicYear;
-        private BigDecimal totalAmount;
-        private BigDecimal paidAmount;
-        private BigDecimal outstandingAmount;
-        private String dueDate;
-        private String status;
+        public String getGatewayName() { return gatewayName; }
+        public void setGatewayName(String gatewayName) { this.gatewayName = gatewayName; }
 
-        public PendingFeeRow() {}
-
-        public Long getAssignmentId() { return assignmentId; }
-        public void setAssignmentId(Long assignmentId) { this.assignmentId = assignmentId; }
-
-        public Long getStudentId() { return studentId; }
-        public void setStudentId(Long studentId) { this.studentId = studentId; }
-
-        public String getPrn() { return prn; }
-        public void setPrn(String prn) { this.prn = prn; }
-
-        public String getFullName() { return fullName; }
-        public void setFullName(String fullName) { this.fullName = fullName; }
-
-        public String getDepartment() { return department; }
-        public void setDepartment(String department) { this.department = department; }
-
-        public String getProgram() { return program; }
-        public void setProgram(String program) { this.program = program; }
-
-        public String getYearSemester() { return yearSemester; }
-        public void setYearSemester(String yearSemester) { this.yearSemester = yearSemester; }
-
-        public String getFeeType() { return feeType; }
-        public void setFeeType(String feeType) { this.feeType = feeType; }
-
-        public String getAcademicYear() { return academicYear; }
-        public void setAcademicYear(String academicYear) { this.academicYear = academicYear; }
-
-        public BigDecimal getTotalAmount() { return totalAmount; }
-        public void setTotalAmount(BigDecimal totalAmount) { this.totalAmount = totalAmount; }
-
-        public BigDecimal getPaidAmount() { return paidAmount; }
-        public void setPaidAmount(BigDecimal paidAmount) { this.paidAmount = paidAmount; }
-
-        public BigDecimal getOutstandingAmount() { return outstandingAmount; }
-        public void setOutstandingAmount(BigDecimal outstandingAmount) { this.outstandingAmount = outstandingAmount; }
-
-        public String getDueDate() { return dueDate; }
-        public void setDueDate(String dueDate) { this.dueDate = dueDate; }
-
-        public String getStatus() { return status; }
-        public void setStatus(String status) { this.status = status; }
+        public String getReceiptNumber() { return receiptNumber; }
+        public void setReceiptNumber(String receiptNumber) { this.receiptNumber = receiptNumber; }
     }
 }

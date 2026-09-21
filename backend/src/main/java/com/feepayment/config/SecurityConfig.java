@@ -60,9 +60,10 @@ public class SecurityConfig {
                 // Public API endpoints
                 .requestMatchers(
                     "/api/auth/**",
-                    "/api/payments/**",
-                    "/h2-console/**"
+                    "/api/payments/**"
                 ).permitAll()
+                // Reports endpoints (accessible by ADMIN and ACCOUNTS)
+                .requestMatchers("/api/reports/**").hasAnyRole("ADMIN", "ACCOUNTS")
                 // Admin-only endpoints
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 // Accounts-only endpoints
