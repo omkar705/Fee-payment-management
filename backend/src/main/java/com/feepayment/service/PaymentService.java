@@ -57,16 +57,17 @@ public class PaymentService {
             throw new IllegalArgumentException("Payment amount must be greater than zero.");
         }
 
-        // Resolve student (via studentId, userId, or userEmail)
+        // Resolve student: always prioritize authenticated userEmail from JWT
         Student student = null;
-        if (request.getStudentId() != null) {
+        if (userEmail != null) {
+            student = studentRepository.findByEmail(userEmail).orElse(null);
+        }
+        // If caller is admin/accounts specifying a studentId, fall back to request
+        if (student == null && request.getStudentId() != null) {
             student = studentRepository.findById(request.getStudentId()).orElse(null);
             if (student == null) {
                 student = studentRepository.findByUserId(request.getStudentId()).orElse(null);
             }
-        }
-        if (student == null && userEmail != null) {
-            student = studentRepository.findByEmail(userEmail).orElse(null);
         }
 
         long amountInPaise = request.getAmount().multiply(new BigDecimal(100)).longValue();
@@ -201,16 +202,16 @@ public class PaymentService {
             throw new IllegalArgumentException("Cryptographic signature verification failed. Payment cannot be verified.");
         }
 
-        // 3. Resolve Student ID
-        Long studentId = request.getStudentId();
-        if (studentId == null && userEmail != null) {
-            studentRepository.findByEmail(userEmail).ifPresent(s -> {
-                // Resolved via email
-            });
+        // 3. Resolve Student ID: prioritize authenticated userEmail from JWT
+        Long studentId = null;
+        if (userEmail != null) {
             Optional<Student> studentOpt = studentRepository.findByEmail(userEmail);
             if (studentOpt.isPresent()) {
                 studentId = studentOpt.get().getId();
             }
+        }
+        if (studentId == null) {
+            studentId = request.getStudentId();
         }
 
         // 4. Record or update fee_payments record to reflect in ledger & reports

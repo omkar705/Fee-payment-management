@@ -165,21 +165,39 @@ public class PaymentController {
     public ResponseEntity<ApiResponse> getTransactionById(
             @PathVariable Long id, Authentication auth) {
         try {
-            String email = auth != null ? auth.getName() : null;
+            if (auth == null) {
+                return ResponseEntity.status(401).body(ApiResponse.error("Authentication required."));
+            }
             Map<String, Object> row = jdbc.queryForMap(
-                "SELECT t.*, r.receipt_number, r.receipt_url, r.generated_date " +
-                "FROM transactions t LEFT JOIN receipts r ON t.transaction_id = r.transaction_id " +
+                "SELECT t.*, r.receipt_number, r.receipt_url, r.generated_date, s.email as student_email " +
+                "FROM transactions t " +
+                "LEFT JOIN receipts r ON t.transaction_id = r.transaction_id " +
+                "LEFT JOIN students s ON t.student_id = s.id " +
                 "WHERE t.transaction_id = ?",
                 id
             );
+
+            boolean isStaff = auth.getAuthorities().stream()
+                    .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN") || a.getAuthority().equals("ROLE_ACCOUNTS"));
+            if (!isStaff) {
+                String callerEmail = auth.getName();
+                String ownerEmail = (String) row.get("student_email");
+                if (ownerEmail == null || !ownerEmail.equalsIgnoreCase(callerEmail)) {
+                    return ResponseEntity.status(403).body(ApiResponse.error("Access denied: You do not have permission to view another student's transaction."));
+                }
+            }
+
             return ResponseEntity.ok(ApiResponse.ok("Transaction retrieved.", row));
+        } catch (org.springframework.dao.EmptyResultDataAccessException e) {
+            return ResponseEntity.status(404).body(ApiResponse.error("Transaction not found."));
         } catch (Exception e) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(500).body(ApiResponse.error("Failed to retrieve transaction: " + e.getMessage()));
         }
     }
 
     /** GET /api/payments/stats — Payment statistics for dashboard (admin/accounts) */
     @GetMapping("/stats")
+    @PreAuthorize("hasAnyRole('ADMIN','ACCOUNTS')")
     public ResponseEntity<ApiResponse> getPaymentStats(Authentication auth) {
         try {
             Map<String, Object> stats = new HashMap<>();
@@ -225,12 +243,25 @@ public class PaymentController {
 
     /** GET /api/payments/receipts/transaction/{transactionId} — Receipt by transaction ID */
     @GetMapping("/receipts/transaction/{transactionId}")
-    public ResponseEntity<ApiResponse> getReceiptByTransactionId(@PathVariable Long transactionId) {
+    public ResponseEntity<ApiResponse> getReceiptByTransactionId(
+            @PathVariable Long transactionId,
+            Authentication auth) {
         try {
+            if (auth == null) {
+                return ResponseEntity.status(401).body(ApiResponse.error("Authentication required."));
+            }
             ReceiptDetails details = paymentService.getReceiptDetails(transactionId);
+            boolean isStaff = auth.getAuthorities().stream()
+                    .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN") || a.getAuthority().equals("ROLE_ACCOUNTS"));
+            if (!isStaff) {
+                String callerEmail = auth.getName();
+                if (details.getStudentEmail() == null || !details.getStudentEmail().equalsIgnoreCase(callerEmail)) {
+                    return ResponseEntity.status(403).body(ApiResponse.error("Access denied: You cannot view another student's receipt."));
+                }
+            }
             return ResponseEntity.ok(ApiResponse.ok("Receipt retrieved.", details));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(404).body(ApiResponse.error("Receipt not found."));
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(ApiResponse.error("Failed to fetch receipt: " + e.getMessage()));
         }
@@ -238,12 +269,25 @@ public class PaymentController {
 
     /** GET /api/payments/receipts/{receiptNumber} — Receipt by receipt number */
     @GetMapping("/receipts/{receiptNumber}")
-    public ResponseEntity<ApiResponse> getReceiptByNumber(@PathVariable String receiptNumber) {
+    public ResponseEntity<ApiResponse> getReceiptByNumber(
+            @PathVariable String receiptNumber,
+            Authentication auth) {
         try {
+            if (auth == null) {
+                return ResponseEntity.status(401).body(ApiResponse.error("Authentication required."));
+            }
             ReceiptDetails details = paymentService.getReceiptDetailsByNumber(receiptNumber);
+            boolean isStaff = auth.getAuthorities().stream()
+                    .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN") || a.getAuthority().equals("ROLE_ACCOUNTS"));
+            if (!isStaff) {
+                String callerEmail = auth.getName();
+                if (details.getStudentEmail() == null || !details.getStudentEmail().equalsIgnoreCase(callerEmail)) {
+                    return ResponseEntity.status(403).body(ApiResponse.error("Access denied: You cannot view another student's receipt."));
+                }
+            }
             return ResponseEntity.ok(ApiResponse.ok("Receipt retrieved.", details));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(404).body(ApiResponse.error("Receipt not found."));
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(ApiResponse.error("Failed to fetch receipt: " + e.getMessage()));
         }
@@ -280,6 +324,7 @@ public class PaymentController {
      * Returns: depth, active workers, available slots, counters, recent events
      */
     @GetMapping("/queue/status")
+    @PreAuthorize("hasAnyRole('ADMIN','ACCOUNTS')")
     public ResponseEntity<ApiResponse> getQueueStatus() {
         Map<String, Object> status = paymentQueueService.getQueueStatus();
         return ResponseEntity.ok(ApiResponse.ok("Queue status retrieved.", status));
@@ -296,6 +341,7 @@ public class PaymentController {
      * Request body: { "reason": "..." }
      */
     @PostMapping("/rollback/{transactionId}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse> rollbackTransaction(
             @PathVariable Long transactionId,
             @RequestBody(required = false) Map<String, String> body,
@@ -349,6 +395,7 @@ public class PaymentController {
      * Demonstrates: CN — secure audit trail over HTTPS; DBMS — indexed queries
      */
     @GetMapping("/gateway-logs")
+    @PreAuthorize("hasAnyRole('ADMIN','ACCOUNTS')")
     public ResponseEntity<ApiResponse> getGatewayLogs(
             @RequestParam(defaultValue = "0")  int page,
             @RequestParam(defaultValue = "20") int size) {

@@ -60,8 +60,17 @@ public class SecurityConfig {
                 // Public API endpoints
                 .requestMatchers(
                     "/api/auth/**",
-                    "/api/payments/**"
+                    "/api/payments/config"
                 ).permitAll()
+                // Payment endpoints for Admin and Accounts
+                .requestMatchers(
+                    "/api/payments/stats",
+                    "/api/payments/gateway-logs",
+                    "/api/payments/rollback/**",
+                    "/api/payments/queue/status"
+                ).hasAnyRole("ADMIN", "ACCOUNTS")
+                // All other payment operations require authentication
+                .requestMatchers("/api/payments/**").authenticated()
                 // Reports endpoints (accessible by ADMIN and ACCOUNTS)
                 .requestMatchers("/api/reports/**").hasAnyRole("ADMIN", "ACCOUNTS")
                 // Admin-only endpoints

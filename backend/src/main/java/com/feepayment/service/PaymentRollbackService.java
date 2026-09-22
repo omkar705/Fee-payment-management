@@ -103,12 +103,24 @@ public class PaymentRollbackService {
         // ====================================================
         int feeUpdated = 0;
         try {
-            feeUpdated = jdbc.update(
-                "UPDATE fee_payments SET status = 'REFUNDED', description = ? " +
-                "WHERE student_id = ? AND status = 'SUCCESS' " +
-                "ORDER BY payment_id DESC LIMIT 1",
-                "Rolled back: " + safeReason, studentId
-            );
+            Long paymentId = txn.get("payment_id") != null ? ((Number) txn.get("payment_id")).longValue() : null;
+            if (paymentId != null && paymentId > 0) {
+                feeUpdated = jdbc.update(
+                    "UPDATE fee_payments SET status = 'REFUNDED', description = ? WHERE payment_id = ?",
+                    "Rolled back: " + safeReason, paymentId
+                );
+            } else if (studentId != null) {
+                // PostgreSQL-compatible subquery for latest matching payment
+                feeUpdated = jdbc.update(
+                    "UPDATE fee_payments SET status = 'REFUNDED', description = ? " +
+                    "WHERE payment_id = (" +
+                    "    SELECT payment_id FROM fee_payments " +
+                    "    WHERE student_id = ? AND status = 'SUCCESS' " +
+                    "    ORDER BY payment_id DESC LIMIT 1" +
+                    ")",
+                    "Rolled back: " + safeReason, studentId
+                );
+            }
         } catch (Exception e) {
             // fee_payments update failure should NOT block the rollback
             // We only log it — the critical transaction update already happened
@@ -180,10 +192,21 @@ public class PaymentRollbackService {
         int feeDeleted = 0;
         if (studentId != null && amount != null) {
             try {
-                feeDeleted = jdbc.update(
-                    "DELETE FROM fee_payments WHERE student_id = ? AND amount_paid = ? AND status = 'SUCCESS' ORDER BY payment_id DESC LIMIT 1",
-                    studentId, new java.math.BigDecimal(String.valueOf(amount))
-                );
+                Long paymentId = txn.get("payment_id") != null ? ((Number) txn.get("payment_id")).longValue() : null;
+                if (paymentId != null && paymentId > 0) {
+                    feeDeleted = jdbc.update("DELETE FROM fee_payments WHERE payment_id = ?", paymentId);
+                } else {
+                    // PostgreSQL-compatible subquery for latest matching payment
+                    feeDeleted = jdbc.update(
+                        "DELETE FROM fee_payments " +
+                        "WHERE payment_id = (" +
+                        "    SELECT payment_id FROM fee_payments " +
+                        "    WHERE student_id = ? AND amount_paid = ? AND status = 'SUCCESS' " +
+                        "    ORDER BY payment_id DESC LIMIT 1" +
+                        ")",
+                        studentId, new java.math.BigDecimal(String.valueOf(amount))
+                    );
+                }
             } catch (Exception e) {
                 log.warn("DELETE Step 2: Could not remove matching fee_payments row: {}", e.getMessage());
             }
@@ -226,7 +249,7 @@ public class PaymentRollbackService {
     private Map<String, Object> fetchTransaction(Long transactionId) {
         try {
             return jdbc.queryForMap(
-                "SELECT transaction_id, transaction_reference, transaction_status, " +
+                "SELECT transaction_id, payment_id, transaction_reference, transaction_status, " +
                 "amount, student_id, gateway_name, created_at " +
                 "FROM transactions WHERE transaction_id = ?",
                 transactionId
