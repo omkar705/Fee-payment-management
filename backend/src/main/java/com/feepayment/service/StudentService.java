@@ -1,17 +1,21 @@
 package com.feepayment.service;
 
+import com.feepayment.model.FeeStructure;
 import com.feepayment.model.Student;
 import com.feepayment.model.StudentData;
+import com.feepayment.repository.FeeStructureRepository;
+import com.feepayment.repository.InstallmentRequestRepository;
 import com.feepayment.repository.StudentRepository;
 import com.feepayment.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import org.springframework.jdbc.core.JdbcTemplate;
-
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,11 +27,8 @@ public class StudentService {
     private final StudentRepository studentRepository;
     private final UserRepository userRepository;
     private final JdbcTemplate jdbc;
-    private final com.feepayment.repository.InstallmentRequestRepository installmentRequestRepository;
-
-    // Total annual fee per student (can be made configurable per course later)
-    private static final BigDecimal TOTAL_FEE = new BigDecimal("120000.00");
-
+    private final InstallmentRequestRepository installmentRequestRepository;
+    private final FeeStructureRepository feeStructureRepository;
 
     public StudentData getProfile() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -58,15 +59,19 @@ public class StudentService {
         Map<String, Object> feeStatus = buildFeeStatus(student);
         dashboard.putAll(feeStatus);
 
-        // Fee structure breakdown (per semester)
-        dashboard.put("tuitionFee",     95000);
-        dashboard.put("developmentFee", 15000);
-        dashboard.put("examFee",         7000);
-        dashboard.put("libraryFee",      3000);
-        dashboard.put("installment1",   60000);
-        dashboard.put("installment2",   60000);
+        // Dynamic fee structure breakdown (from fee_structures table)
+        FeeStructure fs = getStudentFeeStructure(student);
+        BigDecimal totalFee = fs.getTotalAmount();
+        BigDecimal inst1Amount = totalFee.divide(BigDecimal.valueOf(2), 2, RoundingMode.HALF_UP);
+        BigDecimal inst2Amount = totalFee.subtract(inst1Amount);
 
-        // Fetch verified transaction records for the student (enriched with transactionReference)
+        dashboard.put("tuitionFee",     fs.getTuitionFee());
+        dashboard.put("developmentFee", fs.getDevelopmentFee());
+        dashboard.put("examFee",        fs.getExamFee());
+        dashboard.put("installment1",   inst1Amount);
+        dashboard.put("installment2",   inst2Amount);
+
+        // Fetch verified transaction records for the student
         List<Map<String, Object>> paymentHistory = jdbc.query(
             "SELECT t.transaction_id, t.transaction_reference, t.amount, t.created_at, " +
             "t.transaction_status, t.gateway_name, r.receipt_number, r.receipt_url " +
@@ -92,11 +97,9 @@ public class StudentService {
 
         // ---------------------------------------------------------------
         // Build per-installment PAID/PENDING list — live from Supabase
-        // Total = ₹1,20,000 as 2 × ₹60,000 installments
+        // Exactly 2 installments (50% + 50%)
         // ---------------------------------------------------------------
         BigDecimal paidAmount  = new BigDecimal(String.valueOf(feeStatus.get("paidAmount")));
-        BigDecimal inst1Amount = new BigDecimal("60000");
-        BigDecimal inst2Amount = new BigDecimal("60000");
 
         // Walk transactions oldest-first to assign receipt/date to each installment threshold
         List<Map<String, Object>> chrono = jdbc.query(
@@ -135,7 +138,7 @@ public class StudentService {
         boolean inst1Paid = paidAmount.compareTo(inst1Amount) >= 0;
         boolean inst2Paid = paidAmount.compareTo(inst1Amount.add(inst2Amount)) >= 0;
 
-        List<Map<String, Object>> installments = new java.util.ArrayList<>();
+        List<Map<String, Object>> installments = new ArrayList<>();
 
         Map<String, Object> i1 = new HashMap<>();
         i1.put("installmentNo", 1);
@@ -164,11 +167,9 @@ public class StudentService {
         return dashboard;
     }
 
-
     /**
-     * Compute paid / pending amounts for a student from the DB.
-     * Reads from both fee_payments (ledger) and transactions (gateway records),
-     * taking the higher of the two to avoid double counting.
+     * Compute paid / pending amounts for a student dynamically from the DB.
+     * Uses actual student applicable fee from fee_structures.
      */
     private Map<String, Object> buildFeeStatus(Student student) {
         BigDecimal feePaid = BigDecimal.ZERO;
@@ -179,26 +180,24 @@ public class StudentService {
                 "SELECT COALESCE(SUM(amount_paid), 0) FROM fee_payments WHERE student_id = ? AND status = 'SUCCESS'",
                 BigDecimal.class, student.getId()
             );
-        } catch (Exception e) {
-            // fee_payments may not exist yet — handled by schema migration
-        }
+        } catch (Exception ignored) {}
 
         try {
             txnPaid = jdbc.queryForObject(
                 "SELECT COALESCE(SUM(amount), 0) FROM transactions WHERE student_id = ? AND transaction_status = 'SUCCESS'",
                 BigDecimal.class, student.getId()
             );
-        } catch (Exception e) {
-            // ignore
-        }
+        } catch (Exception ignored) {}
 
         if (feePaid == null) feePaid = BigDecimal.ZERO;
         if (txnPaid == null) txnPaid = BigDecimal.ZERO;
 
-        // Use the higher amount (avoid double-counting if both tables record the same payment)
         BigDecimal actualPaid = feePaid.max(txnPaid);
 
-        BigDecimal pendingAmount = TOTAL_FEE.subtract(actualPaid);
+        FeeStructure fs = getStudentFeeStructure(student);
+        BigDecimal totalFee = fs.getTotalAmount();
+
+        BigDecimal pendingAmount = totalFee.subtract(actualPaid);
         if (pendingAmount.compareTo(BigDecimal.ZERO) < 0) {
             pendingAmount = BigDecimal.ZERO;
         }
@@ -214,12 +213,30 @@ public class StudentService {
         }
 
         Map<String, Object> status = new HashMap<>();
-        status.put("totalFee",      TOTAL_FEE.doubleValue());
+        status.put("totalFee",      totalFee.doubleValue());
         status.put("paidAmount",    actualPaid.doubleValue());
         status.put("pendingAmount", pendingAmount.doubleValue());
         status.put("paymentStatus", paymentStatus);
         status.put("isCleared",     isCleared);
         return status;
+    }
+
+    private FeeStructure getStudentFeeStructure(Student student) {
+        if (student.getDepartment() != null) {
+            var opt = feeStructureRepository.findByDepartment(student.getDepartment());
+            if (opt.isPresent()) return opt.get();
+        }
+
+        FeeStructure defaultFs = new FeeStructure();
+        defaultFs.setDepartment(student.getDepartment() != null ? student.getDepartment() : "Information Technology");
+        defaultFs.setCategory("OPEN");
+        defaultFs.setTuitionFee(new BigDecimal("95000.00"));
+        defaultFs.setDevelopmentFee(new BigDecimal("15000.00"));
+        defaultFs.setExamFee(new BigDecimal("10000.00"));
+        defaultFs.setTotalAmount(new BigDecimal("120000.00"));
+        defaultFs.setAcademicYear(student.getAcademicYear() != null ? student.getAcademicYear() : "2025-26");
+        defaultFs.setStatus("ACTIVE");
+        return defaultFs;
     }
 
     private StudentData toData(Student student) {
@@ -272,14 +289,18 @@ public class StudentService {
             plan.put("status", "NOT_APPLIED");
         }
 
+        FeeStructure fs = getStudentFeeStructure(student);
+        BigDecimal totalFee = fs.getTotalAmount();
+        BigDecimal inst1Amount = totalFee.divide(BigDecimal.valueOf(2), 2, RoundingMode.HALF_UP);
+        BigDecimal inst2Amount = totalFee.subtract(inst1Amount);
+
         // Exactly 2 installments schedule
         plan.put("installmentCount", 2);
         plan.put("installments", List.of(
-            Map.of("installmentNumber", 1, "amount", 60000, "dueDate", "15 Oct 2025", "term", "Semester 1 (50%)"),
-            Map.of("installmentNumber", 2, "amount", 60000, "dueDate", "15 Feb 2026", "term", "Semester 2 (50%)")
+            Map.of("installmentNumber", 1, "amount", inst1Amount, "dueDate", "15 Oct 2025", "term", "Semester 1 (50%)"),
+            Map.of("installmentNumber", 2, "amount", inst2Amount, "dueDate", "15 Feb 2026", "term", "Semester 2 (50%)")
         ));
 
         return plan;
     }
 }
-

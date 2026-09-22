@@ -30,6 +30,7 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
     private final UserDetailsServiceImpl userDetailsService;
+    private final AuditLogService auditLogService;
 
     @Transactional
     public LoginResponse login(LoginRequest request) {
@@ -65,6 +66,15 @@ public class AuthService {
 
         // Get display name
         String displayName = getDisplayName(user);
+
+        // Audit Log entry for login event
+        auditLogService.logAction(
+                user.getEmail(),
+                "USER_LOGIN",
+                "User",
+                String.valueOf(user.getId()),
+                "Successful login as " + dbRole
+        );
 
         return new LoginResponse(token, user.getEmail(), dbRole, displayName, user.getId());
     }

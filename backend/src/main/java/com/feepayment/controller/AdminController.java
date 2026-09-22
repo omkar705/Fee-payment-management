@@ -126,5 +126,13 @@ public class AdminController {
         com.feepayment.model.FeeStructure saved = adminService.saveFeeStructure(feeStructure);
         return ResponseEntity.ok(ApiResponse.ok("Fee structure updated.", saved));
     }
+
+    // ============================================================
+    // Audit Logs Endpoint
+    // ============================================================
+    @GetMapping("/audit-logs")
+    public ResponseEntity<?> getAuditLogs() {
+        return ResponseEntity.ok(ApiResponse.ok("Audit logs retrieved.", adminService.getAuditLogs()));
+    }
 }
 

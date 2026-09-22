@@ -68,23 +68,50 @@ function renderStudentDetails(data) {
     setTxt('studentAvatarInitials', initials);
 
     // Profile Section
-    setTxt('profileStudentName', student.name || 'Manan Vivekanand Tote');
-    setTxt('profileStudentPrn', student.prn || 'B25IT2010');
-    setTxt('profileStudentEmail', student.email || 'b25it2010@mmcoe.com');
-    setTxt('profileStudentMobile', student.mobile || '9876543210');
+    setTxt('profileStudentName', student.name || '—');
+    setTxt('profileStudentPrn', student.prn || '—');
+    setTxt('profileStudentEmail', student.email || '—');
+    setTxt('profileStudentMobile', student.mobile || '—');
     setTxt('profileStudentDept', student.department || 'Information Technology');
     setTxt('profileStudentCourse', student.course || 'B.Tech');
     setTxt('profileStudentYear', student.academicYear || '2025-26');
 
-    // Fee Status
+    // Fee Breakdown from DB
     const total = Number(data.totalFee || 120000);
+    const tuition = Number(data.tuitionFee || 95000);
+    const dev = Number(data.developmentFee || 15000);
+    const exam = Number(data.examFee || 10000);
+    const inst1Amt = Number(data.installment1 || (total / 2));
+    const inst2Amt = Number(data.installment2 || (total - inst1Amt));
+
+    setTxt('statTotalAnnualFee', '₹' + total.toLocaleString('en-IN'));
+    setTxt('studentTuitionFee', '₹' + tuition.toLocaleString('en-IN'));
+    setTxt('studentDevFee', '₹' + dev.toLocaleString('en-IN'));
+    setTxt('studentExamFee', '₹' + exam.toLocaleString('en-IN'));
+    setTxt('studentTotalFeeDisplay', '₹' + total.toLocaleString('en-IN'));
+
+    // Installments Schedule
+    setTxt('inst1AmountDisplay', '₹' + inst1Amt.toLocaleString('en-IN'));
+    setTxt('inst2AmountDisplay', '₹' + inst2Amt.toLocaleString('en-IN'));
+    setTxt('payRadioInst1Label', '₹' + inst1Amt.toLocaleString('en-IN'));
+
+    // Fee Status
     const paid = Number(data.paidAmount != null ? data.paidAmount : 0);
     const pending = Math.max(0, total - paid);
 
     setTxt('statPaidAmount', '₹' + paid.toLocaleString('en-IN'));
     setTxt('statPendingBalance', '₹' + pending.toLocaleString('en-IN'));
     setTxt('payOutstandingFee', '₹' + pending.toLocaleString('en-IN'));
-    setTxt('payStudentPrn', student.prn || 'B25IT2010');
+    setTxt('payRadioFullLabel', '₹' + pending.toLocaleString('en-IN'));
+    setTxt('payStudentPrn', student.prn || '—');
+
+    // Update payment radio options
+    const optInst1 = document.getElementById('payOptionInst1');
+    if (optInst1) optInst1.value = inst1Amt;
+    const optFull = document.getElementById('payOptionFull');
+    if (optFull) optFull.value = pending;
+    const customInput = document.getElementById('payCustomInput');
+    if (customInput) customInput.value = pending > 0 ? Math.min(inst1Amt, pending) : 0;
 
     // Fee Status Badge
     const badge = document.getElementById('feeStatusBadge');
@@ -105,13 +132,18 @@ function renderStudentDetails(data) {
     const inst1 = document.getElementById('inst1Badge');
     const inst2 = document.getElementById('inst2Badge');
     if (inst1) {
-        inst1.className = paid >= 60000 ? 'badge bg-success' : 'badge bg-warning text-dark';
-        inst1.textContent = paid >= 60000 ? 'PAID' : 'DUE';
+        inst1.className = paid >= inst1Amt ? 'badge bg-success' : 'badge bg-warning text-dark';
+        inst1.textContent = paid >= inst1Amt ? 'PAID' : 'DUE';
     }
     if (inst2) {
-        inst2.className = paid >= 120000 ? 'badge bg-success' : 'badge bg-warning text-dark';
-        inst2.textContent = paid >= 120000 ? 'PAID' : 'DUE';
+        inst2.className = paid >= total ? 'badge bg-success' : 'badge bg-warning text-dark';
+        inst2.textContent = paid >= total ? 'PAID' : 'DUE';
     }
+}
+
+function updateCustomPayAmount(val) {
+    const input = document.getElementById('payCustomInput');
+    if (input) input.value = val;
 }
 
 /**
@@ -213,19 +245,8 @@ async function loadStudentTransactions() {
     const fullTbody = document.getElementById('studentFullPaymentHistoryTbody');
 
     let history = [];
-    if (currentStudentData && Array.isArray(currentStudentData.paymentHistory) && currentStudentData.paymentHistory.length > 0) {
+    if (currentStudentData && Array.isArray(currentStudentData.paymentHistory)) {
         history = currentStudentData.paymentHistory;
-    } else {
-        history = [
-            {
-                transactionReference: 'TXN-MMCOE-98421',
-                receiptNumber: 'REC-2025-001',
-                date: '2025-08-14',
-                amount: 60000,
-                gateway: 'Razorpay',
-                status: 'SUCCESS'
-            }
-        ];
     }
 
     renderHistoryTables(recentTbody, fullTbody, history);

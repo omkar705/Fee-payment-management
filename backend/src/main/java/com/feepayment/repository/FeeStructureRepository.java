@@ -47,6 +47,12 @@ public class FeeStructureRepository {
         return jdbc.query(sql, rowMapper, department, category).stream().findFirst();
     }
 
+    public Optional<FeeStructure> findByDepartment(String department) {
+        String sql = "SELECT id, department, category, tuition_fee, development_fee, exam_fee, total_amount, academic_year, status " +
+                     "FROM fee_structures WHERE department = ? AND status = 'ACTIVE' LIMIT 1";
+        return jdbc.query(sql, rowMapper, department).stream().findFirst();
+    }
+
     public void save(FeeStructure fs) {
         if (fs.getId() == null) {
             String sql = "INSERT INTO fee_structures (department, category, tuition_fee, development_fee, exam_fee, total_amount, academic_year, status) " +

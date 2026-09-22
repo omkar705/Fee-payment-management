@@ -18,15 +18,14 @@ document.addEventListener('DOMContentLoaded', () => {
 // 1. DASHBOARD INITIALIZATION
 // ============================================================
 async function initAdminDashboard() {
-    loadDashboardStats();
-    loadRecentStudents();
-    loadStudents();
-    loadFeeStructures();
-    drawFeeSummaryChart();
+    await loadDashboardStats();
+    await loadRecentStudents();
+    await loadStudents();
+    await loadFeeStructures();
 }
 
 /**
- * Fetch overview stats: Total Students & Total Collection
+ * Fetch overview stats: Total Students, Total Collection, Pending Fees, Department Collections
  */
 async function loadDashboardStats() {
     try {
@@ -38,13 +37,41 @@ async function loadDashboardStats() {
                 totalStudentsEl.textContent = data.totalStudents || 0;
             }
             const totalFeeEl = document.getElementById('statTotalFeeCollection');
-            if (totalFeeEl && data.totalFeeCollection) {
-                totalFeeEl.textContent = '₹' + Number(data.totalFeeCollection).toLocaleString('en-IN');
+            if (totalFeeEl) {
+                totalFeeEl.textContent = '₹' + Number(data.totalFeeCollection || 0).toLocaleString('en-IN');
+            }
+            const pendingFeeEl = document.getElementById('statTotalPendingFees');
+            if (pendingFeeEl) {
+                pendingFeeEl.textContent = '₹' + Number(data.totalPendingFees || 0).toLocaleString('en-IN');
+            }
+
+            // Populate department-wise collection table & chart
+            if (data.departmentWiseCollection && Array.isArray(data.departmentWiseCollection)) {
+                renderDeptWiseCollection(data.departmentWiseCollection);
+                drawFeeSummaryChart(data.departmentWiseCollection);
             }
         }
     } catch (e) {
         console.warn('Using default dashboard stats.');
     }
+}
+
+function renderDeptWiseCollection(deptList) {
+    const tbody = document.getElementById('deptWiseCollectionTbody');
+    if (!tbody) return;
+
+    if (!deptList || deptList.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3" class="text-center text-muted py-3">No department collection data recorded.</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = deptList.map(item => `
+        <tr>
+            <td><strong>${escHtml(item.department)}</strong></td>
+            <td>${item.students != null ? item.students : 0}</td>
+            <td><strong>₹${Number(item.collected || 0).toLocaleString('en-IN')}</strong></td>
+        </tr>
+    `).join('');
 }
 
 /**
@@ -92,7 +119,7 @@ function renderRecentTable(tbody, students) {
 // 2. NATIVE CANVAS FEE COLLECTION CHART
 // Simple 2D bar chart — 100% native HTML5 Canvas, zero external libraries
 // ============================================================
-function drawFeeSummaryChart() {
+function drawFeeSummaryChart(deptData) {
     const canvas = document.getElementById('adminFeeChart');
     if (!canvas) return;
 
@@ -106,11 +133,28 @@ function drawFeeSummaryChart() {
     const width = canvas.parentElement.clientWidth;
     const height = 200;
 
-    const months = ['Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    const amounts = [8.2, 6.1, 4.9, 5.5, 9.3, 11.5, 7.2, 8.5, 10.2]; // in Lakhs
-    const maxAmount = 14;
+    let labels = [];
+    let amounts = []; // in Thousands (₹k)
 
-    const paddingLeft = 40;
+    if (deptData && deptData.length > 0) {
+        labels = deptData.map(d => {
+            const name = d.department || '';
+            if (name.toLowerCase().includes('information')) return 'IT';
+            if (name.toLowerCase().includes('computer')) return 'CS';
+            if (name.toLowerCase().includes('mechanical')) return 'Mech';
+            if (name.toLowerCase().includes('electronics')) return 'E&TC';
+            if (name.toLowerCase().includes('civil')) return 'Civil';
+            return name.slice(0, 5);
+        });
+        amounts = deptData.map(d => Math.round(Number(d.collected || 0) / 1000));
+    } else {
+        labels = ['IT', 'CS', 'Mech', 'Civil', 'E&TC'];
+        amounts = [310, 0, 0, 0, 0];
+    }
+
+    const maxAmount = Math.max(50, ...amounts) * 1.25;
+
+    const paddingLeft = 50;
     const paddingBottom = 30;
     const chartWidth = width - paddingLeft - 20;
     const chartHeight = height - paddingBottom - 20;
@@ -125,28 +169,35 @@ function drawFeeSummaryChart() {
     ctx.lineTo(width - 10, height - paddingBottom);
     ctx.stroke();
 
-    const barWidth = Math.max(12, Math.floor((chartWidth / months.length) * 0.55));
-    const step = chartWidth / months.length;
+    const barWidth = Math.max(16, Math.floor((chartWidth / labels.length) * 0.45));
+    const step = chartWidth / labels.length;
 
-    months.forEach((month, i) => {
-        const barHeight = (amounts[i] / maxAmount) * chartHeight;
+    labels.forEach((label, i) => {
+        const barHeight = Math.max(2, (amounts[i] / maxAmount) * chartHeight);
         const x = paddingLeft + i * step + (step - barWidth) / 2;
         const y = height - paddingBottom - barHeight;
 
         // Draw bar
-        ctx.fillStyle = '#0d6efd';
+        ctx.fillStyle = '#2563eb';
         ctx.fillRect(x, y, barWidth, barHeight);
 
-        // Draw month label
-        ctx.fillStyle = '#6c757d';
-        ctx.font = '11px sans-serif';
+        // Value text on top of bar
+        ctx.fillStyle = '#334155';
+        ctx.font = '10px sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText(month, x + barWidth / 2, height - 10);
+        if (amounts[i] > 0) {
+            ctx.fillText('₹' + amounts[i] + 'k', x + barWidth / 2, y - 5);
+        }
+
+        // Department label below baseline
+        ctx.fillStyle = '#64748b';
+        ctx.font = '11px sans-serif';
+        ctx.fillText(label, x + barWidth / 2, height - 10);
     });
 }
 
 // ============================================================
-// 3. MANAGE STUDENTS DIRECTORY (CRUD)
+// 3. MANAGE STUDENTS DIRECTORY (CRUD + ACTIVATE/DEACTIVATE)
 // ============================================================
 async function loadStudents() {
     const tbody = document.getElementById('studentsTbody');
@@ -190,9 +241,94 @@ function renderStudentsTable(students) {
                 <button class="btn btn-sm btn-outline-secondary py-0 px-2 ms-1" onclick="openEditStudentModal(${s.id})">
                     <i class="bi bi-pencil-square"></i> Edit
                 </button>
+                <button class="btn btn-sm ${s.status === 'ACTIVE' ? 'btn-outline-warning' : 'btn-outline-success'} py-0 px-2 ms-1" onclick="toggleStudentStatus(${s.id}, '${s.status || 'ACTIVE'}')">
+                    <i class="bi ${s.status === 'ACTIVE' ? 'bi-person-x' : 'bi-person-check'}"></i> ${s.status === 'ACTIVE' ? 'Deactivate' : 'Activate'}
+                </button>
             </td>
         </tr>
     `).join('');
+}
+
+async function toggleStudentStatus(studentId, currentStatus) {
+    const newStatus = (currentStatus === 'ACTIVE') ? 'INACTIVE' : 'ACTIVE';
+    const action = newStatus === 'ACTIVE' ? 'activate' : 'deactivate';
+    if (!confirm(`Are you sure you want to ${action} this student account?`)) return;
+
+    try {
+        const result = await apiFetch(`/admin/students/${studentId}/status`, {
+            method: 'PATCH',
+            body: JSON.stringify({ status: newStatus })
+        });
+
+        if (result && result.ok) {
+            alert(`Student has been ${newStatus.toLowerCase()}d successfully.`);
+            await loadStudents();
+            await loadDashboardStats();
+            return;
+        }
+    } catch (e) {
+        console.warn('API error updating status');
+    }
+
+    // Cache fallback
+    const idx = allStudentsCache.findIndex(s => s.id === studentId);
+    if (idx !== -1) {
+        allStudentsCache[idx].status = newStatus;
+        renderStudentsTable(allStudentsCache);
+    }
+}
+
+function openAddStudentModal() {
+    const form = document.getElementById('addStudentModalForm');
+    if (form) form.reset();
+    const modal = new bootstrap.Modal(document.getElementById('addStudentModal'));
+    modal.show();
+}
+
+async function handleRegisterStudentModal(e) {
+    e.preventDefault();
+
+    const name = document.getElementById('newStudentName').value.trim();
+    const prn = document.getElementById('newStudentPrn').value.trim().toUpperCase();
+    const email = document.getElementById('newStudentEmail').value.trim();
+    const mobile = document.getElementById('newStudentMobile').value.trim();
+    const department = document.getElementById('newStudentDept').value;
+    const course = document.getElementById('newStudentCourse').value.trim();
+    const academicYear = document.getElementById('newStudentYear').value.trim();
+
+    const btn = document.getElementById('btnSubmitAddStudent');
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Registering...';
+    }
+
+    const payload = { name, prn, email, mobile, department, course, academicYear, status: 'ACTIVE' };
+
+    try {
+        const result = await apiFetch('/admin/students', {
+            method: 'POST',
+            body: JSON.stringify(payload)
+        });
+
+        if (result && result.ok) {
+            alert('Student registered successfully in PostgreSQL database!');
+            bootstrap.Modal.getInstance(document.getElementById('addStudentModal'))?.hide();
+            await loadStudents();
+            await loadRecentStudents();
+            await loadDashboardStats();
+            return;
+        } else {
+            const msg = result && result.data && result.data.message ? result.data.message : 'Registration failed.';
+            alert('Error: ' + msg);
+        }
+    } catch (err) {
+        alert('Server connection error. Please try again.');
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = 'Register Student';
+        }
+    }
 }
 
 function openEditStudentModal(studentId) {
@@ -232,9 +368,10 @@ async function handleSaveStudent(e) {
         });
 
         if (result && result.ok) {
-            alert('Student details updated successfully!');
+            alert('Student details updated successfully in PostgreSQL!');
             bootstrap.Modal.getInstance(document.getElementById('editStudentModal'))?.hide();
             await loadStudents();
+            await loadDashboardStats();
             return;
         }
     } catch (err) {
@@ -429,7 +566,7 @@ async function handleSaveFeeStructure(e) {
         });
 
         if (result && result.ok) {
-            alert('Fee structure saved successfully!');
+            alert('Fee structure saved successfully in PostgreSQL database!');
             bootstrap.Modal.getInstance(document.getElementById('feeStructureModal'))?.hide();
             await loadFeeStructures();
             return;
@@ -438,7 +575,6 @@ async function handleSaveFeeStructure(e) {
         console.warn('API error, saving locally in cache.');
     }
 
-    // Local fallback update for viva demo
     if (id) {
         const idx = allFeeStructuresCache.findIndex(item => item.id == id);
         if (idx !== -1) {
@@ -452,6 +588,51 @@ async function handleSaveFeeStructure(e) {
     alert('Fee structure saved successfully!');
     bootstrap.Modal.getInstance(document.getElementById('feeStructureModal'))?.hide();
     renderFeeStructureTable(allFeeStructuresCache);
+}
+
+// ============================================================
+// 5. SYSTEM AUDIT LOGS RETRIEVAL & RENDERING
+// ============================================================
+async function loadAuditLogs() {
+    const tbody = document.getElementById('auditLogsTbody');
+    if (!tbody) return;
+
+    try {
+        const result = await apiFetch('/admin/audit-logs');
+        if (result && result.ok && result.data && result.data.data) {
+            const logs = result.data.data;
+            if (!logs || logs.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-3">No audit records logged yet.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = logs.map(l => {
+                let badgeClass = 'bg-secondary';
+                if (l.action && l.action.includes('CREATED')) badgeClass = 'bg-success';
+                else if (l.action && l.action.includes('UPDATED')) badgeClass = 'bg-primary';
+                else if (l.action && l.action.includes('STATUS')) badgeClass = 'bg-warning text-dark';
+                else if (l.action && l.action.includes('LOGIN')) badgeClass = 'bg-info text-dark';
+
+                const dateStr = l.createdAt ? new Date(l.createdAt).toLocaleString('en-IN') : 'Just now';
+
+                return `
+                    <tr>
+                        <td><small class="text-muted">${escHtml(dateStr)}</small></td>
+                        <td><code>${escHtml(l.username || 'admin@mmcoe.com')}</code></td>
+                        <td><span class="badge ${badgeClass}">${escHtml(l.action)}</span></td>
+                        <td>${escHtml(l.entityName || '—')}</td>
+                        <td>${escHtml(l.details || '—')}</td>
+                        <td><small class="text-muted">${escHtml(l.ipAddress || '127.0.0.1')}</small></td>
+                    </tr>
+                `;
+            }).join('');
+            return;
+        }
+    } catch (e) {
+        console.warn('Could not load audit logs from API');
+    }
+
+    tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-3">No audit records available.</td></tr>';
 }
 
 // ============================================================
@@ -470,12 +651,7 @@ function getSampleStudents() {
     return [
         { id: 1, name: 'Manan Vivekanand Tote', prn: 'B25IT2010', email: 'b25it2010@mmcoe.com', mobile: '9876543210', department: 'Information Technology', course: 'B.Tech', academicYear: '2025-26', status: 'ACTIVE' },
         { id: 2, name: 'Aarav Sharma', prn: 'B25IT2001', email: 'b25it2001@mmcoe.com', mobile: '9876543201', department: 'Information Technology', course: 'B.Tech', academicYear: '2025-26', status: 'ACTIVE' },
-        { id: 3, name: 'Priya Desai', prn: 'B25IT2002', email: 'b25it2002@mmcoe.com', mobile: '9876543202', department: 'Information Technology', course: 'B.Tech', academicYear: '2025-26', status: 'ACTIVE' },
-        { id: 4, name: 'Rohan Kulkarni', prn: 'B25IT2003', email: 'b25it2003@mmcoe.com', mobile: '9876543203', department: 'Computer Science', course: 'B.Tech', academicYear: '2025-26', status: 'ACTIVE' },
-        { id: 5, name: 'Sneha Patil', prn: 'B25IT2004', email: 'b25it2004@mmcoe.com', mobile: '9876543204', department: 'Computer Science', course: 'B.Tech', academicYear: '2025-26', status: 'ACTIVE' },
-        { id: 6, name: 'Vikram Joshi', prn: 'B25IT2005', email: 'b25it2005@mmcoe.com', mobile: '9876543205', department: 'Mechanical', course: 'B.Tech', academicYear: '2025-26', status: 'ACTIVE' },
-        { id: 7, name: 'Karan Verma', prn: 'B25IT2007', email: 'b25it2007@mmcoe.com', mobile: '9876543207', department: 'Civil', course: 'B.Tech', academicYear: '2025-26', status: 'ACTIVE' },
-        { id: 8, name: 'Divya Nair', prn: 'B25IT2008', email: 'b25it2008@mmcoe.com', mobile: '9876543208', department: 'Electronics', course: 'B.Tech', academicYear: '2025-26', status: 'ACTIVE' }
+        { id: 3, name: 'Priya Desai', prn: 'B25IT2002', email: 'b25it2002@mmcoe.com', mobile: '9876543202', department: 'Information Technology', course: 'B.Tech', academicYear: '2025-26', status: 'ACTIVE' }
     ];
 }
 

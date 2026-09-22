@@ -1,17 +1,23 @@
 package com.feepayment.service;
 
+import com.feepayment.model.AuditLog;
+import com.feepayment.model.FeeStructure;
 import com.feepayment.model.Role;
 import com.feepayment.model.Student;
 import com.feepayment.model.StudentData;
 import com.feepayment.model.User;
+import com.feepayment.repository.FeeStructureRepository;
 import com.feepayment.repository.RoleRepository;
 import com.feepayment.repository.StudentRepository;
 import com.feepayment.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -26,7 +32,9 @@ public class AdminService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
-    private final com.feepayment.repository.FeeStructureRepository feeStructureRepository;
+    private final FeeStructureRepository feeStructureRepository;
+    private final AuditLogService auditLogService;
+    private final JdbcTemplate jdbc;
 
     public List<StudentData> getAllStudents(String department, String academicYear, String status) {
         List<Student> students;
@@ -82,6 +90,15 @@ public class AdminService {
         student.setUser(user);
         student = studentRepository.save(student);
 
+        // Audit Log entry
+        auditLogService.logAction(
+                getCurrentUsername(),
+                "STUDENT_CREATED",
+                "Student",
+                student.getPrn(),
+                "Registered student " + student.getName() + " in " + student.getDepartment()
+        );
+
         return toData(student);
     }
 
@@ -108,6 +125,15 @@ public class AdminService {
         student.setAcademicYear(data.getAcademicYear());
         student = studentRepository.save(student);
 
+        // Audit Log entry
+        auditLogService.logAction(
+                getCurrentUsername(),
+                "STUDENT_UPDATED",
+                "Student",
+                student.getPrn(),
+                "Updated details for " + student.getName() + " (" + student.getDepartment() + ")"
+        );
+
         return toData(student);
     }
 
@@ -116,70 +142,156 @@ public class AdminService {
         Student student = studentRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Student not found with id: " + id));
 
-        if (!List.of("ACTIVE", "INACTIVE", "PENDING").contains(status.toUpperCase())) {
+        String upperStatus = status.trim().toUpperCase();
+        if (!List.of("ACTIVE", "INACTIVE", "PENDING").contains(upperStatus)) {
             throw new IllegalArgumentException("Invalid status. Allowed: ACTIVE, INACTIVE, PENDING");
         }
 
-        studentRepository.updateStatus(id, status.toUpperCase());
+        studentRepository.updateStatus(id, upperStatus);
 
         // Also update user.enabled
-        userRepository.updateEnabled(student.getUserId(), "ACTIVE".equals(status.toUpperCase()));
+        userRepository.updateEnabled(student.getUserId(), "ACTIVE".equals(upperStatus));
 
-        student.setStatus(status.toUpperCase());
+        student.setStatus(upperStatus);
+
+        // Audit Log entry
+        auditLogService.logAction(
+                getCurrentUsername(),
+                "STUDENT_STATUS_CHANGED",
+                "Student",
+                student.getPrn(),
+                "Changed status of student " + student.getName() + " to " + upperStatus
+        );
+
         return toData(student);
     }
 
     // ============================================================
     // Fee Structure Management (Admin CRUD)
     // ============================================================
-    public List<com.feepayment.model.FeeStructure> getAllFeeStructures() {
+    public List<FeeStructure> getAllFeeStructures() {
         return feeStructureRepository.findAll();
     }
 
-    public com.feepayment.model.FeeStructure getFeeStructureById(Long id) {
+    public FeeStructure getFeeStructureById(Long id) {
         return feeStructureRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Fee structure not found with id: " + id));
     }
 
     @Transactional
-    public com.feepayment.model.FeeStructure saveFeeStructure(com.feepayment.model.FeeStructure feeStructure) {
+    public FeeStructure saveFeeStructure(FeeStructure feeStructure) {
+        boolean isNew = (feeStructure.getId() == null);
         if (feeStructure.getTotalAmount() == null) {
-            java.math.BigDecimal total = java.math.BigDecimal.ZERO;
+            BigDecimal total = BigDecimal.ZERO;
             if (feeStructure.getTuitionFee() != null) total = total.add(feeStructure.getTuitionFee());
             if (feeStructure.getDevelopmentFee() != null) total = total.add(feeStructure.getDevelopmentFee());
             if (feeStructure.getExamFee() != null) total = total.add(feeStructure.getExamFee());
             feeStructure.setTotalAmount(total);
         }
         feeStructureRepository.save(feeStructure);
+
+        // Audit Log entry
+        auditLogService.logAction(
+                getCurrentUsername(),
+                isNew ? "FEE_STRUCTURE_CREATED" : "FEE_STRUCTURE_UPDATED",
+                "FeeStructure",
+                feeStructure.getDepartment(),
+                (isNew ? "Created" : "Updated") + " fee structure for " + feeStructure.getDepartment() + " (Total: ₹" + feeStructure.getTotalAmount() + ")"
+        );
+
         return feeStructure;
     }
 
     // ============================================================
-    // Simple Admin Dashboard Stats
+    // Real Dynamic Admin Dashboard Stats (Calculated from PostgreSQL)
     // ============================================================
     public Map<String, Object> getDashboardStats() {
         Map<String, Object> stats = new HashMap<>();
+
+        // 1. Total Registered Students from PostgreSQL
         long totalStudents = studentRepository.count();
-
         stats.put("totalStudents", totalStudents);
-        stats.put("totalFeeCollection", 8250000);
 
-        // Recent 5 registered students
+        // 2. Total Fee Collection from PostgreSQL transactions (SUCCESS)
+        BigDecimal totalFeeCollection = BigDecimal.ZERO;
+        try {
+            totalFeeCollection = jdbc.queryForObject(
+                "SELECT COALESCE(SUM(amount), 0) FROM transactions WHERE transaction_status = 'SUCCESS'",
+                BigDecimal.class
+            );
+        } catch (Exception ignored) {}
+        stats.put("totalFeeCollection", totalFeeCollection != null ? totalFeeCollection : BigDecimal.ZERO);
+
+        // 3. Real Total Pending Fees (Calculated per student: applicable fee - verified paid)
+        BigDecimal totalPendingFees = BigDecimal.ZERO;
+        try {
+            String pendingSql = """
+                WITH student_fee AS (
+                    SELECT s.id AS student_id,
+                           COALESCE(fs.total_amount, 120000.00) AS applicable_fee
+                    FROM students s
+                    LEFT JOIN fee_structures fs ON s.department = fs.department AND fs.status = 'ACTIVE'
+                ),
+                student_paid AS (
+                    SELECT s.id AS student_id,
+                           COALESCE(SUM(t.amount), 0) AS paid_amount
+                    FROM students s
+                    LEFT JOIN transactions t ON s.id = t.student_id AND t.transaction_status = 'SUCCESS'
+                    GROUP BY s.id
+                )
+                SELECT COALESCE(SUM(GREATEST(0, sf.applicable_fee - sp.paid_amount)), 0)
+                FROM student_fee sf
+                JOIN student_paid sp ON sf.student_id = sp.student_id
+            """;
+            totalPendingFees = jdbc.queryForObject(pendingSql, BigDecimal.class);
+        } catch (Exception ignored) {}
+        stats.put("totalPendingFees", totalPendingFees != null ? totalPendingFees : BigDecimal.ZERO);
+
+        // 4. Recent Student Registrations (5 latest students by ID desc)
         List<StudentData> recentStudents = studentRepository.findAll().stream()
+                .sorted((a, b) -> Long.compare(b.getId() != null ? b.getId() : 0, a.getId() != null ? a.getId() : 0))
                 .limit(5)
                 .map(this::toData)
                 .collect(Collectors.toList());
         stats.put("recentStudents", recentStudents);
 
-        // Department-wise fee collection
-        List<Map<String, Object>> deptCollection = List.of(
-            Map.of("department", "Information Technology", "students", 280, "collected", 3150000),
-            Map.of("department", "Computer Science",        "students", 260, "collected", 2950000),
-            Map.of("department", "Mechanical",            "students", 140, "collected", 1120000),
-            Map.of("department", "Electronics",           "students", 120, "collected", 820000),
-            Map.of("department", "Civil",                 "students", 95,  "collected", 510000)
-        );
-        stats.put("departmentWiseCollection", deptCollection);
+        // 5. Department-wise Collection from live PostgreSQL aggregation
+        String deptSql = """
+            WITH student_calc AS (
+                SELECT s.department,
+                       s.id AS student_id,
+                       COALESCE(SUM(CASE WHEN t.transaction_status = 'SUCCESS' THEN t.amount ELSE 0 END), 0) AS paid
+                FROM students s
+                LEFT JOIN transactions t ON s.id = t.student_id
+                GROUP BY s.department, s.id
+            ),
+            dept_agg AS (
+                SELECT department,
+                       COUNT(student_id) AS total_students,
+                       SUM(paid) AS collected_amount
+                FROM student_calc
+                GROUP BY department
+            )
+            SELECT fs.department,
+                   COALESCE(da.total_students, 0) AS total_students,
+                   COALESCE(da.collected_amount, 0) AS collected_amount
+            FROM fee_structures fs
+            LEFT JOIN dept_agg da ON fs.department = da.department
+            WHERE fs.status = 'ACTIVE'
+            ORDER BY da.collected_amount DESC NULLS LAST, fs.department ASC
+        """;
+        try {
+            List<Map<String, Object>> deptCollection = jdbc.query(deptSql, (rs, rowNum) -> {
+                Map<String, Object> m = new HashMap<>();
+                m.put("department", rs.getString("department"));
+                m.put("students", rs.getLong("total_students"));
+                m.put("collected", rs.getBigDecimal("collected_amount"));
+                return m;
+            });
+            stats.put("departmentWiseCollection", deptCollection);
+        } catch (Exception e) {
+            stats.put("departmentWiseCollection", List.of());
+        }
 
         return stats;
     }
@@ -217,6 +329,13 @@ public class AdminService {
         return result;
     }
 
+    // ============================================================
+    // Audit Logs Retrieval
+    // ============================================================
+    public List<AuditLog> getAuditLogs() {
+        return auditLogService.getRecentLogs(50);
+    }
+
     private StudentData toData(Student student) {
         StudentData data = new StudentData();
         data.setId(student.getId());
@@ -237,5 +356,15 @@ public class AdminService {
             data.setEnabled(student.getUser().getEnabled());
         }
         return data;
+    }
+
+    private String getCurrentUsername() {
+        try {
+            var auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth != null && auth.getName() != null) {
+                return auth.getName();
+            }
+        } catch (Exception ignored) {}
+        return "admin@mmcoe.com";
     }
 }

@@ -39,6 +39,9 @@
             <a href="#fee-structure" class="nav-link-custom" data-section="sec-admin-fee-structure" onclick="showSection('sec-admin-fee-structure')">
                 <i class="bi bi-cash-stack"></i> Manage Fee Structure
             </a>
+            <a href="#audit-logs" class="nav-link-custom" data-section="sec-admin-audit-logs" onclick="showSection('sec-admin-audit-logs')">
+                <i class="bi bi-shield-check"></i> System Audit Logs
+            </a>
             <a href="../reports/reports.html" class="nav-link-custom">
                 <i class="bi bi-file-earmark-bar-graph"></i> Reports &amp; Analysis
             </a>
@@ -97,24 +100,33 @@
                     </div>
                 </div>
 
-                <!-- 2 Useful KPI Cards: Total Students & Total Collection -->
+                <!-- 3 Useful KPI Cards: Total Students, Total Collection, Pending Fees -->
                 <div class="row g-3 mb-4">
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <div class="stat-card border-start border-primary border-4">
                             <div class="stat-card-title text-primary">
                                 <i class="bi bi-people-fill me-1"></i> Total Registered Students
                             </div>
                             <div class="stat-card-value" id="statTotalStudents">&mdash;</div>
-                            <div class="stat-card-desc text-muted">Active database records across all departments</div>
+                            <div class="stat-card-desc text-muted">Active database records across departments</div>
                         </div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <div class="stat-card border-start border-success border-4">
                             <div class="stat-card-title text-success">
                                 <i class="bi bi-currency-rupee me-1"></i> Total Fee Collection
                             </div>
-                            <div class="stat-card-value text-success" id="statTotalFeeCollection">&#8377;82,50,000</div>
-                            <div class="stat-card-desc text-muted">Total collected for AY 2025-26</div>
+                            <div class="stat-card-value text-success" id="statTotalFeeCollection">&mdash;</div>
+                            <div class="stat-card-desc text-muted">Verified payments in PostgreSQL</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stat-card border-start border-warning border-4">
+                            <div class="stat-card-title text-warning">
+                                <i class="bi bi-hourglass-split me-1"></i> Pending Fee Dues
+                            </div>
+                            <div class="stat-card-value text-warning" id="statTotalPendingFees">&mdash;</div>
+                            <div class="stat-card-desc text-muted">Calculated outstanding student fees</div>
                         </div>
                     </div>
                 </div>
@@ -153,7 +165,7 @@
                     <div class="col-lg-6">
                         <div class="content-card h-100">
                             <div class="content-card-header">
-                                <h3><i class="bi bi-bar-chart-line text-primary"></i> Fee Collection Summary</h3>
+                                <h3><i class="bi bi-bar-chart-line text-primary"></i> Fee Collection by Department</h3>
                                 <span class="badge bg-light text-dark border">AY 2025-26</span>
                             </div>
                             <div class="content-card-body">
@@ -177,29 +189,7 @@
                                     </thead>
                                     <tbody id="deptWiseCollectionTbody">
                                         <tr>
-                                            <td>Information Technology</td>
-                                            <td>280</td>
-                                            <td><strong>&#8377;31,50,000</strong></td>
-                                        </tr>
-                                        <tr>
-                                            <td>Computer Science</td>
-                                            <td>260</td>
-                                            <td><strong>&#8377;29,50,000</strong></td>
-                                        </tr>
-                                        <tr>
-                                            <td>Mechanical Engineering</td>
-                                            <td>140</td>
-                                            <td><strong>&#8377;11,20,000</strong></td>
-                                        </tr>
-                                        <tr>
-                                            <td>Electronics &amp; Telecom</td>
-                                            <td>120</td>
-                                            <td><strong>&#8377;8,20,000</strong></td>
-                                        </tr>
-                                        <tr>
-                                            <td>Civil Engineering</td>
-                                            <td>95</td>
-                                            <td><strong>&#8377;5,10,000</strong></td>
+                                            <td colspan="3" class="text-center text-muted py-3">Loading department collections...</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -217,9 +207,9 @@
                 <div class="content-card">
                     <div class="content-card-header">
                         <h3><i class="bi bi-people-fill text-primary"></i> Student Directory</h3>
-                        <a href="add-student.html" class="btn btn-primary btn-sm">
+                        <button class="btn btn-primary btn-sm" onclick="openAddStudentModal()">
                             <i class="bi bi-person-plus me-1"></i> Add New Student
-                        </a>
+                        </button>
                     </div>
                     <div class="content-card-body">
                         <!-- Filters -->
@@ -257,7 +247,7 @@
                                         <th>Department</th>
                                         <th>Email</th>
                                         <th>Status</th>
-                                        <th style="width: 140px;">Action</th>
+                                        <th style="width: 200px;">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody id="studentsTbody">
@@ -284,7 +274,7 @@
                     </div>
                     <div class="content-card-body">
                         <p class="text-secondary small mb-3">
-                            Configured annual fee slabs by department and admission quota/category.
+                            Configured annual fee slabs by department and admission quota/category in PostgreSQL.
                         </p>
                         <div class="table-responsive">
                             <table class="table table-hover table-bordered mb-0">
@@ -312,7 +302,105 @@
                 </div>
             </div>
 
+            <!-- ========================================================
+                 SECTION 4: SYSTEM AUDIT LOGS
+                 ======================================================== -->
+            <div id="sec-admin-audit-logs" class="admin-section d-none">
+                <div class="content-card">
+                    <div class="content-card-header">
+                        <h3><i class="bi bi-shield-check text-primary"></i> System Audit Logs</h3>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="loadAuditLogs()">
+                            <i class="bi bi-arrow-clockwise me-1"></i> Refresh Logs
+                        </button>
+                    </div>
+                    <div class="content-card-body">
+                        <p class="text-secondary small mb-3">
+                            Direct audit log entries from PostgreSQL tracking administrative modifications, student changes, and access events.
+                        </p>
+                        <div class="table-responsive">
+                            <table class="table table-hover table-bordered mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Date / Time</th>
+                                        <th>Username</th>
+                                        <th>Action</th>
+                                        <th>Entity</th>
+                                        <th>Details</th>
+                                        <th>IP Address</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="auditLogsTbody">
+                                    <tr>
+                                        <td colspan="6" class="text-center text-muted py-3">Loading audit logs...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </main>
+    </div>
+</div>
+
+<!-- ============================================================
+     MODAL: Add Student
+     ============================================================ -->
+<div class="modal fade" id="addStudentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fs-6 fw-bold">
+                    <i class="bi bi-person-plus text-primary me-2"></i>Register New Student
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="addStudentModalForm" onsubmit="handleRegisterStudentModal(event)">
+                <div class="modal-body">
+                    <div class="mb-2">
+                        <label for="newStudentName" class="form-label small fw-semibold">Full Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control form-control-sm" id="newStudentName" required placeholder="e.g. Ramesh Kumar Sharma">
+                    </div>
+                    <div class="mb-2">
+                        <label for="newStudentPrn" class="form-label small fw-semibold">PRN <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control form-control-sm text-uppercase" id="newStudentPrn" required placeholder="e.g. B25IT2011">
+                    </div>
+                    <div class="mb-2">
+                        <label for="newStudentEmail" class="form-label small fw-semibold">Email Address <span class="text-danger">*</span></label>
+                        <input type="email" class="form-control form-control-sm" id="newStudentEmail" required placeholder="e.g. ramesh@mmcoe.com">
+                    </div>
+                    <div class="mb-2">
+                        <label for="newStudentMobile" class="form-label small fw-semibold">Mobile Number <span class="text-danger">*</span></label>
+                        <input type="tel" class="form-control form-control-sm" id="newStudentMobile" required placeholder="10-digit mobile number">
+                    </div>
+                    <div class="mb-2">
+                        <label for="newStudentDept" class="form-label small fw-semibold">Department <span class="text-danger">*</span></label>
+                        <select id="newStudentDept" class="form-select form-select-sm" required>
+                            <option value="Information Technology">Information Technology</option>
+                            <option value="Computer Science">Computer Science</option>
+                            <option value="Mechanical">Mechanical</option>
+                            <option value="Civil">Civil</option>
+                            <option value="Electronics">Electronics</option>
+                        </select>
+                    </div>
+                    <div class="row g-2 mb-2">
+                        <div class="col-6">
+                            <label for="newStudentCourse" class="form-label small fw-semibold">Course</label>
+                            <input type="text" class="form-control form-control-sm" id="newStudentCourse" value="B.Tech" required>
+                        </div>
+                        <div class="col-6">
+                            <label for="newStudentYear" class="form-label small fw-semibold">Academic Year</label>
+                            <input type="text" class="form-control form-control-sm" id="newStudentYear" value="2025-26" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary btn-sm" id="btnSubmitAddStudent">Register Student</button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
@@ -492,7 +580,10 @@ function showSection(sectionId) {
     if (titleEl) {
         if (sectionId === 'sec-admin-students') titleEl.textContent = 'Manage Students';
         else if (sectionId === 'sec-admin-fee-structure') titleEl.textContent = 'Manage Fee Structure';
-        else titleEl.textContent = 'Admin Dashboard';
+        else if (sectionId === 'sec-admin-audit-logs') {
+            titleEl.textContent = 'System Audit Logs';
+            loadAuditLogs();
+        } else titleEl.textContent = 'Admin Dashboard';
     }
 }
 
@@ -505,6 +596,7 @@ window.addEventListener('DOMContentLoaded', () => {
     const hash = window.location.hash;
     if (hash === '#students') showSection('sec-admin-students');
     else if (hash === '#fee-structure') showSection('sec-admin-fee-structure');
+    else if (hash === '#audit-logs') showSection('sec-admin-audit-logs');
     else showSection('sec-admin-dashboard');
 });
 </script>

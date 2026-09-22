@@ -28,12 +28,12 @@ async function loadAccountsStats() {
         const result = await apiFetch('/accounts/dashboard');
         if (result && result.ok && result.data && result.data.data) {
             const data = result.data.data;
-            setStat('statTotalCollection', '₹' + Number(data.totalFeeCollection || 8250000).toLocaleString('en-IN'));
-            setStat('statPendingFees', '₹' + Number(data.pendingFees || 1425000).toLocaleString('en-IN'));
-            setStat('statSuccessPayments', Number(data.successfulPayments || 1126).toLocaleString('en-IN'));
-            setStat('statPendingRequests', data.pendingTransactions || 8);
+            setStat('statTotalCollection', '₹' + Number(data.totalFeeCollection || 0).toLocaleString('en-IN'));
+            setStat('statPendingFees', '₹' + Number(data.pendingFees || 0).toLocaleString('en-IN'));
+            setStat('statSuccessPayments', Number(data.successfulPayments || 0).toLocaleString('en-IN'));
+            setStat('statPendingRequests', data.pendingTransactions || 0);
 
-            renderRecentActivity(data.recentActivity || getSampleRecentActivity());
+            renderRecentActivity(data.recentActivity || []);
             return;
         }
     } catch (e) {
