@@ -135,6 +135,15 @@ public class StudentService {
             }
         }
 
+        // Tag payment history records with installment allocation for clear auditing
+        Map<Long, String> allocationMap = new HashMap<>();
+        if (inst1TxnId != null) allocationMap.put(inst1TxnId, "Installment 1 (50%)");
+        if (inst2TxnId != null) allocationMap.put(inst2TxnId, "Installment 2 (50%)");
+        for (Map<String, Object> p : paymentHistory) {
+            Long tid = (Long) p.get("transactionId");
+            p.put("allocation", allocationMap.getOrDefault(tid, "Excess / Test Payment"));
+        }
+
         boolean inst1Paid = paidAmount.compareTo(inst1Amount) >= 0;
         boolean inst2Paid = paidAmount.compareTo(inst1Amount.add(inst2Amount)) >= 0;
 
@@ -169,55 +178,62 @@ public class StudentService {
 
     /**
      * Compute paid / pending amounts for a student dynamically from the DB.
-     * Uses actual student applicable fee from fee_structures.
+     * Uses transactions table as the single authoritative record of verified successful payments.
+     *
+     * In accordance with college policy:
+     * - Prescribed annual fee is partitioned into exactly 2 installments (50% + 50%).
+     * - Maximum applicable paid amount credited towards the annual fee obligation is totalFee.
+     * - Pending balance is max(totalFee - validPaidAmount, 0).
+     * - Any payments beyond the total prescribed fee are recognized as excess/overpayment.
      */
     private Map<String, Object> buildFeeStatus(Student student) {
-        BigDecimal feePaid = BigDecimal.ZERO;
-        BigDecimal txnPaid = BigDecimal.ZERO;
+        FeeStructure fs = getStudentFeeStructure(student);
+        BigDecimal totalFee = fs.getTotalAmount();
+        if (totalFee == null || totalFee.compareTo(BigDecimal.ZERO) <= 0) {
+            totalFee = new BigDecimal("120000.00");
+        }
 
+        // Single authoritative query: verified successful payments from transactions table
+        BigDecimal totalSuccessfulPaid = BigDecimal.ZERO;
         try {
-            feePaid = jdbc.queryForObject(
-                "SELECT COALESCE(SUM(amount_paid), 0) FROM fee_payments WHERE student_id = ? AND status = 'SUCCESS'",
-                BigDecimal.class, student.getId()
-            );
-        } catch (Exception ignored) {}
-
-        try {
-            txnPaid = jdbc.queryForObject(
+            totalSuccessfulPaid = jdbc.queryForObject(
                 "SELECT COALESCE(SUM(amount), 0) FROM transactions WHERE student_id = ? AND transaction_status = 'SUCCESS'",
                 BigDecimal.class, student.getId()
             );
-        } catch (Exception ignored) {}
-
-        if (feePaid == null) feePaid = BigDecimal.ZERO;
-        if (txnPaid == null) txnPaid = BigDecimal.ZERO;
-
-        BigDecimal actualPaid = feePaid.max(txnPaid);
-
-        FeeStructure fs = getStudentFeeStructure(student);
-        BigDecimal totalFee = fs.getTotalAmount();
-
-        BigDecimal pendingAmount = totalFee.subtract(actualPaid);
-        if (pendingAmount.compareTo(BigDecimal.ZERO) < 0) {
-            pendingAmount = BigDecimal.ZERO;
+        } catch (Exception e) {
+            try {
+                totalSuccessfulPaid = jdbc.queryForObject(
+                    "SELECT COALESCE(SUM(amount_paid), 0) FROM fee_payments WHERE student_id = ? AND status = 'SUCCESS'",
+                    BigDecimal.class, student.getId()
+                );
+            } catch (Exception ignored) {}
         }
+
+        if (totalSuccessfulPaid == null) totalSuccessfulPaid = BigDecimal.ZERO;
+
+        // Valid paid amount credited towards student's prescribed annual fee (cannot exceed total annual fee)
+        BigDecimal validPaidAmount = totalSuccessfulPaid.min(totalFee);
+        BigDecimal pendingAmount = totalFee.subtract(validPaidAmount).max(BigDecimal.ZERO);
+        BigDecimal excessAmount = totalSuccessfulPaid.subtract(validPaidAmount).max(BigDecimal.ZERO);
 
         boolean isCleared = pendingAmount.compareTo(BigDecimal.ZERO) <= 0;
         String paymentStatus;
         if (isCleared) {
             paymentStatus = "PAID_IN_FULL";
-        } else if (actualPaid.compareTo(BigDecimal.ZERO) > 0) {
+        } else if (validPaidAmount.compareTo(BigDecimal.ZERO) > 0) {
             paymentStatus = "PARTIALLY_PAID";
         } else {
             paymentStatus = "UNPAID";
         }
 
         Map<String, Object> status = new HashMap<>();
-        status.put("totalFee",      totalFee.doubleValue());
-        status.put("paidAmount",    actualPaid.doubleValue());
-        status.put("pendingAmount", pendingAmount.doubleValue());
-        status.put("paymentStatus", paymentStatus);
-        status.put("isCleared",     isCleared);
+        status.put("totalFee",               totalFee.doubleValue());
+        status.put("paidAmount",             validPaidAmount.doubleValue());
+        status.put("pendingAmount",          pendingAmount.doubleValue());
+        status.put("totalTransactionAmount", totalSuccessfulPaid.doubleValue());
+        status.put("excessAmount",           excessAmount.doubleValue());
+        status.put("paymentStatus",          paymentStatus);
+        status.put("isCleared",              isCleared);
         return status;
     }
 

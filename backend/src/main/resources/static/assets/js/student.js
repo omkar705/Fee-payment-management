@@ -263,7 +263,10 @@ function renderHistoryTables(recentTbody, fullTbody, history) {
                     <td>${escHtml(tx.date || '2025-08-14')}</td>
                     <td><strong>₹${Number(tx.amount || 60000).toLocaleString('en-IN')}</strong></td>
                     <td>${escHtml(tx.gateway || 'Razorpay')}</td>
-                    <td><span class="badge bg-success">SUCCESS</span></td>
+                    <td>
+                        <span class="badge bg-success">SUCCESS</span>
+                        ${tx.allocation ? `<br><small class="badge ${tx.allocation.includes('Installment') ? 'bg-primary' : 'bg-light text-secondary border'} mt-1">${escHtml(tx.allocation)}</small>` : ''}
+                    </td>
                 </tr>
             `).join('');
         }
@@ -279,7 +282,10 @@ function renderHistoryTables(recentTbody, fullTbody, history) {
                     <td>${escHtml(tx.date || '2025-08-14')}</td>
                     <td><strong>₹${Number(tx.amount || 60000).toLocaleString('en-IN')}</strong></td>
                     <td>${escHtml(tx.gateway || 'Razorpay')}</td>
-                    <td><span class="badge bg-success">SUCCESS</span></td>
+                    <td>
+                        <span class="badge bg-success">SUCCESS</span>
+                        ${tx.allocation ? `<br><small class="badge ${tx.allocation.includes('Installment') ? 'bg-primary' : 'bg-light text-secondary border'} mt-1">${escHtml(tx.allocation)}</small>` : ''}
+                    </td>
                     <td>
                         <button class="btn btn-sm btn-outline-primary py-0 px-2" onclick="showReceiptModal('${tx.receiptNumber || tx.transactionReference}', ${tx.amount || 60000}, '${tx.date || '2025-08-14'}', '${tx.gateway || 'Razorpay'}')">
                             <i class="bi bi-receipt"></i> Receipt
