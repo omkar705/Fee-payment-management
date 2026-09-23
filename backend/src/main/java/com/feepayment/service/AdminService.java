@@ -88,6 +88,11 @@ public class AdminService {
         student.setAcademicYear(data.getAcademicYear());
         student.setStatus("ACTIVE");
         student.setUser(user);
+        student.setBtechYear(data.getBtechYear() != null ? data.getBtechYear() : "1st Year");
+        student.setCaste(data.getCaste() != null ? data.getCaste() : "OPEN");
+        student.setGender(data.getGender() != null ? data.getGender() : "Male");
+        student.setAnnualFamilyIncome(data.getAnnualFamilyIncome() != null ? data.getAnnualFamilyIncome() : BigDecimal.ZERO);
+        student.setQuota(data.getQuota() != null ? data.getQuota() : "CAP");
         student = studentRepository.save(student);
 
         // Audit Log entry
@@ -123,6 +128,11 @@ public class AdminService {
         student.setDepartment(data.getDepartment());
         student.setCourse(data.getCourse());
         student.setAcademicYear(data.getAcademicYear());
+        student.setBtechYear(data.getBtechYear() != null ? data.getBtechYear() : "1st Year");
+        student.setCaste(data.getCaste() != null ? data.getCaste() : "OPEN");
+        student.setGender(data.getGender() != null ? data.getGender() : "Male");
+        student.setAnnualFamilyIncome(data.getAnnualFamilyIncome() != null ? data.getAnnualFamilyIncome() : BigDecimal.ZERO);
+        student.setQuota(data.getQuota() != null ? data.getQuota() : "CAP");
         student = studentRepository.save(student);
 
         // Audit Log entry
@@ -181,11 +191,16 @@ public class AdminService {
     @Transactional
     public FeeStructure saveFeeStructure(FeeStructure feeStructure) {
         boolean isNew = (feeStructure.getId() == null);
-        if (feeStructure.getTotalAmount() == null) {
+        if (feeStructure.getTotalAmount() == null || feeStructure.getTotalAmount().compareTo(BigDecimal.ZERO) == 0) {
             BigDecimal total = BigDecimal.ZERO;
             if (feeStructure.getTuitionFee() != null) total = total.add(feeStructure.getTuitionFee());
             if (feeStructure.getDevelopmentFee() != null) total = total.add(feeStructure.getDevelopmentFee());
             if (feeStructure.getExamFee() != null) total = total.add(feeStructure.getExamFee());
+            if (feeStructure.getUniversityFee() != null) total = total.add(feeStructure.getUniversityFee());
+            if (feeStructure.getLibraryFee() != null) total = total.add(feeStructure.getLibraryFee());
+            if (feeStructure.getLaboratoryFee() != null) total = total.add(feeStructure.getLaboratoryFee());
+            if (feeStructure.getInsuranceFee() != null) total = total.add(feeStructure.getInsuranceFee());
+            if (feeStructure.getOtherFee() != null) total = total.add(feeStructure.getOtherFee());
             feeStructure.setTotalAmount(total);
         }
         feeStructureRepository.save(feeStructure);
@@ -348,6 +363,11 @@ public class AdminService {
         data.setAcademicYear(student.getAcademicYear());
         data.setStatus(student.getStatus());
         data.setCreatedAt(student.getCreatedAt() != null ? student.getCreatedAt().toString() : null);
+        data.setBtechYear(student.getBtechYear());
+        data.setCaste(student.getCaste());
+        data.setGender(student.getGender());
+        data.setAnnualFamilyIncome(student.getAnnualFamilyIncome());
+        data.setQuota(student.getQuota());
 
         // Fetch user enabled status if needed
         if (student.getUserId() != null) {

@@ -41,11 +41,18 @@ public class StudentRepository {
         s.setStatus(rs.getString("status"));
         Timestamp ts = rs.getTimestamp("created_at");
         s.setCreatedAt(ts != null ? ts.toLocalDateTime() : null);
+        
+        s.setBtechYear(rs.getString("btech_year"));
+        s.setCaste(rs.getString("caste"));
+        s.setGender(rs.getString("gender"));
+        s.setAnnualFamilyIncome(rs.getBigDecimal("annual_family_income"));
+        s.setQuota(rs.getString("quota"));
+        
         return s;
     };
 
     private static final String SELECT_ALL =
-        "SELECT id, user_id, name, prn, email, mobile, department, course, academic_year, status, created_at FROM students";
+        "SELECT id, user_id, name, prn, email, mobile, department, course, academic_year, status, created_at, btech_year, caste, gender, annual_family_income, quota FROM students";
 
     public List<Student> findAll() {
         return jdbc.query(SELECT_ALL, studentRowMapper);
@@ -124,8 +131,8 @@ public class StudentRepository {
     public Student save(Student student) {
         if (student.getId() == null) {
             // INSERT
-            String sql = "INSERT INTO students (user_id, name, prn, email, mobile, department, course, academic_year, status, created_at) " +
-                         "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            String sql = "INSERT INTO students (user_id, name, prn, email, mobile, department, course, academic_year, status, created_at, btech_year, caste, gender, annual_family_income, quota) " +
+                         "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             KeyHolder keyHolder = new GeneratedKeyHolder();
             LocalDateTime now = LocalDateTime.now();
             jdbc.update(con -> {
@@ -140,6 +147,11 @@ public class StudentRepository {
                 ps.setString(8, student.getAcademicYear());
                 ps.setString(9, student.getStatus() != null ? student.getStatus() : "ACTIVE");
                 ps.setTimestamp(10, Timestamp.valueOf(now));
+                ps.setString(11, student.getBtechYear());
+                ps.setString(12, student.getCaste());
+                ps.setString(13, student.getGender());
+                ps.setBigDecimal(14, student.getAnnualFamilyIncome());
+                ps.setString(15, student.getQuota());
                 return ps;
             }, keyHolder);
             Map<String, Object> keys = keyHolder.getKeys();
@@ -156,7 +168,7 @@ public class StudentRepository {
             student.setCreatedAt(now);
         } else {
             // UPDATE
-            String sql = "UPDATE students SET name=?, prn=?, email=?, mobile=?, department=?, course=?, academic_year=?, status=? WHERE id=?";
+            String sql = "UPDATE students SET name=?, prn=?, email=?, mobile=?, department=?, course=?, academic_year=?, status=?, btech_year=?, caste=?, gender=?, annual_family_income=?, quota=? WHERE id=?";
             jdbc.update(sql,
                 student.getName(),
                 student.getPrn(),
@@ -166,6 +178,11 @@ public class StudentRepository {
                 student.getCourse(),
                 student.getAcademicYear(),
                 student.getStatus(),
+                student.getBtechYear(),
+                student.getCaste(),
+                student.getGender(),
+                student.getAnnualFamilyIncome(),
+                student.getQuota(),
                 student.getId()
             );
         }

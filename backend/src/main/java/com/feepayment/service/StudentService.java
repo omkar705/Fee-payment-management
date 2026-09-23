@@ -68,6 +68,11 @@ public class StudentService {
         dashboard.put("tuitionFee",     fs.getTuitionFee());
         dashboard.put("developmentFee", fs.getDevelopmentFee());
         dashboard.put("examFee",        fs.getExamFee());
+        dashboard.put("universityFee",  fs.getUniversityFee());
+        dashboard.put("libraryFee",     fs.getLibraryFee());
+        dashboard.put("laboratoryFee",  fs.getLaboratoryFee());
+        dashboard.put("insuranceFee",   fs.getInsuranceFee());
+        dashboard.put("otherFee",       fs.getOtherFee());
         dashboard.put("installment1",   inst1Amount);
         dashboard.put("installment2",   inst2Amount);
 
@@ -238,19 +243,50 @@ public class StudentService {
     }
 
     private FeeStructure getStudentFeeStructure(Student student) {
+        String applicableCaste = student.getCaste();
+        String incomeLimit = "<=5L";
+        
+        // Income rule: If > 5L, force OPEN category for fee lookup
+        if (student.getAnnualFamilyIncome() != null && student.getAnnualFamilyIncome().compareTo(new BigDecimal("500000")) > 0) {
+            applicableCaste = "OPEN";
+            incomeLimit = ">5L";
+        }
+        
+        String btechYear = student.getBtechYear() != null ? student.getBtechYear() : "1st Year";
+        String gender = student.getGender() != null ? student.getGender() : "Male";
+        String quota = student.getQuota() != null ? student.getQuota() : "CAP";
+        String academicYear = student.getAcademicYear() != null ? student.getAcademicYear() : "2025-26";
+        String dept = student.getDepartment() != null ? student.getDepartment() : "Information Technology";
+
+        var opt = feeStructureRepository.findApplicableFeeStructure(
+            academicYear, dept, btechYear, applicableCaste, gender, incomeLimit, quota
+        );
+
+        if (opt.isPresent()) return opt.get();
+
+        // Fallback if no specific dynamic rule matches
         if (student.getDepartment() != null) {
-            var opt = feeStructureRepository.findByDepartment(student.getDepartment());
-            if (opt.isPresent()) return opt.get();
+            var fallbackOpt = feeStructureRepository.findByDepartment(student.getDepartment());
+            if (fallbackOpt.isPresent()) return fallbackOpt.get();
         }
 
         FeeStructure defaultFs = new FeeStructure();
-        defaultFs.setDepartment(student.getDepartment() != null ? student.getDepartment() : "Information Technology");
+        defaultFs.setDepartment(dept);
         defaultFs.setCategory("OPEN");
+        defaultFs.setBtechYear(btechYear);
+        defaultFs.setGender(gender);
+        defaultFs.setIncomeLimit(incomeLimit);
+        defaultFs.setQuota(quota);
         defaultFs.setTuitionFee(new BigDecimal("95000.00"));
         defaultFs.setDevelopmentFee(new BigDecimal("15000.00"));
         defaultFs.setExamFee(new BigDecimal("10000.00"));
+        defaultFs.setUniversityFee(BigDecimal.ZERO);
+        defaultFs.setLibraryFee(BigDecimal.ZERO);
+        defaultFs.setLaboratoryFee(BigDecimal.ZERO);
+        defaultFs.setInsuranceFee(BigDecimal.ZERO);
+        defaultFs.setOtherFee(BigDecimal.ZERO);
         defaultFs.setTotalAmount(new BigDecimal("120000.00"));
-        defaultFs.setAcademicYear(student.getAcademicYear() != null ? student.getAcademicYear() : "2025-26");
+        defaultFs.setAcademicYear(academicYear);
         defaultFs.setStatus("ACTIVE");
         return defaultFs;
     }
@@ -267,6 +303,11 @@ public class StudentService {
         data.setAcademicYear(student.getAcademicYear());
         data.setStatus(student.getStatus());
         data.setCreatedAt(student.getCreatedAt() != null ? student.getCreatedAt().toString() : null);
+        data.setBtechYear(student.getBtechYear());
+        data.setCaste(student.getCaste());
+        data.setGender(student.getGender());
+        data.setAnnualFamilyIncome(student.getAnnualFamilyIncome());
+        data.setQuota(student.getQuota());
 
         if (student.getUserId() != null) {
             userRepository.findById(student.getUserId()).ifPresent(u -> data.setEnabled(u.getEnabled()));

@@ -1,6 +1,7 @@
 package com.feepayment.model;
 
 import jakarta.validation.constraints.*;
+import java.math.BigDecimal;
 
 /**
  * StudentData — Represents student form and profile information
@@ -49,6 +50,22 @@ public class StudentData {
     private String createdAt;
     private Boolean enabled;
 
+    // New Fields for dynamic fee calculation
+    @NotBlank(message = "BTech Year is required")
+    private String btechYear;
+
+    @NotBlank(message = "Caste is required")
+    private String caste;
+
+    @NotBlank(message = "Gender is required")
+    private String gender;
+
+    @NotNull(message = "Annual family income is required")
+    @Min(value = 0, message = "Income cannot be negative")
+    private BigDecimal annualFamilyIncome;
+
+    private String quota;
+
     public StudentData() {}
 
     public Long getId() { return id; }
@@ -83,4 +100,19 @@ public class StudentData {
 
     public Boolean getEnabled() { return enabled; }
     public void setEnabled(Boolean enabled) { this.enabled = enabled; }
+
+    public String getBtechYear() { return btechYear; }
+    public void setBtechYear(String btechYear) { this.btechYear = btechYear; }
+
+    public String getCaste() { return caste; }
+    public void setCaste(String caste) { this.caste = caste; }
+
+    public String getGender() { return gender; }
+    public void setGender(String gender) { this.gender = gender; }
+
+    public BigDecimal getAnnualFamilyIncome() { return annualFamilyIncome; }
+    public void setAnnualFamilyIncome(BigDecimal annualFamilyIncome) { this.annualFamilyIncome = annualFamilyIncome; }
+
+    public String getQuota() { return quota; }
+    public void setQuota(String quota) { this.quota = quota; }
 }

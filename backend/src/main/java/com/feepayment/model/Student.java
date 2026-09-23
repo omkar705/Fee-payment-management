@@ -1,5 +1,6 @@
 package com.feepayment.model;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public class Student {
@@ -16,9 +17,16 @@ public class Student {
     private LocalDateTime createdAt;
     private User user;
 
+    // New Fields
+    private String btechYear;
+    private String caste;
+    private String gender;
+    private BigDecimal annualFamilyIncome;
+    private String quota;
+
     public Student() {}
 
-    public Student(Long id, Long userId, String name, String prn, String email, String mobile, String department, String course, String academicYear, String status, LocalDateTime createdAt, User user) {
+    public Student(Long id, Long userId, String name, String prn, String email, String mobile, String department, String course, String academicYear, String status, LocalDateTime createdAt, User user, String btechYear, String caste, String gender, BigDecimal annualFamilyIncome, String quota) {
         this.id = id;
         this.userId = userId;
         this.name = name;
@@ -31,6 +39,11 @@ public class Student {
         this.status = status;
         this.createdAt = createdAt;
         this.user = user;
+        this.btechYear = btechYear;
+        this.caste = caste;
+        this.gender = gender;
+        this.annualFamilyIncome = annualFamilyIncome;
+        this.quota = quota;
     }
 
     public Long getId() { return id; }
@@ -68,4 +81,19 @@ public class Student {
 
     public User getUser() { return user; }
     public void setUser(User user) { this.user = user; }
+
+    public String getBtechYear() { return btechYear; }
+    public void setBtechYear(String btechYear) { this.btechYear = btechYear; }
+
+    public String getCaste() { return caste; }
+    public void setCaste(String caste) { this.caste = caste; }
+
+    public String getGender() { return gender; }
+    public void setGender(String gender) { this.gender = gender; }
+
+    public BigDecimal getAnnualFamilyIncome() { return annualFamilyIncome; }
+    public void setAnnualFamilyIncome(BigDecimal annualFamilyIncome) { this.annualFamilyIncome = annualFamilyIncome; }
+
+    public String getQuota() { return quota; }
+    public void setQuota(String quota) { this.quota = quota; }
 }

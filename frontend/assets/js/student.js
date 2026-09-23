@@ -75,12 +75,22 @@ function renderStudentDetails(data) {
     setTxt('profileStudentDept', student.department || 'Information Technology');
     setTxt('profileStudentCourse', student.course || 'B.Tech');
     setTxt('profileStudentYear', student.academicYear || '2025-26');
+    setTxt('profileStudentBtechYear', student.btechYear || '1st Year');
+    setTxt('profileStudentCaste', student.caste || 'OPEN');
+    setTxt('profileStudentGender', student.gender || 'Male');
+    setTxt('profileStudentIncome', student.annualFamilyIncome ? '₹' + Number(student.annualFamilyIncome).toLocaleString('en-IN') : '₹0');
+    setTxt('profileStudentQuota', student.quota || 'CAP');
 
     // Fee Breakdown from DB
     const total = Number(data.totalFee || 120000);
-    const tuition = Number(data.tuitionFee || 95000);
-    const dev = Number(data.developmentFee || 15000);
-    const exam = Number(data.examFee || 10000);
+    const tuition = Number(data.tuitionFee || 0);
+    const dev = Number(data.developmentFee || 0);
+    const exam = Number(data.examFee || 0);
+    const univ = Number(data.universityFee || 0);
+    const lib = Number(data.libraryFee || 0);
+    const lab = Number(data.laboratoryFee || 0);
+    const ins = Number(data.insuranceFee || 0);
+    const other = Number(data.otherFee || 0);
     const inst1Amt = Number(data.installment1 || (total / 2));
     const inst2Amt = Number(data.installment2 || (total - inst1Amt));
 
@@ -88,6 +98,11 @@ function renderStudentDetails(data) {
     setTxt('studentTuitionFee', '₹' + tuition.toLocaleString('en-IN'));
     setTxt('studentDevFee', '₹' + dev.toLocaleString('en-IN'));
     setTxt('studentExamFee', '₹' + exam.toLocaleString('en-IN'));
+    setTxt('studentUniversityFee', '₹' + univ.toLocaleString('en-IN'));
+    setTxt('studentLibraryFee', '₹' + lib.toLocaleString('en-IN'));
+    setTxt('studentLaboratoryFee', '₹' + lab.toLocaleString('en-IN'));
+    setTxt('studentInsuranceFee', '₹' + ins.toLocaleString('en-IN'));
+    setTxt('studentOtherFee', '₹' + other.toLocaleString('en-IN'));
     setTxt('studentTotalFeeDisplay', '₹' + total.toLocaleString('en-IN'));
 
     // Installments Schedule
