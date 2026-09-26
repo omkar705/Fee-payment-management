@@ -42,8 +42,10 @@ function clearSession() {
     localStorage.removeItem('fpm_name');
     localStorage.removeItem('fpm_userId');
     localStorage.removeItem('fpm_payment_history');
+    localStorage.removeItem('fpm_installment_plan');
     sessionStorage.removeItem('fpm_payment_history');
     sessionStorage.removeItem('fpm_payment_done');
+    sessionStorage.removeItem('fpm_installment_plan');
 }
 
 function isLoggedIn() {

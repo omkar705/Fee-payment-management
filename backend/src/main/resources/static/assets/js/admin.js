@@ -302,7 +302,13 @@ async function handleRegisterStudentModal(e) {
         btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Registering...';
     }
 
-    const payload = { name, prn, email, mobile, department, course, academicYear, status: 'ACTIVE' };
+    const btechYear = document.getElementById('newStudentBtechYear').value;
+    const caste = document.getElementById('newStudentCaste').value;
+    const gender = document.getElementById('newStudentGender').value;
+    const annualFamilyIncome = Number(document.getElementById('newStudentIncome').value || 0);
+    const quota = document.getElementById('newStudentQuota').value;
+
+    const payload = { name, prn, email, mobile, department, course, academicYear, btechYear, caste, gender, annualFamilyIncome, quota, status: 'ACTIVE' };
 
     try {
         const result = await apiFetch('/admin/students', {
@@ -343,6 +349,11 @@ function openEditStudentModal(studentId) {
     document.getElementById('editStudentDept').value = student.department;
     document.getElementById('editStudentCourse').value = student.course || 'B.Tech';
     document.getElementById('editStudentStatus').value = student.status || 'ACTIVE';
+    document.getElementById('editStudentBtechYear').value = student.btechYear || '1st Year';
+    document.getElementById('editStudentCaste').value = student.caste || 'OPEN';
+    document.getElementById('editStudentGender').value = student.gender || 'Male';
+    document.getElementById('editStudentIncome').value = student.annualFamilyIncome || 0;
+    document.getElementById('editStudentQuota').value = student.quota || 'CAP';
 
     const modal = new bootstrap.Modal(document.getElementById('editStudentModal'));
     modal.show();
@@ -358,7 +369,12 @@ async function handleSaveStudent(e) {
         mobile: document.getElementById('editStudentMobile').value.trim(),
         department: document.getElementById('editStudentDept').value,
         course: document.getElementById('editStudentCourse').value.trim(),
-        status: document.getElementById('editStudentStatus').value
+        status: document.getElementById('editStudentStatus').value,
+        btechYear: document.getElementById('editStudentBtechYear').value,
+        caste: document.getElementById('editStudentCaste').value,
+        gender: document.getElementById('editStudentGender').value,
+        annualFamilyIncome: Number(document.getElementById('editStudentIncome').value || 0),
+        quota: document.getElementById('editStudentQuota').value
     };
 
     try {
@@ -493,9 +509,18 @@ function openAddFeeStructureModal() {
     document.getElementById('feeStructureId').value = '';
     document.getElementById('feeDepartment').value = 'Information Technology';
     document.getElementById('feeCategory').value = 'OPEN';
+    document.getElementById('feeBtechYear').value = '1st Year';
+    document.getElementById('feeGender').value = 'Male';
+    document.getElementById('feeIncomeLimit').value = '<=5L';
+    document.getElementById('feeQuota').value = 'CAP';
     document.getElementById('feeTuition').value = '95000';
     document.getElementById('feeDev').value = '15000';
     document.getElementById('feeExam').value = '10000';
+    document.getElementById('feeUniversity').value = '0';
+    document.getElementById('feeLibrary').value = '0';
+    document.getElementById('feeLaboratory').value = '0';
+    document.getElementById('feeInsurance').value = '0';
+    document.getElementById('feeOther').value = '0';
     document.getElementById('feeYear').value = '2025-26';
     calcFeeTotal();
 
@@ -511,9 +536,18 @@ function openEditFeeStructureModal(id) {
     document.getElementById('feeStructureId').value = fs.id;
     document.getElementById('feeDepartment').value = fs.department;
     document.getElementById('feeCategory').value = fs.category || 'OPEN';
-    document.getElementById('feeTuition').value = fs.tuitionFee;
-    document.getElementById('feeDev').value = fs.developmentFee;
-    document.getElementById('feeExam').value = fs.examFee;
+    document.getElementById('feeBtechYear').value = fs.btechYear || '1st Year';
+    document.getElementById('feeGender').value = fs.gender || 'Male';
+    document.getElementById('feeIncomeLimit').value = fs.incomeLimit || '<=5L';
+    document.getElementById('feeQuota').value = fs.quota || 'CAP';
+    document.getElementById('feeTuition').value = fs.tuitionFee || 0;
+    document.getElementById('feeDev').value = fs.developmentFee || 0;
+    document.getElementById('feeExam').value = fs.examFee || 0;
+    document.getElementById('feeUniversity').value = fs.universityFee || 0;
+    document.getElementById('feeLibrary').value = fs.libraryFee || 0;
+    document.getElementById('feeLaboratory').value = fs.laboratoryFee || 0;
+    document.getElementById('feeInsurance').value = fs.insuranceFee || 0;
+    document.getElementById('feeOther').value = fs.otherFee || 0;
     document.getElementById('feeYear').value = fs.academicYear || '2025-26';
     calcFeeTotal();
 
@@ -525,7 +559,12 @@ function calcFeeTotal() {
     const tuition = Number(document.getElementById('feeTuition')?.value || 0);
     const dev = Number(document.getElementById('feeDev')?.value || 0);
     const exam = Number(document.getElementById('feeExam')?.value || 0);
-    const total = tuition + dev + exam;
+    const univ = Number(document.getElementById('feeUniversity')?.value || 0);
+    const lib = Number(document.getElementById('feeLibrary')?.value || 0);
+    const lab = Number(document.getElementById('feeLaboratory')?.value || 0);
+    const ins = Number(document.getElementById('feeInsurance')?.value || 0);
+    const other = Number(document.getElementById('feeOther')?.value || 0);
+    const total = tuition + dev + exam + univ + lib + lab + ins + other;
 
     const display = document.getElementById('feeTotalDisplay');
     if (display) {
@@ -539,18 +578,37 @@ async function handleSaveFeeStructure(e) {
     const id = document.getElementById('feeStructureId')?.value;
     const department = document.getElementById('feeDepartment')?.value;
     const category = document.getElementById('feeCategory')?.value;
+    const btechYear = document.getElementById('feeBtechYear')?.value;
+    const gender = document.getElementById('feeGender')?.value;
+    const incomeLimit = document.getElementById('feeIncomeLimit')?.value;
+    const quota = document.getElementById('feeQuota')?.value;
     const tuitionFee = Number(document.getElementById('feeTuition')?.value || 0);
     const developmentFee = Number(document.getElementById('feeDev')?.value || 0);
     const examFee = Number(document.getElementById('feeExam')?.value || 0);
-    const totalAmount = tuitionFee + developmentFee + examFee;
+    const universityFee = Number(document.getElementById('feeUniversity')?.value || 0);
+    const libraryFee = Number(document.getElementById('feeLibrary')?.value || 0);
+    const laboratoryFee = Number(document.getElementById('feeLaboratory')?.value || 0);
+    const insuranceFee = Number(document.getElementById('feeInsurance')?.value || 0);
+    const otherFee = Number(document.getElementById('feeOther')?.value || 0);
+    
+    const totalAmount = tuitionFee + developmentFee + examFee + universityFee + libraryFee + laboratoryFee + insuranceFee + otherFee;
     const academicYear = document.getElementById('feeYear')?.value || '2025-26';
 
     const payload = {
         department,
         category,
+        btechYear,
+        gender,
+        incomeLimit,
+        quota,
         tuitionFee,
         developmentFee,
         examFee,
+        universityFee,
+        libraryFee,
+        laboratoryFee,
+        insuranceFee,
+        otherFee,
         totalAmount,
         academicYear,
         status: 'ACTIVE'

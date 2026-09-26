@@ -394,6 +394,49 @@
                             <input type="text" class="form-control form-control-sm" id="newStudentYear" value="2025-26" required>
                         </div>
                     </div>
+                    <div class="row g-2 mb-2">
+                        <div class="col-6">
+                            <label for="newStudentBtechYear" class="form-label small fw-semibold">BTech Year <span class="text-danger">*</span></label>
+                            <select id="newStudentBtechYear" class="form-select form-select-sm" required>
+                                <option value="1st Year">1st Year</option>
+                                <option value="2nd Year">2nd Year</option>
+                                <option value="3rd Year">3rd Year</option>
+                                <option value="4th Year">4th Year</option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label for="newStudentCaste" class="form-label small fw-semibold">Caste <span class="text-danger">*</span></label>
+                            <select id="newStudentCaste" class="form-select form-select-sm" required>
+                                <option value="OPEN">OPEN</option>
+                                <option value="OBC">OBC</option>
+                                <option value="SC">SC</option>
+                                <option value="ST">ST</option>
+                                <option value="VJ/NT">VJ/NT</option>
+                                <option value="SBC">SBC</option>
+                                <option value="EWS">EWS</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row g-2 mb-2">
+                        <div class="col-4">
+                            <label for="newStudentGender" class="form-label small fw-semibold">Gender <span class="text-danger">*</span></label>
+                            <select id="newStudentGender" class="form-select form-select-sm" required>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                            </select>
+                        </div>
+                        <div class="col-4">
+                            <label for="newStudentIncome" class="form-label small fw-semibold">Income (&#8377;) <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control form-control-sm" id="newStudentIncome" min="0" required placeholder="500000">
+                        </div>
+                        <div class="col-4">
+                            <label for="newStudentQuota" class="form-label small fw-semibold">Quota <span class="text-danger">*</span></label>
+                            <select id="newStudentQuota" class="form-select form-select-sm" required>
+                                <option value="CAP">CAP</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
@@ -481,6 +524,49 @@
                             </select>
                         </div>
                     </div>
+                    <div class="row g-2 mb-2">
+                        <div class="col-6">
+                            <label for="editStudentBtechYear" class="form-label small fw-semibold">BTech Year <span class="text-danger">*</span></label>
+                            <select id="editStudentBtechYear" class="form-select form-select-sm" required>
+                                <option value="1st Year">1st Year</option>
+                                <option value="2nd Year">2nd Year</option>
+                                <option value="3rd Year">3rd Year</option>
+                                <option value="4th Year">4th Year</option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label for="editStudentCaste" class="form-label small fw-semibold">Caste <span class="text-danger">*</span></label>
+                            <select id="editStudentCaste" class="form-select form-select-sm" required>
+                                <option value="OPEN">OPEN</option>
+                                <option value="OBC">OBC</option>
+                                <option value="SC">SC</option>
+                                <option value="ST">ST</option>
+                                <option value="VJ/NT">VJ/NT</option>
+                                <option value="SBC">SBC</option>
+                                <option value="EWS">EWS</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row g-2 mb-2">
+                        <div class="col-4">
+                            <label for="editStudentGender" class="form-label small fw-semibold">Gender <span class="text-danger">*</span></label>
+                            <select id="editStudentGender" class="form-select form-select-sm" required>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                            </select>
+                        </div>
+                        <div class="col-4">
+                            <label for="editStudentIncome" class="form-label small fw-semibold">Income (&#8377;) <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control form-control-sm" id="editStudentIncome" min="0" required>
+                        </div>
+                        <div class="col-4">
+                            <label for="editStudentQuota" class="form-label small fw-semibold">Quota <span class="text-danger">*</span></label>
+                            <select id="editStudentQuota" class="form-select form-select-sm" required>
+                                <option value="CAP">CAP</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
@@ -506,39 +592,97 @@
             <form id="feeStructureForm" onsubmit="handleSaveFeeStructure(event)">
                 <input type="hidden" id="feeStructureId">
                 <div class="modal-body">
-                    <div class="mb-2">
-                        <label for="feeDepartment" class="form-label">Department</label>
-                        <select id="feeDepartment" class="form-select form-select-sm" required>
-                            <option value="Information Technology">Information Technology</option>
-                            <option value="Computer Science">Computer Science</option>
-                            <option value="Mechanical">Mechanical</option>
-                            <option value="Civil">Civil</option>
-                            <option value="Electronics">Electronics</option>
-                        </select>
-                    </div>
-                    <div class="mb-2">
-                        <label for="feeCategory" class="form-label">Category / Quota</label>
-                        <select id="feeCategory" class="form-select form-select-sm" required>
-                            <option value="OPEN">OPEN / General</option>
-                            <option value="OBC">OBC</option>
-                            <option value="SC">SC</option>
-                            <option value="ST">ST</option>
-                            <option value="EWS">EWS</option>
-                            <option value="TFWS">TFWS</option>
-                        </select>
+                    <div class="row g-2 mb-2">
+                        <div class="col-md-6">
+                            <label for="feeDepartment" class="form-label small fw-semibold">Department</label>
+                            <select id="feeDepartment" class="form-select form-select-sm" required>
+                                <option value="Information Technology">Information Technology</option>
+                                <option value="Computer Science">Computer Science</option>
+                                <option value="Mechanical">Mechanical</option>
+                                <option value="Civil">Civil</option>
+                                <option value="Electronics">Electronics</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="feeCategory" class="form-label small fw-semibold">Caste</label>
+                            <select id="feeCategory" class="form-select form-select-sm" required>
+                                <option value="OPEN">OPEN</option>
+                                <option value="OBC">OBC</option>
+                                <option value="SC">SC</option>
+                                <option value="ST">ST</option>
+                                <option value="VJ/NT">VJ/NT</option>
+                                <option value="SBC">SBC</option>
+                                <option value="EWS">EWS</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
                     </div>
                     <div class="row g-2 mb-2">
-                        <div class="col-md-4">
-                            <label for="feeTuition" class="form-label">Tuition Fee (&#8377;)</label>
-                            <input type="number" class="form-control form-control-sm" id="feeTuition" min="0" required oninput="calcFeeTotal()">
+                        <div class="col-md-3">
+                            <label for="feeBtechYear" class="form-label small fw-semibold">BTech Year</label>
+                            <select id="feeBtechYear" class="form-select form-select-sm" required>
+                                <option value="1st Year">1st Year</option>
+                                <option value="2nd Year">2nd Year</option>
+                                <option value="3rd Year">3rd Year</option>
+                                <option value="4th Year">4th Year</option>
+                            </select>
                         </div>
-                        <div class="col-md-4">
-                            <label for="feeDev" class="form-label">Dev Fee (&#8377;)</label>
-                            <input type="number" class="form-control form-control-sm" id="feeDev" min="0" required oninput="calcFeeTotal()">
+                        <div class="col-md-3">
+                            <label for="feeGender" class="form-label small fw-semibold">Gender</label>
+                            <select id="feeGender" class="form-select form-select-sm" required>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                            </select>
                         </div>
-                        <div class="col-md-4">
-                            <label for="feeExam" class="form-label">Exam Fee (&#8377;)</label>
-                            <input type="number" class="form-control form-control-sm" id="feeExam" min="0" required oninput="calcFeeTotal()">
+                        <div class="col-md-3">
+                            <label for="feeIncomeLimit" class="form-label small fw-semibold">Income</label>
+                            <select id="feeIncomeLimit" class="form-select form-select-sm" required>
+                                <option value="<=5L">&lt;= 5L</option>
+                                <option value=">5L">&gt; 5L</option>
+                                <option value="NA">N/A</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="feeQuota" class="form-label small fw-semibold">Quota</label>
+                            <select id="feeQuota" class="form-select form-select-sm" required>
+                                <option value="CAP">CAP</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row g-2 mb-2">
+                        <div class="col-md-3">
+                            <label for="feeTuition" class="form-label small fw-semibold">Tuition</label>
+                            <input type="number" class="form-control form-control-sm" id="feeTuition" min="0" required oninput="calcFeeTotal()" value="0">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="feeDev" class="form-label small fw-semibold">Dev</label>
+                            <input type="number" class="form-control form-control-sm" id="feeDev" min="0" required oninput="calcFeeTotal()" value="0">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="feeExam" class="form-label small fw-semibold">Exam</label>
+                            <input type="number" class="form-control form-control-sm" id="feeExam" min="0" required oninput="calcFeeTotal()" value="0">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="feeUniversity" class="form-label small fw-semibold">University</label>
+                            <input type="number" class="form-control form-control-sm" id="feeUniversity" min="0" required oninput="calcFeeTotal()" value="0">
+                        </div>
+                    </div>
+                    <div class="row g-2 mb-2">
+                        <div class="col-md-3">
+                            <label for="feeLibrary" class="form-label small fw-semibold">Library</label>
+                            <input type="number" class="form-control form-control-sm" id="feeLibrary" min="0" required oninput="calcFeeTotal()" value="0">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="feeLaboratory" class="form-label small fw-semibold">Lab</label>
+                            <input type="number" class="form-control form-control-sm" id="feeLaboratory" min="0" required oninput="calcFeeTotal()" value="0">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="feeInsurance" class="form-label small fw-semibold">Insurance</label>
+                            <input type="number" class="form-control form-control-sm" id="feeInsurance" min="0" required oninput="calcFeeTotal()" value="0">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="feeOther" class="form-label small fw-semibold">Other</label>
+                            <input type="number" class="form-control form-control-sm" id="feeOther" min="0" required oninput="calcFeeTotal()" value="0">
                         </div>
                     </div>
                     <div class="mb-2">

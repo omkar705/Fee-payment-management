@@ -59,6 +59,9 @@ public class StudentService {
         Map<String, Object> feeStatus = buildFeeStatus(student);
         dashboard.putAll(feeStatus);
 
+        // Add installment plan info
+        dashboard.put("installment", getInstallmentPlan(student));
+
         // Dynamic fee structure breakdown (from fee_structures table)
         FeeStructure fs = getStudentFeeStructure(student);
         BigDecimal totalFee = fs.getTotalAmount();
@@ -330,7 +333,10 @@ public class StudentService {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         Student student = studentRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("Student not found."));
+        return getInstallmentPlan(student);
+    }
 
+    public Map<String, Object> getInstallmentPlan(Student student) {
         Map<String, Object> plan = new HashMap<>();
         var opt = installmentRequestRepository.findLatestByStudentId(student.getId());
 
@@ -353,10 +359,13 @@ public class StudentService {
 
         // Exactly 2 installments schedule
         plan.put("installmentCount", 2);
-        plan.put("installments", List.of(
+        plan.put("installmentAmount", inst1Amount.intValue());
+        List<Map<String, Object>> schedule = List.of(
             Map.of("installmentNumber", 1, "amount", inst1Amount, "dueDate", "15 Oct 2025", "term", "Semester 1 (50%)"),
             Map.of("installmentNumber", 2, "amount", inst2Amount, "dueDate", "15 Feb 2026", "term", "Semester 2 (50%)")
-        ));
+        );
+        plan.put("installments", schedule);
+        plan.put("schedule", schedule);
 
         return plan;
     }

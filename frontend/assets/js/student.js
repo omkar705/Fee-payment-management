@@ -6,6 +6,11 @@
  */
 
 let currentStudentData = null;
+let currentInstallmentPlan = null;
+
+function hasInstallmentPlan() {
+    return !!(currentInstallmentPlan && currentInstallmentPlan.hasRequest === true);
+}
 
 document.addEventListener('DOMContentLoaded', () => {
     if (!requireAuth('STUDENT')) return;
@@ -14,9 +19,16 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function initStudentPortal() {
+    currentStudentData = null;
+    currentInstallmentPlan = null;
+
     await loadStudentProfileAndFees();
     await loadInstallmentPlan();
     await loadStudentTransactions();
+
+    if (window.location.hash === '#installments') {
+        showSection('sec-student-installments');
+    }
 }
 
 /**
@@ -27,6 +39,9 @@ async function loadStudentProfileAndFees() {
         const result = await apiFetch('/student/dashboard');
         if (result && result.ok && result.data && result.data.data) {
             currentStudentData = result.data.data;
+            if (currentStudentData.installment) {
+                currentInstallmentPlan = currentStudentData.installment;
+            }
             renderStudentDetails(currentStudentData);
             return;
         }
@@ -34,9 +49,10 @@ async function loadStudentProfileAndFees() {
         console.warn('API error, using session student profile.');
     }
 
-    // Fallback data
+    // Fallback data for offline/demo:
+    // A newly created student starts with no installment request and paidAmount 0
     const sessionEmail = getEmail() || 'b25it2010@mmcoe.com';
-    const sessionName = getName() || 'Manan Vivekanand Tote';
+    const sessionName = getName() || 'Student';
     currentStudentData = {
         student: {
             name: sessionName,
@@ -48,10 +64,15 @@ async function loadStudentProfileAndFees() {
             academicYear: '2025-26'
         },
         totalFee: 120000,
-        paidAmount: 60000,
-        pendingAmount: 60000,
-        paymentStatus: 'PARTIALLY_PAID'
+        paidAmount: 0,
+        pendingAmount: 120000,
+        paymentStatus: 'PENDING',
+        installment: {
+            hasRequest: false,
+            status: 'NOT_APPLIED'
+        }
     };
+    currentInstallmentPlan = currentStudentData.installment;
     renderStudentDetails(currentStudentData);
 }
 
@@ -62,7 +83,7 @@ function renderStudentDetails(data) {
     setTxt('welcomeGreeting', `Welcome back, ${student.name ? student.name.split(' ')[0] : 'Student'}!`);
     setTxt('studentDeptText', student.department || 'Information Technology');
     setTxt('topbarStudentName', student.name || 'Student');
-    setTxt('topbarStudentPrn', `PRN: ${student.prn || 'B25IT2010'}`);
+    setTxt('topbarStudentPrn', `PRN: ${student.prn || '—'}`);
 
     const initials = student.name ? student.name.split(' ').map(n => n[0]).join('').slice(0, 2) : 'ST';
     setTxt('studentAvatarInitials', initials);
@@ -108,25 +129,22 @@ function renderStudentDetails(data) {
     // Installments Schedule
     setTxt('inst1AmountDisplay', '₹' + inst1Amt.toLocaleString('en-IN'));
     setTxt('inst2AmountDisplay', '₹' + inst2Amt.toLocaleString('en-IN'));
+    setTxt('inst1ScheduleAmount', '₹' + inst1Amt.toLocaleString('en-IN'));
+    setTxt('inst2ScheduleAmount', '₹' + inst2Amt.toLocaleString('en-IN'));
     setTxt('payRadioInst1Label', '₹' + inst1Amt.toLocaleString('en-IN'));
+    setTxt('payOptionInst1Amount', '₹' + inst1Amt.toLocaleString('en-IN'));
 
     // Fee Status
     const paid = Number(data.paidAmount != null ? data.paidAmount : 0);
-    const pending = Math.max(0, total - paid);
+    const pending = Number(data.pendingAmount != null ? data.pendingAmount : Math.max(0, total - paid));
 
+    setTxt('statTotalAnnualFee', '₹' + total.toLocaleString('en-IN'));
     setTxt('statPaidAmount', '₹' + paid.toLocaleString('en-IN'));
     setTxt('statPendingBalance', '₹' + pending.toLocaleString('en-IN'));
     setTxt('payOutstandingFee', '₹' + pending.toLocaleString('en-IN'));
     setTxt('payRadioFullLabel', '₹' + pending.toLocaleString('en-IN'));
+    setTxt('payOptionFullAmount', '₹' + pending.toLocaleString('en-IN'));
     setTxt('payStudentPrn', student.prn || '—');
-
-    // Update payment radio options
-    const optInst1 = document.getElementById('payOptionInst1');
-    if (optInst1) optInst1.value = inst1Amt;
-    const optFull = document.getElementById('payOptionFull');
-    if (optFull) optFull.value = pending;
-    const customInput = document.getElementById('payCustomInput');
-    if (customInput) customInput.value = pending > 0 ? Math.min(inst1Amt, pending) : 0;
 
     // Fee Status Badge
     const badge = document.getElementById('feeStatusBadge');
@@ -143,7 +161,12 @@ function renderStudentDetails(data) {
         }
     }
 
-    // Installments status badges
+    // Installments schedule amounts & badges
+    const inst1Amount = Math.round(total / 2);
+    const inst2Amount = total - inst1Amount;
+    setTxt('inst1ScheduleAmount', '₹' + inst1Amount.toLocaleString('en-IN'));
+    setTxt('inst2ScheduleAmount', '₹' + inst2Amount.toLocaleString('en-IN'));
+
     const inst1 = document.getElementById('inst1Badge');
     const inst2 = document.getElementById('inst2Badge');
     if (inst1) {
@@ -154,6 +177,9 @@ function renderStudentDetails(data) {
         inst2.className = paid >= total ? 'badge bg-success' : 'badge bg-warning text-dark';
         inst2.textContent = paid >= total ? 'PAID' : 'DUE';
     }
+
+    // Sync payment options with fees
+    syncPaymentOptionsWithFees(pending, total);
 }
 
 function updateCustomPayAmount(val) {
@@ -165,46 +191,302 @@ function updateCustomPayAmount(val) {
  * 2. Load 2-Installment Plan Status & Schedule
  */
 async function loadInstallmentPlan() {
-    const statusPill = document.getElementById('installmentStatusPill');
-    const statusDetails = document.getElementById('installmentStatusDetails');
-
     try {
         const result = await apiFetch('/student/installment-plan');
         if (result && result.ok && result.data && result.data.data) {
-            const plan = result.data.data;
-            if (plan.hasRequest) {
-                const status = plan.status || 'PENDING';
-                if (statusPill) {
-                    statusPill.className = status === 'APPROVED' ? 'badge bg-success' :
-                                           status === 'REJECTED' ? 'badge bg-danger' : 'badge bg-warning text-dark';
-                    statusPill.textContent = status;
-                }
-                if (statusDetails) {
-                    statusDetails.innerHTML = `
-                        <div class="alert ${status === 'APPROVED' ? 'alert-success' : 'alert-warning'} mb-0">
-                            <strong>Status: ${status}</strong> &mdash; 
-                            ${status === 'APPROVED' ? 'Your 2-installment plan has been approved by Accounts Office.' : 'Your application is currently under review by Accounts Office.'}
-                            <br><small class="text-muted">Reason: ${escHtml(plan.reason || 'None stated')}</small>
-                        </div>
-                    `;
-                }
-                return;
-            }
+            currentInstallmentPlan = result.data.data;
+        } else if (currentStudentData && currentStudentData.installment) {
+            currentInstallmentPlan = currentStudentData.installment;
+        } else if (!currentInstallmentPlan) {
+            currentInstallmentPlan = { hasRequest: false, status: 'NOT_APPLIED' };
         }
     } catch (e) {
         console.warn('Could not load installment plan from API.');
+        if (currentStudentData && currentStudentData.installment) {
+            currentInstallmentPlan = currentStudentData.installment;
+        } else if (!currentInstallmentPlan) {
+            currentInstallmentPlan = { hasRequest: false, status: 'NOT_APPLIED' };
+        }
     }
 
-    if (statusPill) {
-        statusPill.className = 'badge bg-success';
-        statusPill.textContent = 'ELIGIBLE';
+    renderInstallmentUI(currentInstallmentPlan);
+}
+
+/**
+ * Render conditional Installment UI based on backend plan
+ */
+function renderInstallmentUI(plan) {
+    const navItem = document.getElementById('navInstallmentPlan');
+    const quickBtn = document.getElementById('quickActionInstallmentBtn');
+    const installmentSection = document.getElementById('sec-student-installments');
+    const statusPill = document.getElementById('installmentStatusPill');
+    const statusDetails = document.getElementById('installmentStatusDetails');
+    const scheduleCard = document.getElementById('installmentScheduleCard');
+    const applyCard = document.getElementById('installmentApplyCard');
+    const applyCardBody = document.getElementById('installmentApplyCardBody');
+    const dashMsg = document.getElementById('dashInstMsg');
+    const dashBtn = document.getElementById('dashInstBtn');
+
+    // Sidebar navigation is always accessible
+    if (navItem) navItem.classList.remove('d-none');
+
+    const hasReq = !!(plan && plan.hasRequest === true);
+    const status = hasReq ? (plan.status || 'PENDING').toUpperCase() : 'NOT_APPLIED';
+
+    // -------------------------------------------------------------
+    // CASE 1: Student has NOT applied
+    // (hasRequest === false, status === "NOT_APPLIED")
+    // -------------------------------------------------------------
+    if (!hasReq || status === 'NOT_APPLIED') {
+        // Quick Action button on Dashboard: "Apply for Installment"
+        if (quickBtn) {
+            quickBtn.classList.remove('d-none');
+            quickBtn.innerHTML = '<i class="bi bi-file-earmark-plus me-1"></i> Apply for Installment';
+        }
+
+        // Dashboard installment summary card
+        if (dashMsg) {
+            dashMsg.textContent = 'You have not applied for an installment plan yet.';
+        }
+        if (dashBtn) {
+            dashBtn.className = 'btn btn-outline-primary btn-sm';
+            dashBtn.innerHTML = '<i class="bi bi-file-earmark-plus me-1"></i> Apply for Installment';
+        }
+
+        // Section 4: 2-Installment Plan
+        // 1. Hide status badge completely (no APPROVED/PENDING/REJECTED/ELIGIBLE badge)
+        if (statusPill) {
+            statusPill.classList.add('d-none');
+            statusPill.textContent = '';
+        }
+
+        // 2. Status message
+        if (statusDetails) {
+            statusDetails.innerHTML = '<p class="mb-0 text-muted">You have not applied for an installment plan yet.</p>';
+        }
+
+        // 3. Hide installment schedule card
+        if (scheduleCard) {
+            scheduleCard.classList.add('d-none');
+        }
+
+        // 4. Show Apply for Installment Form
+        if (applyCard) {
+            applyCard.classList.remove('d-none');
+        }
+        if (applyCardBody) {
+            applyCardBody.innerHTML = `
+                <p class="text-secondary small mb-3">
+                    If you require split payment, submit an application to the Accounts Office to split your annual fee into exactly two installments.
+                </p>
+                <form id="applyInstallmentForm" onsubmit="handleApplyInstallment(event)">
+                    <div class="mb-3">
+                        <label for="installmentReason" class="form-label">Reason for Requesting 2 Installments <span class="text-danger">*</span></label>
+                        <textarea class="form-control" id="installmentReason" rows="3" placeholder="Briefly state your reason (e.g. Parent educational loan processing, semester-wise payment preference)" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary" id="applyInstallmentBtn">
+                        <i class="bi bi-send me-1"></i> Apply for Installment
+                    </button>
+                </form>
+            `;
+        }
+
+        // 5. Configure payment page for full outstanding fee only (no installment option)
+        configurePaymentForFullFee();
+        return;
     }
+
+    // -------------------------------------------------------------
+    // CASES 2, 3, 4: Student HAS applied (hasRequest === true)
+    // -------------------------------------------------------------
+    if (quickBtn) {
+        quickBtn.classList.remove('d-none');
+        quickBtn.innerHTML = '<i class="bi bi-calendar-range me-1"></i> View 2-Installment Plan';
+    }
+
+    // Show status pill
+    if (statusPill) {
+        statusPill.classList.remove('d-none');
+        if (status === 'APPROVED') {
+            statusPill.className = 'badge bg-success';
+            statusPill.textContent = 'APPROVED';
+        } else if (status === 'REJECTED') {
+            statusPill.className = 'badge bg-danger';
+            statusPill.textContent = 'REJECTED';
+        } else {
+            statusPill.className = 'badge bg-warning text-dark';
+            statusPill.textContent = 'PENDING';
+        }
+    }
+
+    // Status details
     if (statusDetails) {
-        statusDetails.innerHTML = `
-            <div class="alert alert-info mb-0">
-                <strong>Standard 2-Installment Policy:</strong> All registered students are eligible to pay tuition fees in two installments (Semester 1 and Semester 2).
-            </div>
-        `;
+        if (status === 'APPROVED') {
+            statusDetails.innerHTML = `
+                <div class="alert alert-success mb-0">
+                    <strong>Status: APPROVED</strong> &mdash; Your 2-installment plan has been approved by Accounts Office.
+                    <br><small class="text-muted">Reason: ${escHtml(plan.reason || 'Standard academic session installment')}</small>
+                </div>
+            `;
+        } else if (status === 'REJECTED') {
+            statusDetails.innerHTML = `
+                <div class="alert alert-danger mb-0">
+                    <strong>Status: REJECTED</strong> &mdash; Your 2-installment application was rejected by Accounts Office. Full annual fee payment is required.
+                    <br><small class="text-muted">Reason: ${escHtml(plan.reason || 'None stated')}</small>
+                </div>
+            `;
+        } else {
+            statusDetails.innerHTML = `
+                <div class="alert alert-warning mb-0">
+                    <strong>Status: PENDING</strong> &mdash; Application is under review by Accounts Office.
+                    <br><small class="text-muted">Reason: ${escHtml(plan.reason || 'None stated')}</small>
+                </div>
+            `;
+        }
+    }
+
+    // Dashboard overview card sync
+    if (dashMsg) {
+        if (status === 'APPROVED') {
+            dashMsg.textContent = 'Your 2-installment plan is approved (Semester 1 & 2: ₹60,000 each).';
+        } else if (status === 'REJECTED') {
+            dashMsg.textContent = 'Application was rejected by Accounts Office. Full annual fee payment required.';
+        } else {
+            dashMsg.textContent = 'Application is under review by Accounts Office.';
+        }
+    }
+    if (dashBtn) {
+        if (status === 'APPROVED') {
+            dashBtn.className = 'btn btn-outline-primary btn-sm';
+            dashBtn.innerHTML = '<i class="bi bi-calendar-range me-1"></i> View 2-Installment Plan';
+        } else if (status === 'REJECTED') {
+            dashBtn.className = 'btn btn-outline-danger btn-sm';
+            dashBtn.innerHTML = '<i class="bi bi-arrow-repeat me-1"></i> View Details / Re-apply';
+        } else {
+            dashBtn.className = 'btn btn-outline-warning text-dark btn-sm';
+            dashBtn.innerHTML = '<i class="bi bi-hourglass-split me-1"></i> View Status';
+        }
+    }
+
+    // Schedule card: ONLY display when APPROVED
+    if (scheduleCard) {
+        if (status === 'APPROVED') {
+            scheduleCard.classList.remove('d-none');
+        } else {
+            scheduleCard.classList.add('d-none');
+        }
+    }
+
+    // Apply card body
+    if (applyCard) applyCard.classList.remove('d-none');
+    if (applyCardBody) {
+        if (status === 'APPROVED') {
+            applyCardBody.innerHTML = `
+                <div class="text-center py-3">
+                    <i class="bi bi-check-circle-fill text-success fs-3 mb-2 d-block"></i>
+                    <h6 class="fw-bold text-success mb-1">Installment Plan Active</h6>
+                    <p class="text-muted mb-0 small">Your 2-installment plan is approved and active for AY 2025-26.</p>
+                </div>
+            `;
+        } else if (status === 'PENDING') {
+            applyCardBody.innerHTML = `
+                <div class="text-center py-3">
+                    <i class="bi bi-hourglass-split text-warning fs-3 mb-2 d-block"></i>
+                    <h6 class="fw-bold text-warning mb-1">Application Under Review</h6>
+                    <p class="text-muted mb-0 small">Application is under review by Accounts Office.</p>
+                </div>
+            `;
+        } else if (status === 'REJECTED') {
+            applyCardBody.innerHTML = `
+                <p class="text-secondary small mb-3">
+                    Your previous installment request was rejected. You may submit a new application with additional justification if required.
+                </p>
+                <form id="applyInstallmentForm" onsubmit="handleApplyInstallment(event)">
+                    <div class="mb-3">
+                        <label for="installmentReason" class="form-label">Reason for Requesting 2 Installments <span class="text-danger">*</span></label>
+                        <textarea class="form-control" id="installmentReason" rows="3" placeholder="State reason with details..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary" id="applyInstallmentBtn">
+                        <i class="bi bi-send me-1"></i> Apply for Installment
+                    </button>
+                </form>
+            `;
+        }
+    }
+
+    // Configure payment options for installment student
+    configurePaymentForInstallmentStudent(status, plan);
+}
+
+function configurePaymentForFullFee() {
+    const instWrapper = document.getElementById('payOptionInstWrapper');
+    const fullWrapper = document.getElementById('payOptionFullWrapper');
+    const fullRadio = document.getElementById('payOptionFull');
+    const instRadio = document.getElementById('payOptionInst1');
+    const customInput = document.getElementById('payCustomInput');
+
+    // Completely hide installment payment option
+    if (instWrapper) instWrapper.classList.add('d-none');
+    if (instRadio) instRadio.checked = false;
+
+    // Show full fee option
+    if (fullWrapper) fullWrapper.classList.remove('d-none');
+    if (fullRadio) fullRadio.checked = true;
+
+    // Calculate actual outstanding pending fee
+    const total = Number(currentStudentData?.totalFee != null ? currentStudentData.totalFee : 120000);
+    const paid = Number(currentStudentData?.paidAmount != null ? currentStudentData.paidAmount : 0);
+    const pending = Number(currentStudentData?.pendingAmount != null ? currentStudentData.pendingAmount : Math.max(0, total - paid));
+
+    setTxt('payOptionFullAmount', '₹' + pending.toLocaleString('en-IN'));
+    if (fullRadio) fullRadio.value = pending;
+    if (customInput) customInput.value = pending;
+}
+
+function configurePaymentForInstallmentStudent(status, plan) {
+    const instWrapper = document.getElementById('payOptionInstWrapper');
+    const fullWrapper = document.getElementById('payOptionFullWrapper');
+    const fullRadio = document.getElementById('payOptionFull');
+    const instRadio = document.getElementById('payOptionInst1');
+    const customInput = document.getElementById('payCustomInput');
+
+    const total = Number(currentStudentData?.totalFee != null ? currentStudentData.totalFee : 120000);
+    const paid = Number(currentStudentData?.paidAmount != null ? currentStudentData.paidAmount : 0);
+    const pending = Number(currentStudentData?.pendingAmount != null ? currentStudentData.pendingAmount : Math.max(0, total - paid));
+
+    setTxt('payOptionFullAmount', '₹' + pending.toLocaleString('en-IN'));
+    if (fullRadio) fullRadio.value = pending;
+
+    // Only students with APPROVED installment plans can pay in installments
+    if (status === 'APPROVED') {
+        if (instWrapper) instWrapper.classList.remove('d-none');
+
+        const instAmt = plan?.installmentAmount || Math.round(total / 2) || 60000;
+        const currentInstPayable = Math.min(instAmt, pending);
+
+        setTxt('payOptionInst1Amount', '₹' + currentInstPayable.toLocaleString('en-IN'));
+        if (instRadio) {
+            instRadio.value = currentInstPayable;
+            instRadio.checked = true;
+        }
+        if (customInput) {
+            customInput.value = currentInstPayable;
+        }
+    } else {
+        // PENDING or REJECTED: cannot pay installment rate yet, show full fee option
+        if (instWrapper) instWrapper.classList.add('d-none');
+        if (instRadio) instRadio.checked = false;
+        if (fullRadio) fullRadio.checked = true;
+        if (customInput) customInput.value = pending;
+    }
+}
+
+function syncPaymentOptionsWithFees(pending, total) {
+    if (!currentInstallmentPlan || !currentInstallmentPlan.hasRequest) {
+        configurePaymentForFullFee();
+    } else {
+        const status = (currentInstallmentPlan.status || 'PENDING').toUpperCase();
+        configurePaymentForInstallmentStudent(status, currentInstallmentPlan);
     }
 }
 
@@ -229,24 +511,25 @@ async function handleApplyInstallment(e) {
             body: JSON.stringify({ reason })
         });
 
-        alert('Your 2-installment application has been submitted successfully to the Accounts Office!');
-        document.getElementById('installmentReason').value = '';
-        await loadInstallmentPlan();
+        if (result && result.ok) {
+            alert('Your 2-installment application has been submitted successfully to the Accounts Office!');
+            const reasonInput = document.getElementById('installmentReason');
+            if (reasonInput) reasonInput.value = '';
+            await loadInstallmentPlan();
+        } else {
+            const msg = (result && result.data && result.data.message) ? result.data.message : 'Failed to submit installment application.';
+            alert('Notice: ' + msg);
+            await loadInstallmentPlan();
+        }
     } catch (err) {
         alert('Application submitted! (Demo mode recorded)');
-        const statusPill = document.getElementById('installmentStatusPill');
-        const statusDetails = document.getElementById('installmentStatusDetails');
-        if (statusPill) {
-            statusPill.className = 'badge bg-warning text-dark';
-            statusPill.textContent = 'PENDING';
-        }
-        if (statusDetails) {
-            statusDetails.innerHTML = `
-                <div class="alert alert-warning mb-0">
-                    <strong>Status: PENDING REVIEW</strong> &mdash; Your request for 2 installments has been submitted.
-                </div>
-            `;
-        }
+        currentInstallmentPlan = {
+            hasRequest: true,
+            status: 'PENDING',
+            reason: reason,
+            appliedDate: new Date().toISOString()
+        };
+        renderInstallmentUI(currentInstallmentPlan);
     } finally {
         if (btn) btn.disabled = false;
     }
@@ -416,8 +699,10 @@ async function completePaymentFlow(amount, paymentId) {
     alert(`Payment of ₹${amount.toLocaleString('en-IN')} verified successfully!`);
     resetPayButton();
 
-    // Reload fees and profile
+    // Reload fees, installment plan, and transaction history
     await loadStudentProfileAndFees();
+    await loadInstallmentPlan();
+    await loadStudentTransactions();
     showSection('sec-student-dashboard');
 }
 
